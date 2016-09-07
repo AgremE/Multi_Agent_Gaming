@@ -194,5 +194,19 @@ public class ActionList implements GameStateConstants {
         action[n][3] = par3;
         action[n][4] = par4;
         n++;
-    }    
+    }
+    // This is for trading action only
+    // With the form of (weight, actionType, player, resource type, num_resource, player_2, resource_type, num_resource)
+    public void addAction(double w, int a, int par1, int par2, int par3, int par4, int par5, int par6){
+    	weight[n] = w;
+    	totalweight += w;
+    	action[n][0] = a;
+    	action[n][1] = par1;
+    	action[n][2] = par2;
+        action[n][3] = par3;
+        action[n][4] = par4;
+        action[n][5] = par5;
+        action[n][6] = par6;
+        n++;
+    }
 }

@@ -42,19 +42,18 @@ public interface GameStateConstants extends HexTypeConstants {
     //int OFS_EDGEACCESSIBLE      = OFS_VERTICES      +N_VERTICES;
     //int OFS_VERTEXACCESSIBLE    = OFS_EDGEACCESSIBLE+N_EDGES;
 
-        int OFS_SCORE               = 0; // get the score from OFS_PLAYERDATA
-        int OFS_NSETTLEMENTS        = 1; // get Number of 
-        int OFS_NCITIES             = 2;
-        int OFS_NROADS              = 3;
-        int OFS_PLAYERSLONGESTROAD  = 4;
-        int OFS_HASPLAYEDCARD       = 5;
-        int OFS_RESOURCES           = OFS_HASPLAYEDCARD   +1;
-        int OFS_ACCESSTOPORT        = OFS_RESOURCES     +NRESOURCES;
-        int OFS_USEDCARDS           = OFS_ACCESSTOPORT  +(NRESOURCES+1);
-        int OFS_OLDCARDS            = OFS_USEDCARDS     +N_DEVCARDTYPES;// Need to hide from other players
-        int OFS_NEWCARDS            = OFS_OLDCARDS      +N_DEVCARDTYPES;
-        int PLAYERSTATESIZE         = OFS_NEWCARDS      +N_DEVCARDTYPES;
-
+    int OFS_SCORE               = 0; // get the score from OFS_PLAYERDATA
+    int OFS_NSETTLEMENTS        = 1; // get Number of 
+    int OFS_NCITIES             = 2;
+    int OFS_NROADS              = 3;
+    int OFS_PLAYERSLONGESTROAD  = 4;
+    int OFS_HASPLAYEDCARD       = 5;
+    int OFS_RESOURCES           = OFS_HASPLAYEDCARD   +1;
+    int OFS_ACCESSTOPORT        = OFS_RESOURCES     +NRESOURCES;
+    int OFS_USEDCARDS           = OFS_ACCESSTOPORT  +(NRESOURCES+1);
+    int OFS_OLDCARDS            = OFS_USEDCARDS     +N_DEVCARDTYPES;// Need to hide from other players
+    int OFS_NEWCARDS            = OFS_OLDCARDS      +N_DEVCARDTYPES;
+    int PLAYERSTATESIZE         = OFS_NEWCARDS      +N_DEVCARDTYPES;
     int[] OFS_PLAYERDATA        = { OFS_VERTICES+N_VERTICES,//WHole game state of the board presenting + player one
                                     OFS_VERTICES+N_VERTICES + PLAYERSTATESIZE,// 
                                     //OFS_VERTICES+N_VERTICES + 2*PLAYERSTATESIZE,

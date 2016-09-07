@@ -198,6 +198,37 @@ public abstract class Player implements GameStateConstants
                     bl.possibilities.addAction(w,A_PORTTRADE, 4, i, 1, j);
             }
         }
+        // Trade with another agent
+        // Let assuming that agent cannot trade with card more than 4
+        // TODO need to list of all the possible action in trading here
+        // We need to do rollout one more time with trading then get the reward from there.
+        for (i=0; i<NRESOURCES; i++)
+        {
+            for (j = 0; j<NRESOURCES; j++)
+            {
+                if (i==j) continue;
+                w = 1.0;
+                for(int player = 0; player < NPLAYERS ;player++){
+                	if (pl == player) continue;
+                	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] == 1) && 
+                			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
+                		bl.tradingPossibilites.addAction(w,A_TRADING,pl,i,1,player,j,1);
+                	}
+                	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] > 1) && 
+                			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
+                		bl.tradingPossibilites.addAction(w,A_TRADING,pl,i,2,player,j,1);
+                		
+                	}
+                	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] > 2) && 
+                			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
+                		bl.tradingPossibilites.addAction(w,A_TRADING,pl,i,3,player,j,1);
+                		
+                	}
+                }
+                
+            }
+        }
+        
     }
     //TODO: Hide the development card of other players in the status of the game environment
     public void listDevCardPossibilities(int []s)
@@ -623,10 +654,15 @@ public abstract class Player implements GameStateConstants
                 }
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 0;
                 break;
+            case A_TRADING:
+            	break;
                 
         }
     }
 
+    public void listPossibleTrade(int[] s){
+    	
+    }
 //    private void listDevCardPossibilities(int []s)
 //    {
 //        int fsmlevel    = s[OFS_FSMLEVEL];
