@@ -6,6 +6,7 @@
 package smartsettlers.boardlayout;
 
 import java.util.Random;
+import pomdpSettler.*;
 
 /**
  *
@@ -202,9 +203,8 @@ public class ActionList implements GameStateConstants {
     	totalweight += w;
     	action[n][0] = a;
     	action[n][1] = player_1;
-    	for(int i = 1; i < 8; i++){
-    		action[n][i] = offer[i];
-    		action[n][i+8] = get[i];
+    	for(int i = 2; i < 7; i++){
+    		action[n][i] = offer[];
     	}
     	action[n][8] = player_2;
         n++;

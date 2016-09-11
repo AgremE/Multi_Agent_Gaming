@@ -133,8 +133,8 @@ public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
         // currently we reject everything!
     	
         int response = SOCRobotNegotiator.REJECT_OFFER;
-        SSRobotClient rc = (SSRobotClient)client;
-        pause(1000);
+        //SSRobotClient rc = (SSRobotClient)client;
+        //pause(1000);
         //
         
         
@@ -144,7 +144,7 @@ public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
     
     int[] translateTranding(SOCTradeOffer offer){
     	
-    	ActionList action = null;
+    	int[] action = null;
     	SOCResourceSet give_resource = null;
     	SOCResourceSet get_resource = null;
     	int offer_from = 0;

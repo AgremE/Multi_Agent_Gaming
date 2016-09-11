@@ -797,6 +797,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         // We copy the state from here
         player[pl].listPossibilities(s);
         player[pl].selectAction(s,a);
+        
         if (isLoggingOn)
             gamelog.addAction(a);
         
@@ -979,6 +980,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         //System.out.println("FSM LEVEL"+fsmlevel);
         int pl          = s2[OFS_FSMPLAYER+fsmlevel];
 //        System.out.printf("!1");
+        // Doing the trading before start simulating the game and compare the average outcome
         
     }
     public void UCTsimulateGame(int[] s2)

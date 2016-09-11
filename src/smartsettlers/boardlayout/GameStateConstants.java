@@ -139,6 +139,15 @@ public interface GameStateConstants extends HexTypeConstants {
     int NCARDTYPES              = 5;
     int NCARDS                  = 25; // Number of development card
     
+    // Constant for trading resource
+    // for the case that Jsettler want to trad anything that whithin unknow type we are going to reject all the offer
+    int TRAD_SHEEP = 0;
+    int TRAD_WOOD = 1;
+    int TRAD_CLAY = 2;
+    int TRAD_WHEAT = 3;
+    int TRAD_STONE = 4;
+    int TRAD_UNKNOW = 5;
+    
     String[] resourceNames = {"sheep", "wood", "clay", "wheat", "stone"};
     String[] cardNames = {"knight", "+1 point", "+2 road", "+2 res.", "monopoly"};
     // 

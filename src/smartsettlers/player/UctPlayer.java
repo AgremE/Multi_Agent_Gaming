@@ -36,13 +36,17 @@ public class UctPlayer extends Player {
             for (j=0; j<bl.possibilities.n; j++)
             {
                 int[] a2 = bl.possibilities.action[j];
+                if(a2[1] == A_TRADING){
+                	// Print out the trading state please
+                	continue;
+                }
                 System.out.printf("%2d: [%d %d %d %d %d]  w:%f\n", j, a2[0], a2[1], a2[2], a2[3], a2[4], bl.possibilities.weight[j]);
             }
             // All of the init agents are the UCT player
             // All of the miulslateGame start here
             bl.UCTsimulateGame(s2);
             // I need to approximate the belife state first then simulate it like it an actuat state of the game
-            int aind = bl.uctTree.selectAction(s, pl, true);
+            int aind = bl.uctTree.selectAction(s, pl, true);// action index of the maximun return
             bl.player[pl].listPossibilities(s);
             for (i=0; i<a.length; i++)
                 a[i] = bl.possibilities.action[aind][i];

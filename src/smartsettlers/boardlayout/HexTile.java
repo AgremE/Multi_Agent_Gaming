@@ -12,6 +12,7 @@ import smartsettlers.util.*;
  *
  * @author szityu
  */
+
 public class HexTile implements HexTypeConstants
 {
     
