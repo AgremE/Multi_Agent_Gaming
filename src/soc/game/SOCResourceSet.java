@@ -347,4 +347,8 @@ public class SOCResourceSet implements Serializable, Cloneable
         resources[SOCResourceConstants.WOOD] = set.getAmount(SOCResourceConstants.WOOD);
         resources[SOCResourceConstants.UNKNOWN] = set.getAmount(SOCResourceConstants.UNKNOWN);
     }
+    // Add by agreme
+    public int[] getReourceset(){
+    	return this.resources;
+    }
 }

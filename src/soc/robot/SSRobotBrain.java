@@ -8,6 +8,8 @@ package soc.robot;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Vector;
+
+import smartsettlers.boardlayout.ActionList;
 import smartsettlers.boardlayout.GameStateConstants;
 import soc.debug.D;
 
@@ -129,10 +131,32 @@ public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
         //super.considerOffer(offer); // otherwise the game hangs...
         
         // currently we reject everything!
+    	
         int response = SOCRobotNegotiator.REJECT_OFFER;
+        SSRobotClient rc = (SSRobotClient)client;
+        pause(1000);
+        //
+        
+        
+        
         return response;
     }
     
+    int[] translateTranding(SOCTradeOffer offer){
+    	
+    	ActionList action = null;
+    	SOCResourceSet give_resource = null;
+    	SOCResourceSet get_resource = null;
+    	int offer_from = 0;
+    	int POMDPs_NUM = 0;
+    	// The standard of the order to the resource here is using the from SOC not POMDPs Agent
+    	offer_from = offer.getPlayerOffer();
+    	give_resource = offer.getGiveSet();
+    	get_resource = offer.getGetSet();
+    	//action = new ActionList(1.0, A_TRADING, offer_from,give_resource.getReourceset(),POMDPs_NUM,get_resource.getReourceset());
+    	
+    	return action;
+    }
 
     int robberVictim = -1;
     
@@ -1108,6 +1132,8 @@ public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
                             ///
                             /// consider the offer
                             ///
+                            // TODO: Working on translating the offer state from the SOC to smartsettler
+                            
                             int ourResponseToOffer = considerOffer(offer);
 
                             D.ebugPrintln("%%% ourResponseToOffer = " + ourResponseToOffer);

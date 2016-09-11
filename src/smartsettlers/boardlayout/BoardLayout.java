@@ -980,80 +980,6 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int pl          = s2[OFS_FSMPLAYER+fsmlevel];
 //        System.out.printf("!1");
         
-        //Calculate all the possible option of action like dev_card, building, or whatever
-        player[pl].listPossibilities(s2);
-//        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
-//        System.out.printf("!2");
-        int N_IT = 1000;
-        // Only one action left there is nothing to stimulate there
-        if (tradingPossibilites.n == 1)
-            N_IT = 1;
-        
-        for(it=0; it<N_IT; it++)
-        {
-//            if (it%10 == 0)
-//                System.out.printf(".");
-            isKnownState = true;
-            //Close state s2 in order to protect the original state
-            s = cloneOfState(s2);
-            uctTree.clearTraces();
-            while (true)
-            {
-                int hc = UCT.getHashCode(s);
-                node = uctTree.getNode(hc);
-                
-                //System.out.print(node+" ");
-                fsmlevel    = s[OFS_FSMLEVEL];
-                pl          = s[OFS_FSMPLAYER+fsmlevel];
-                //System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
-                player[pl].listPossibilities(s);
-                int nactions = possibilities.n; //Number of action available
-                int aind; //action index (ind is stand for index)
-
-                if ((isKnownState) && (node!=null))
-                {
-                    // known states
-                    //aind = possibilities.randomInd();                
-                    aind = uctTree.selectAction(hc,pl,false);
-                    uctTree.addTrace(hc, pl, aind);
-//        System.out.printf("!7");
-
-                }
-                else if ((isKnownState) && (node==null))
-                {
-                    // first unknown state
-                    isKnownState = false;
-                    aind = possibilities.randomInd();                
-                    uctTree.addState(s,hc, possibilities);
-                    uctTree.addTrace(hc, pl, aind);
-//        System.out.printf("!8");
-                }
-                else
-                {
-                    // further unknown states
-                    aind = possibilities.randomInd();                
-//        System.out.printf("!9");
-                }
-
-                a = possibilities.action[aind];
-//        System.out.printf("!5");
-                player[pl].performAction(s, a);
-                stateTransition(s, a);
-
-                winner = getWinner(s);
-                if (winner !=-1)
-                    break;
-            }
-            uctTree.update(winner, uctTime);
-        }
-        // !!! printing takes LOTS of time
-        //System.out.println(uctTree);
-//        s2[3] = 8;
-//        printArray(s);
-//        printArray(s2);
-        isLoggingOn = oldIsLoggingOn;
-        s=null;
-        a=null;
     }
     public void UCTsimulateGame(int[] s2)
     {
@@ -1134,6 +1060,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 a = possibilities.action[aind];
 //        System.out.printf("!5");
                 player[pl].performAction(s, a);
+                // Changing state
                 stateTransition(s, a);
 
                 winner = getWinner(s);

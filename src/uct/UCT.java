@@ -35,7 +35,7 @@ public class UCT implements GameStateConstants {
         for (int i=0; i<MAXNTRACES; i++)
             traceList[i] = new Trace();
     }
-    
+    // Hash Code of state which represent in the tree
     public static int getHashCode(int[] s)
     {
         int [] s2 = s.clone();
@@ -47,12 +47,13 @@ public class UCT implements GameStateConstants {
         return(Arrays.hashCode(s2));
         
     }
-    
+    // Add state to the tree with list of possible action
     public void addState(int[] s, ActionList possibilities)
     {
         addState(s, getHashCode(s),possibilities);
     }
-    
+    // At state to the tree with some expected reward withing that state. Only consider the reward of building settlement and city
+    //TODO: Change to add some reward to build the road and buying development card.
     public void addState(int[] s, int hc, ActionList possibilities) // s "state", hc "hashcode" 
     {
         int fsmlevel    = s[OFS_FSMLEVEL];
@@ -73,6 +74,7 @@ public class UCT implements GameStateConstants {
                 case A_BUILDCITY:
                     vwins[i] = 10;
                     break;
+                //TODO: Change to add some reward to build the road and buying development card.
             }
             totalvwins += vwins[i];
         }
@@ -134,8 +136,7 @@ public class UCT implements GameStateConstants {
             node.nvisits++;
             node.nwins[tr.aind][winner]++;
             node.nactionvisits[tr.aind]++;
-            node.timeStamp = timeStamp;
-            
+            node.timeStamp = timeStamp;            
             tree.put(tr.hc, node);
         }
 
@@ -163,7 +164,7 @@ public class UCT implements GameStateConstants {
     {
         return selectAction(getHashCode(s),pl, echo);
     }
-    
+    // UCT Selection method: You can finid it easily on Wikipeadia
     public int selectAction(int hc, int pl, boolean echo)
     {
         int k;
@@ -197,6 +198,7 @@ public class UCT implements GameStateConstants {
                 {
                     System.out.printf("%2d (%d): \t %5.2f = %5.2f + %5.2f\n", k, node.nactionvisits[k], v, 
                             ((double)node.nwins[k][pl])/(node.nactionvisits[k]), C0*Math.sqrt(Math.log(node.nactions)/node.nactionvisits[k]));
+                    		// The most simplest form of UCT algorithm
                     v = ((double)node.nwins[k][pl])/(node.nactionvisits[k]);
                 }
             }

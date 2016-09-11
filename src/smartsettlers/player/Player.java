@@ -202,6 +202,7 @@ public abstract class Player implements GameStateConstants
         // Let assuming that agent cannot trade with card more than 4
         // TODO need to list of all the possible action in trading here
         // We need to do rollout one more time with trading then get the reward from there.
+        
         for (i=0; i<NRESOURCES; i++)
         {
             for (j = 0; j<NRESOURCES; j++)

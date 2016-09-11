@@ -74,7 +74,7 @@ public interface GameStateConstants extends HexTypeConstants {
      * 5- End Turn
      * 
      * */
-    int ACTIONSIZE = 5;
+    int ACTIONSIZE = 15;
     
     // todo: who has longest road, biggest army, where is the robber
     // State of the game is represent in constant number

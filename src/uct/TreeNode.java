@@ -36,7 +36,7 @@ public class TreeNode implements GameStateConstants {
     
     public TreeNode(int nactions, int player, int[] virtualwins)
     {
-        this(nactions);
+        this(nactions);// This one call above function
         for (int i=0; i<nactions; i++)
             nwins[i][player] = virtualwins[i];
     }

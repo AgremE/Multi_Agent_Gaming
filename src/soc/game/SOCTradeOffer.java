@@ -97,6 +97,7 @@ public class SOCTradeOffer implements Serializable, Cloneable
     {
         return to;
     }
+    
 
     /**
      * @return the set of resources offered
@@ -129,5 +130,11 @@ public class SOCTradeOffer implements Serializable, Cloneable
         str += ("|give=" + give + "|get=" + get);
 
         return str;
+    }
+    
+    //Add by agreme
+    
+    public int getPlayerOffer(){
+    	return this.from;
     }
 }
