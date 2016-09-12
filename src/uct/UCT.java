@@ -21,7 +21,7 @@ import smartsettlers.boardlayout.GameStateConstants;
 public class UCT implements GameStateConstants {
     
     public Hashtable tree;
-    
+    public double max_outcome = 0.0;
     public static final int MAXNTRACES = 20000;
     int ntraces;
     Trace[] traceList;
@@ -61,7 +61,7 @@ public class UCT implements GameStateConstants {
         int state       = s[OFS_FSMSTATE+fsmlevel];
         int[] vwins     = new int[possibilities.n];
         int totalvwins  = 0;
-        int i;
+        int i; 
         //Start Construct tree for trace the node of the monte carlo tree
         for (i=0; i<possibilities.n; i++)
         {
@@ -210,6 +210,9 @@ public class UCT implements GameStateConstants {
         }
         if (echo)
             System.out.printf("sel:%d\n\n", maxind);
+        
+        this.max_outcome = maxv;
+        
         return maxind;
         
     }
@@ -236,6 +239,13 @@ public class UCT implements GameStateConstants {
             
         }
         return s;
+    }
+    // Use this function to decide whether to negotiate or not
+    
+    public double getMaxOutcome(){
+    	
+    	return this.max_outcome;
+    	
     }
 }
 

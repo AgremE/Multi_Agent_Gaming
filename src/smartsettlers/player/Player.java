@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+/*List of possible trade is in listNormalPossibilities
+ * */
 
 package smartsettlers.player;
 
@@ -210,19 +208,27 @@ public abstract class Player implements GameStateConstants
                 if (i==j) continue;
                 w = 1.0;
                 for(int player = 0; player < NPLAYERS ;player++){
+                	
                 	if (pl == player) continue;
+                	
                 	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] == 1) && 
                 			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
+                		
                 		bl.tradingPossibilites.addAction(w,A_TRADING,pl,i,1,player,j,1);
+                		
                 	}
                 	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] > 1) && 
                 			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
+                		
                 		bl.tradingPossibilites.addAction(w,A_TRADING,pl,i,2,player,j,1);
+                		
                 		
                 	}
                 	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] > 2) && 
                 			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
+                		
                 		bl.tradingPossibilites.addAction(w,A_TRADING,pl,i,3,player,j,1);
+                		
                 		
                 	}
                 }
@@ -468,6 +474,7 @@ public abstract class Player implements GameStateConstants
         int fsmstate    = s[OFS_FSMSTATE+fsmlevel];
         int pl          = s[OFS_FSMPLAYER+fsmlevel];
         int i, j, ind, val, ind2, k, ncards;
+        int another_player = 0;
         // We need to perform to translate every action from this point
         switch (a[0])
         {
@@ -656,14 +663,21 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 0;
                 break;
             case A_TRADING:
-            	break;
+            	
+            	//Trading with other player with only one at a time 
+            	int otherplayer = a[4];
+            	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[2]] -= a[3];
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[5]] += a[6];
+                s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[5]] -= a[6];
+                s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[2]] += a[3];
+                break;
                 
         }
     }
 
-    public void listPossibleTrade(int[] s){
-    	
-    }
+//    public void listPossibleTrade(int[] s){
+//    	
+//    }
 //    private void listDevCardPossibilities(int []s)
 //    {
 //        int fsmlevel    = s[OFS_FSMLEVEL];

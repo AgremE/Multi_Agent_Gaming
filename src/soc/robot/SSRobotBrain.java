@@ -130,9 +130,11 @@ public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
     {
         //super.considerOffer(offer); // otherwise the game hangs...
         
-        // currently we reject everything!
+        // It is just for SmartSettler brain Run nothing more 
     	
         int response = SOCRobotNegotiator.REJECT_OFFER;
+        // When they offer run simulation here
+        
         //SSRobotClient rc = (SSRobotClient)client;
         //pause(1000);
         //
@@ -141,7 +143,14 @@ public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
         
         return response;
     }
-    
+    boolean checkOfferValide(int[] action){
+    	
+    	boolean valide = false;
+    	
+    	
+    	
+    	return valide;
+    }
     int[] translateTranding(SOCTradeOffer offer){
     	
     	int[] action = null;
@@ -326,6 +335,7 @@ public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
         SOCPossiblePiece targetPiece;
         switch (rc.bl.action[0])
         {
+        //TODO: Add trading option
             case A_BUILDROAD:
                 coord = rc.translateEdgeToJSettlers(rc.bl.action[1]);
                 targetPiece = new SOCPossibleRoad(ourPlayerData, coord, new Vector());

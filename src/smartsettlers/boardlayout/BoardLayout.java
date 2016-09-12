@@ -795,6 +795,17 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         // doing stuff
         // We copy the state from here
+        
+        // Consider the trade at the beginning first.
+        // Loop through the list of possible trading
+        for(int i =0 ; i < this.tradingPossibilites.n; i++){
+        	
+        	int[] state = cloneOfState(s);
+            this.UCTsimulateTrading(state);
+           
+            	
+        }
+        
         player[pl].listPossibilities(s);
         player[pl].selectAction(s,a);
         
@@ -961,14 +972,18 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     // Stimulate about 1000 game step to choose which one give the best result of movement
     // Store data and state from this part for training the neural network
     //TODO: Need to work independence Simulation to work with the tradning
-    public void UCTsimulateTrading(int[] s2){
+    public void UCTsimulateTrading(int[] s2, int[] trad){
+    	
     	int[] s = null;    
-        int[] a = new int[ACTIONSIZE];// ACTIONSIZE is 5
-
+        int[] a = new int[ACTIONSIZE];// ACTIONSIZE is 15
+        
         TreeNode node;
         boolean isKnownState = true;
         int winner;
         int it;
+        
+        UCT uctTree_trad = new UCT();
+        
         //s2 with the side of 269
         boolean oldIsLoggingOn = isLoggingOn;
         isLoggingOn = false;
@@ -981,7 +996,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int pl          = s2[OFS_FSMPLAYER+fsmlevel];
 //        System.out.printf("!1");
         // Doing the trading before start simulating the game and compare the average outcome
-        
+        // after trading if this.max > trading.max doing nothing else call on player.perform
     }
     public void UCTsimulateGame(int[] s2)
     {
@@ -996,6 +1011,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         boolean oldIsLoggingOn = isLoggingOn;
         isLoggingOn = false;
         uctTime ++;
+        
         if (uctTree.tree.size()>100000)
             uctTree.tree.clear();
         
@@ -1008,7 +1024,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].listPossibilities(s2);
 //        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
 //        System.out.printf("!2");
-        int N_IT = 1000;
+        int N_IT = 10000;
         // Only one action left there is nothing to stimulate there
         if (possibilities.n == 1)
             N_IT = 1;
