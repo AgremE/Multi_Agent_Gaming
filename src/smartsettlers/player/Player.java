@@ -200,7 +200,7 @@ public abstract class Player implements GameStateConstants
         // Let assuming that agent cannot trade with card more than 4
         // TODO need to list of all the possible action in trading here
         // We need to do rollout one more time with trading then get the reward from there.
-        
+        // I think I should put it with the normal list of possibilities
         for (i=0; i<NRESOURCES; i++)
         {
             for (j = 0; j<NRESOURCES; j++)
@@ -372,6 +372,8 @@ public abstract class Player implements GameStateConstants
         boolean hasneighbor;
 
         bl.possibilities.Clear();
+        bl.tradingPossibilites.Clear();
+        
         switch (fsmstate)
         {
             case S_SETTLEMENT1:

@@ -13,6 +13,9 @@ import smartsettlers.boardlayout.BoardLayout;
  * @author szityu
  */
 
+/*
+ * Improve by Agreme (Makara Phav)
+ * */
 public class UctPlayer extends Player {
 
     public UctPlayer(BoardLayout bl, int position)

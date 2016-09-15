@@ -801,7 +801,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         for(int i =0 ; i < this.tradingPossibilites.n; i++){
         	
         	int[] state = cloneOfState(s);
-            this.UCTsimulateTrading(state);
+            //this.UCTsimulateTrading(state);
            
             	
         }
@@ -968,10 +968,24 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         
     }
+    public int[] changeState(int[] state_info, int[] chang_info, int pl, int otherplayer){
+    	int[] state_after;
+    	state_after = cloneOfState(state_info);
+    	state_after[OFS_PLAYERDATA[pl] + OFS_RESOURCES + chang_info[2]] -= chang_info[3];
+    	state_after[OFS_PLAYERDATA[pl] + OFS_RESOURCES + chang_info[5]] += chang_info[6];
+    	state_after[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + chang_info[5]] -= chang_info[6];
+    	state_after[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + chang_info[2]] += chang_info[3];
+    	return state_after;
+    }
     // """Important Function to explain explicitly"""
     // Stimulate about 1000 game step to choose which one give the best result of movement
     // Store data and state from this part for training the neural network
     //TODO: Need to work independence Simulation to work with the tradning
+    // Step of the simulation:
+    // Clone the state
+    // Change the state
+    // Simulate it
+    //Choose the best
     public void UCTsimulateTrading(int[] s2, int[] trad){
     	
     	int[] s = null;    
@@ -1079,9 +1093,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 //        System.out.printf("!5");
                 player[pl].performAction(s, a);
                 // Changing state
+                // It also changing tht player number at the same time as we use the state transition
                 stateTransition(s, a);
-
+                //Initi the winner and loser count here
+                //TODO: init the player who win and who lose here from UTC tree
                 winner = getWinner(s);
+                
                 if (winner !=-1)
                     break;
             }

@@ -24,6 +24,8 @@ public class UCT implements GameStateConstants {
     public double max_outcome = 0.0;
     public static final int MAXNTRACES = 20000;
     int ntraces;
+    private int win = 0;
+    private int lose = 0;
     Trace[] traceList;
     Random rnd = new Random();
     
@@ -246,6 +248,14 @@ public class UCT implements GameStateConstants {
     	
     	return this.max_outcome;
     	
+    }
+    
+    public int getWinCount(){
+    	return this.win;
+    }
+    
+    public int getLossCount(){
+    	return this.win;
     }
 }
 
