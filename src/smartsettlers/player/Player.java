@@ -214,20 +214,20 @@ public abstract class Player implements GameStateConstants
                 	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] == 1) && 
                 			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
                 		
-                		bl.tradingPossibilites.addAction(w,A_TRADING,pl,i,1,player,j,1);
+                		bl.tradingPossibilites.addAction(w,TRADING_OPTIONS,pl,i,1,player,j,1);
                 		
                 	}
                 	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] > 1) && 
                 			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
                 		
-                		bl.tradingPossibilites.addAction(w,A_TRADING,pl,i,2,player,j,1);
+                		bl.tradingPossibilites.addAction(w,TRADING_OPTIONS,pl,i,2,player,j,1);
                 		
                 		
                 	}
                 	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] > 2) && 
                 			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
                 		
-                		bl.tradingPossibilites.addAction(w,A_TRADING,pl,i,3,player,j,1);
+                		bl.tradingPossibilites.addAction(w,TRADING_OPTIONS,pl,i,3,player,j,1);
                 		
                 		
                 	}

@@ -808,14 +808,17 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         	int[] state_trad_simulation = cloneOfState(s);
         	changeState(state_trad_simulation, a, pl, a[3]);
         	UCTsimulateTrading(state_trad_simulation);
+        	int traind = i;
         	if(gameTradTem < uctTradinTree.getAverageWinLose(pl)){
         		// TODO: Start the trading offer
         		// Wait for offer
         		// Start trading offer accepted otherwise reject
         		// and Start normal simulation with monte carlo
+        		// Add list of trading here
         	}
-        	
         }
+        // Start offer to that specific player:
+        
         // We always clean up the list before we continues to work on building up the new list of possibility
         player[pl].listPossibilities(s);
         player[pl].selectAction(s,a);
