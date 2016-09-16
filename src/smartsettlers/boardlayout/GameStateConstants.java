@@ -11,6 +11,7 @@ import java.awt.Color;
  *
  * @author szityu
  */
+/*Improve by Agreme(Makara Phav)*/
 public interface GameStateConstants extends HexTypeConstants {
 
     int NPLAYERS = 2;// Change into semi zero sum game
@@ -118,7 +119,7 @@ public interface GameStateConstants extends HexTypeConstants {
     int A_PAYTAX                = 12;
     int A_PLACEROBBER           = 13;
     int A_TRADING				= 14;
-    
+    int A_CONSIDEROFFER			= 15;
     
     
     int VERTEX_EMPTY            = 0;

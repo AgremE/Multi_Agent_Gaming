@@ -40,7 +40,4 @@ public class TreeNode implements GameStateConstants {
         for (int i=0; i<nactions; i++)
             nwins[i][player] = virtualwins[i];
     }
-    // addVisit
-    
-    // selectAction
 }

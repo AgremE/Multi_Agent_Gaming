@@ -22,7 +22,7 @@ import convNNSettler.*;
  *
  * @author szityu
  */
-
+/*Improve by Agreme(Makara Phav)*/
 public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
 {
     public static final int[][] PORT_COORD = {
@@ -152,7 +152,9 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     public int mode = MODE_UCT;
     
     public UCT uctTree;
+    public UCT uctTradinTree;
     private int uctTime = 0;
+    private int uctTradingTime = 0;
     
     public void setState(int[] s)
     {
@@ -792,20 +794,29 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     {
         int fsmlevel    = s[OFS_FSMLEVEL];
         int pl          = s[OFS_FSMPLAYER+fsmlevel];
-        
+        float gameTradTem = 0;
+        int[] state = cloneOfState(s);
         // doing stuff
         // We copy the state from here
         
         // Consider the trade at the beginning first.
         // Loop through the list of possible trading
+        UCTsimulateTrading(state);
+    	gameTradTem = uctTradinTree.getAverageWinLose(pl);
         for(int i =0 ; i < this.tradingPossibilites.n; i++){
-        	
-        	int[] state = cloneOfState(s);
             //this.UCTsimulateTrading(state);
-           
-            	
+        	int[] state_trad_simulation = cloneOfState(s);
+        	changeState(state_trad_simulation, a, pl, a[3]);
+        	UCTsimulateTrading(state_trad_simulation);
+        	if(gameTradTem < uctTradinTree.getAverageWinLose(pl)){
+        		// TODO: Start the trading offer
+        		// Wait for offer
+        		// Start trading offer accepted otherwise reject
+        		// and Start normal simulation with monte carlo
+        	}
+        	
         }
-        
+        // We always clean up the list before we continues to work on building up the new list of possibility
         player[pl].listPossibilities(s);
         player[pl].selectAction(s,a);
         
@@ -986,28 +997,108 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     // Change the state
     // Simulate it
     //Choose the best
-    public void UCTsimulateTrading(int[] s2, int[] trad){
+    // This function will use inside the GameTick function to simulate for every trading possible situation under current assumption
+    public void UCTsimulateTrading(int[] s2){
     	
     	int[] s = null;    
-        int[] a = new int[ACTIONSIZE];// ACTIONSIZE is 15
-        
+        int[] a = new int[ACTIONSIZE];// ACTIONSIZE is 5
+
         TreeNode node;
         boolean isKnownState = true;
         int winner;
         int it;
-        
-        UCT uctTree_trad = new UCT();
-        
         //s2 with the side of 269
+        // Keep trace of this variable because it might hang the process
         boolean oldIsLoggingOn = isLoggingOn;
         isLoggingOn = false;
-        uctTime ++;
-        if (uctTree.tree.size()>100000)
-            uctTree.tree.clear();
+        uctTradingTime ++;
+        
+        if (uctTradinTree.tree.size()>100000)
+        	uctTradinTree.tree.clear();
         
         int fsmlevel    = s2[OFS_FSMLEVEL];
         //System.out.println("FSM LEVEL"+fsmlevel);
         int pl          = s2[OFS_FSMPLAYER+fsmlevel];
+//        System.out.printf("!1");
+        
+        //Calculate all the possible option of action like dev_card, building, or whatever
+        player[pl].listPossibilities(s2);
+//        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
+//        System.out.printf("!2");
+        int N_IT = 1000;
+        // Only one action left there is nothing to stimulate there
+        if (possibilities.n == 1)
+            N_IT = 1;
+        
+        for(it=0; it<N_IT; it++)
+        {
+//            if (it%10 == 0)
+//                System.out.printf(".");
+            isKnownState = true;
+            //Close state s2 in order to protect the original state
+            s = cloneOfState(s2);
+            uctTradinTree.clearTraces();
+            while (true)
+            {
+                int hc = UCT.getHashCode(s);
+                node = uctTradinTree.getNode(hc);
+                
+                //System.out.print(node+" ");
+                fsmlevel    = s[OFS_FSMLEVEL];
+                pl          = s[OFS_FSMPLAYER+fsmlevel];
+                //System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
+                player[pl].listPossibilities(s);
+                int nactions = possibilities.n; //Number of action available
+                int aind; //action index (ind is stand for index)
+
+                if ((isKnownState) && (node!=null))
+                {
+                    // known states
+                    //aind = possibilities.randomInd();                
+                    aind = uctTradinTree.selectAction(hc,pl,false);
+                    uctTradinTree.addTrace(hc, pl, aind);
+//        System.out.printf("!7");
+
+                }
+                else if ((isKnownState) && (node==null))
+                {
+                    // first unknown state
+                    isKnownState = false;
+                    aind = possibilities.randomInd();                
+                    uctTradinTree.addState(s,hc, possibilities);
+                    uctTradinTree.addTrace(hc, pl, aind);
+//        System.out.printf("!8");
+                }
+                else
+                {
+                    // further unknown states
+                    aind = possibilities.randomInd();                
+//        System.out.printf("!9");
+                }
+
+                a = possibilities.action[aind];
+//        System.out.printf("!5");
+                player[pl].performAction(s, a);
+                // Changing state
+                // It also changing tht player number at the same time as we use the state transition
+                stateTransition(s, a);
+                //Initi the winner and loser count here
+                //TODO: init the player who win and who lose here from UTC tree
+                winner = getWinner(s);
+                
+                if (winner !=-1)
+                    break;
+            }
+            uctTradinTree.update(winner, uctTradingTime);
+        }
+        // !!! printing takes LOTS of time
+        //System.out.println(uctTree);
+//        s2[3] = 8;
+//        printArray(s);
+//        printArray(s2);
+        isLoggingOn = oldIsLoggingOn;
+        s=null;
+        a=null;
 //        System.out.printf("!1");
         // Doing the trading before start simulating the game and compare the average outcome
         // after trading if this.max > trading.max doing nothing else call on player.perform
@@ -1026,7 +1117,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         isLoggingOn = false;
         uctTime ++;
         
-        if (uctTree.tree.size()>100000)
+        if (uctTree.tree.size()>1000000)
             uctTree.tree.clear();
         
         int fsmlevel    = s2[OFS_FSMLEVEL];
@@ -1095,8 +1186,6 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 // Changing state
                 // It also changing tht player number at the same time as we use the state transition
                 stateTransition(s, a);
-                //Initi the winner and loser count here
-                //TODO: init the player who win and who lose here from UTC tree
                 winner = getWinner(s);
                 
                 if (winner !=-1)

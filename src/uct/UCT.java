@@ -24,8 +24,8 @@ public class UCT implements GameStateConstants {
     public double max_outcome = 0.0;
     public static final int MAXNTRACES = 20000;
     int ntraces;
-    private int win = 0;
-    private int lose = 0;
+    private int[] winCount = new int[NPLAYERS];
+    private int[] loseCount = new int[NPLAYERS];
     Trace[] traceList;
     Random rnd = new Random();
     
@@ -121,7 +121,7 @@ public class UCT implements GameStateConstants {
     {
         if (ntraces >= MAXNTRACES)
             return;
-        traceList[ntraces].set(hc, pl, aind);
+        traceList[ntraces].set(hc, pl, aind);// aind is action index repected to list possibility
         ntraces++;
     }
     
@@ -140,8 +140,20 @@ public class UCT implements GameStateConstants {
             node.nactionvisits[tr.aind]++;
             node.timeStamp = timeStamp;            
             tree.put(tr.hc, node);
+            winCount[winner]++;
+            for(int loser = 0; loser < NPLAYERS; loser++ ){
+            	if(loser == winner){
+            		continue;
+            	}
+            	loseCount[loser]++;
+            }
         }
-
+        
+        //TODO: Start counting only the final state to consider the trading or we should consider other options
+        //if we average the outcome, it would be more efficient to consider the trading option
+        
+        
+        
         /// SLOOOW!!! 
 //        Enumeration ek = tree.keys();
 //        Enumeration ee = tree.elements();
@@ -156,6 +168,7 @@ public class UCT implements GameStateConstants {
 //                tree.remove(keyo);
 //            }
 //        }
+        
     }
         
     public static final int MINVISITS = 10;
@@ -250,12 +263,15 @@ public class UCT implements GameStateConstants {
     	
     }
     
-    public int getWinCount(){
-    	return this.win;
+    public int getWinCount(int player){
+    	return this.winCount[player];
     }
     
-    public int getLossCount(){
-    	return this.win;
+    public int getLoseCount(int player){
+    	return this.loseCount[player];
+    }
+    public float getAverageWinLose(int player){
+    	return (this.getWinCount(player)/this.getLoseCount(player));
     }
 }
 

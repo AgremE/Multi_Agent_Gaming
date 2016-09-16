@@ -666,13 +666,19 @@ public abstract class Player implements GameStateConstants
                 break;
             case A_TRADING:
             	
-            	//Trading with other player with only one at a time 
+            	//Trading with other player with only one at a time
+            	// This one should be offer accepted
             	int otherplayer = a[4];
             	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[2]] -= a[3];
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[5]] += a[6];
                 s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[5]] -= a[6];
                 s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[2]] += a[3];
                 break;
+            case A_CONSIDEROFFER:
+            	// Call to trading simulation again here to see whether it is good idea to trade
+            	
+            	break;
+            	
                 
         }
     }

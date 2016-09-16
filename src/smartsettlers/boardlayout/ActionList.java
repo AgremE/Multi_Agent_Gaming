@@ -12,6 +12,9 @@ import pomdpSettler.*;
  *
  * @author szityu
  */
+/*
+ * Improve by Agreme(Makara Phav)
+ * */
 public class ActionList implements GameStateConstants {
 	
     public static final int MAX_ACTIONLISTSIZE = 200;
