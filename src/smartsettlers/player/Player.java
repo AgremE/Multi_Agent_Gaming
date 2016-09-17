@@ -201,6 +201,7 @@ public abstract class Player implements GameStateConstants
         // TODO need to list of all the possible action in trading here
         // We need to do rollout one more time with trading then get the reward from there.
         // I think I should put it with the normal list of possibilities
+        /*
         for (i=0; i<NRESOURCES; i++)
         {
             for (j = 0; j<NRESOURCES; j++)
@@ -234,7 +235,7 @@ public abstract class Player implements GameStateConstants
                 }
                 
             }
-        }
+        }*/
         
     }
     //TODO: Hide the development card of other players in the status of the game environment
@@ -664,7 +665,7 @@ public abstract class Player implements GameStateConstants
                 }
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 0;
                 break;
-            case A_TRADING:
+            /*case A_TRADING:
             	
             	//Trading with other player with only one at a time
             	// This one should be offer accepted
@@ -677,7 +678,7 @@ public abstract class Player implements GameStateConstants
             case A_CONSIDEROFFER:
             	// Call to trading simulation again here to see whether it is good idea to trade
             	
-            	break;
+            	break;*/
             	
                 
         }
