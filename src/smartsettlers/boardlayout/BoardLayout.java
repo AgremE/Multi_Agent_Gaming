@@ -13,6 +13,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import smartsettlers.player.*;
 import smartsettlers.util.*;
+import tradingPOMDPs.TradingAction;
+import tradingPOMDPs.TradingUtil;
 import uct.TreeNode;
 import uct.UCT;
 import convNNSettler.*;
@@ -119,6 +121,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         2, 3, 3, 4, 4, 5, 5, 6, 6, 8, 8, 9, 9, 10, 10, 11, 11, 12
     };
     
+    public final int MAX_TRAD_OFFER = 5;
+    
     public HexTile[] hextiles;
     public Edge[] edges;
     public Vertex[] vertices;
@@ -145,7 +149,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     public GameLog gamelog; // All takend action which already decided by MCTS is stored here.
     public boolean isLoggingOn;
     public ActionList possibilities = new ActionList();
-    public ActionList tradingPossibilites = new ActionList();
+    public TradingAction tradingPossibilites = new TradingAction(); // Store all the possible trading option
+    public TradingAction goodTrading = new TradingAction();
     
     public static final int MODE_RANDOM = 0;
     public static final int MODE_UCT    = 1;
@@ -793,30 +798,56 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     public void GameTick(int[] s, int [] a)
     {
         int fsmlevel    = s[OFS_FSMLEVEL];
-        int pl          = s[OFS_FSMPLAYER+fsmlevel];
-        float gameTradTem = 0;
+        int statlevel 	= s[OFS_FSMSTATE+ fsmlevel];
+        int pl          = s[OFS_FSMPLAYER+ fsmlevel];
+        float winLoseOrigin = 0;
         int[] state = cloneOfState(s);
+        int[] trad;
+        int numTradOffer = 0;
+        boolean offer_answer = false;
+        if(statlevel == S_NORMAL){
+        	
+        	UCTsimulateGame(state);
+        	winLoseOrigin = uctTradinTree.getAverageWinLose(pl);
+            for(int i =0 ; i < this.tradingPossibilites.n; i++){
+                //this.UCTsimulateTrading(state);
+            	int[] state_trad_simulation = cloneOfState(s);
+            	// Chaning a to action of trading posibility
+            	changeState(state_trad_simulation, a, pl, a[3]);
+            	UCTsimulateTrading(state_trad_simulation);
+            	TradingUtil tradutil = new TradingUtil(this);
+            	trad = tradingPossibilites.trad[i];
+            	int traind = i;
+            	if(winLoseOrigin < uctTradinTree.getAverageWinLose(pl)){
+            		// TODO: Start the trading offer
+            		// Wait for offer
+            		// Start trading offer accepted otherwise reject
+            		// and Start normal simulation with monte carlo
+            		// Add list of trading here
+            		// It is complete different action from player.performaction
+            		// Therefore, we need to make complete different thinking mechanisim for agent to make
+            		// decision
+            		//trad_action.considerOffer(state, orignalStateChance, pl);
+            		
+            		offer_answer = tradutil.consdierOffer(trad,pl,winLoseOrigin);
+            		if(offer_answer){
+            			s = tradutil.applyTrad(s, trad, pl);
+            			break;
+            		}
+            		if(numTradOffer > MAX_TRAD_OFFER){
+            			break;
+            		}
+            		numTradOffer++;
+            	}
+            	
+            }
+        }
         // doing stuff
         // We copy the state from here
         
         // Consider the trade at the beginning first.
         // Loop through the list of possible trading
-        UCTsimulateTrading(state);
-    	gameTradTem = uctTradinTree.getAverageWinLose(pl);
-        for(int i =0 ; i < this.tradingPossibilites.n; i++){
-            //this.UCTsimulateTrading(state);
-        	int[] state_trad_simulation = cloneOfState(s);
-        	changeState(state_trad_simulation, a, pl, a[3]);
-        	UCTsimulateTrading(state_trad_simulation);
-        	int traind = i;
-        	if(gameTradTem < uctTradinTree.getAverageWinLose(pl)){
-        		// TODO: Start the trading offer
-        		// Wait for offer
-        		// Start trading offer accepted otherwise reject
-        		// and Start normal simulation with monte carlo
-        		// Add list of trading here
-        	}
-        }
+        
         // Start offer to that specific player:
         
         // We always clean up the list before we continues to work on building up the new list of possibility
@@ -1004,7 +1035,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     public void UCTsimulateTrading(int[] s2){
     	
     	int[] s = null;    
-        int[] a = new int[ACTIONSIZE];// ACTIONSIZE is 5
+        int[] a = new int[TradingAction.ACTIONSIZE];// ACTIONSIZE is 5
 
         TreeNode node;
         boolean isKnownState = true;

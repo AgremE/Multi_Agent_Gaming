@@ -11,13 +11,13 @@ public class TradingUtil implements  GameStateConstants{
 			this.bl = bl;
 		}
 		
-		public boolean consdierOffer(int action,int pl,int current_win_lose){
+		public boolean consdierOffer(int[] trad,int pl,float current_win_lose){
 			
-			int[] state_clone  = bl.cloneOfState(bl.state);
 			float tem_win_lose = 0;
 			// Simulate the game after trading
 			// if give better result than current state reuturn true
 			// other wise return false
+			int[] state_clone = bl.changeState(bl.state, trad, trad[0], trad[3]);
 			bl.UCTsimulateTrading(state_clone);
 			tem_win_lose = bl.uctTradinTree.getAverageWinLose(pl);
 			if(tem_win_lose > current_win_lose){

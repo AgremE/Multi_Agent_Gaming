@@ -201,7 +201,6 @@ public abstract class Player implements GameStateConstants
         // TODO need to list of all the possible action in trading here
         // We need to do rollout one more time with trading then get the reward from there.
         // I think I should put it with the normal list of possibilities
-        /*
         for (i=0; i<NRESOURCES; i++)
         {
             for (j = 0; j<NRESOURCES; j++)
@@ -215,27 +214,27 @@ public abstract class Player implements GameStateConstants
                 	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] == 1) && 
                 			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
                 		
-                		bl.tradingPossibilites.addAction(w,TRADING_OPTIONS,pl,i,1,player,j,1);
+                		bl.tradingPossibilites.addTradOption(w,pl,i,1,player,j,1);
                 		
                 	}
                 	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] > 1) && 
                 			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
                 		
-                		bl.tradingPossibilites.addAction(w,TRADING_OPTIONS,pl,i,2,player,j,1);
+                		bl.tradingPossibilites.addTradOption(w,pl,i,2,player,j,1);
                 		
                 		
                 	}
                 	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] > 2) && 
                 			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
                 		
-                		bl.tradingPossibilites.addAction(w,TRADING_OPTIONS,pl,i,3,player,j,1);
+                		bl.tradingPossibilites.addTradOption(w,pl,i,3,player,j,1);
                 		
                 		
                 	}
                 }
                 
             }
-        }*/
+        }
         
     }
     //TODO: Hide the development card of other players in the status of the game environment
@@ -679,8 +678,6 @@ public abstract class Player implements GameStateConstants
             	// Call to trading simulation again here to see whether it is good idea to trade
             	
             	break;*/
-            	
-                
         }
     }
 
@@ -966,6 +963,5 @@ public abstract class Player implements GameStateConstants
 //                        
 //       
 //    }
-    
     
 }

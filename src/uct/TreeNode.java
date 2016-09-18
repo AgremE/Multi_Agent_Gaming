@@ -40,4 +40,9 @@ public class TreeNode implements GameStateConstants {
         for (int i=0; i<nactions; i++)
             nwins[i][player] = virtualwins[i];
     }
+    // Just to get the number of win for each action corresponding to each player
+    public int[][] getNumWin(){
+    	
+    	return this.nwins;
+    }
 }
