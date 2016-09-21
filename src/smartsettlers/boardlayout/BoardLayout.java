@@ -805,10 +805,15 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int[] trad;
         int numTradOffer = 0;
         boolean offer_answer = false;
+        
         if(statlevel == S_NORMAL){
         	
+        	state = hideState(pl, state);
         	UCTsimulateGame(state);
         	winLoseOrigin = uctTradinTree.getAverageWinLose(pl);
+        	
+        	outerloop:
+        		
             for(int i =0 ; i < this.tradingPossibilites.n; i++){
                 //this.UCTsimulateTrading(state);
             	int[] state_trad_simulation = cloneOfState(s);
@@ -829,15 +834,20 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             		// decision
             		//trad_action.considerOffer(state, orignalStateChance, pl);
             		
-            		offer_answer = tradutil.consdierOffer(trad,pl,winLoseOrigin);
-            		if(offer_answer){
-            			s = tradutil.applyTrad(s, trad, pl);
-            			break;
+            		for(int player_ind = 0; player_ind < N_PLAYER; player_ind++){
+            			
+            			offer_answer = tradutil.consdierOffer(trad,player_ind,winLoseOrigin);
+            			
+                		if(offer_answer){
+                			s = tradutil.applyTrad(s, trad, player_ind);
+                			break outerloop; // break the whole nested loop with this line
+                		}
             		}
+            		numTradOffer++;
+            		// There is a limit number of offers because the speed of the playing the game
             		if(numTradOffer > MAX_TRAD_OFFER){
             			break;
             		}
-            		numTradOffer++;
             	}
             	
             }
@@ -876,7 +886,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         if (pl == 0)
         {
-            int[] s2 = cloneOfState(s);    
+            int[] s2 = cloneOfState(s);
             UCTsimulateGame(s2);
             s2=null;
             player[pl].listPossibilities(s);
@@ -1013,6 +1023,9 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         
     }
+    /*
+     * Change the information of the state according to trading offer
+     * */
     public int[] changeState(int[] state_info, int[] chang_info, int pl, int otherplayer){
     	int[] state_after;
     	state_after = cloneOfState(state_info);
@@ -1250,7 +1263,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     }
           
     int[] auxScoreArray = new int[4];
-    
+    // No need to change the recalScores because it is only called in the state transition which need to perform the
+    // score calculation later so if we hide the hidden variable at the beginning of simulation it would be fine
     public void recalcScores(int[] s)
     {
         int pl;
@@ -1562,7 +1576,32 @@ public void recalcLongestRoad(int[] s, int pl)
     	}
     	return s;
     }
-    public void sendDevCardInfotoPOMDPsAgent(int player,int devCard){
+    /*
+     * Criterial to hide all the data from other player:
+     *  1- Development Card Need to hide
+     *  2- Need to hide score of development card from other player
+     *  3- init to put number of card into to Total number of Card into total number index of state data
+     *  // Only using during the simulation to simulate the real life senario
+     * */
+    public int[] hideState(int pl, int[] state){
+    	
+    	int[] s = this.cloneOfState(state);
+    	
+    	for(int i =0; i< N_PLAYER;i++){
+    		
+    		if(i != pl){
+    			//Hide victory point card
+    			s[OFS_PLAYERDATA[i] + OFS_TOTALNDEVCARD] += s[OFS_PLAYERDATA[i] + OFS_OLDCARDS + CARD_ONEPOINT];
+    			s[OFS_PLAYERDATA[i] + OFS_OLDCARDS + CARD_ONEPOINT] = 0;
+    			// Hide other development card
+    			for(int DEV_IND = 0; DEV_IND < N_DEVCARDTYPES; DEV_IND ++){
+    				s[OFS_PLAYERDATA[i] + OFS_TOTALNDEVCARD] += s[OFS_PLAYERDATA[i] + OFS_NEWCARDS + DEV_IND];
+    				s[OFS_PLAYERDATA[i] + OFS_NEWCARDS + DEV_IND] = 0;
+    			}
+    		}
+    		
+    	}
+    	return s;
     	
     }
 }

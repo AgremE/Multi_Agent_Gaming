@@ -600,14 +600,18 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[4]] += a[3];
                 break;
             case A_BUYCARD:
+            	
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_WHEAT]--;
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_SHEEP]--;                    
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_STONE]--;
+                
                 val = bl.cardSequence[s[OFS_NCARDSGONE]];
+                
                 if (val==CARD_ONEPOINT)
                     s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + val]++;
                 else
                     s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + val]++;
+                
                 s[OFS_NCARDSGONE] ++;
                 break;
             case A_PLAYCARD_FREERESOURCE:
