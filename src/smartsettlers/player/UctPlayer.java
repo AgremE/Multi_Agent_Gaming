@@ -35,6 +35,7 @@ public class UctPlayer extends Player {
         int[] s2 = BoardLayout.cloneOfState(s);  
         if (bl.uctTree != null)
         {
+        	s2 = bl.hideState(pl, s2);
             bl.player[pl].listPossibilities(s2);
             for (j=0; j<bl.possibilities.n; j++)
             {
@@ -44,7 +45,6 @@ public class UctPlayer extends Player {
             // All of the init agents are the UCT player
             // All of the miulslateGame start here
             // Hide all the state development card
-            s2 = bl.hideState(pl, s2);
             bl.UCTsimulateGame(s2);
             // I need to approximate the belife state first then simulate it like it an actuat state of the game
             int aind = bl.uctTree.selectAction(s, pl, true);// action index of the maximun return

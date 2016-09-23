@@ -209,7 +209,7 @@ public abstract class Player implements GameStateConstants
                 w = 1.0;
                 for(int player = 0; player < NPLAYERS ;player++){
                 	
-                	if (pl == player) continue;
+                	if (pl == player){continue;}
                 	
                 	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] == 1) && 
                 			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
@@ -346,6 +346,7 @@ public abstract class Player implements GameStateConstants
             for (j=0; j<6; j++)
             {
                 ind = bl.neighborHexVertex[i][j];
+                int res = 0;
                 if (ind==-1)
                     continue;
                 val = s[OFS_VERTICES + ind];
@@ -357,7 +358,13 @@ public abstract class Player implements GameStateConstants
                     pl2 = -1;
                 if ((pl2!=-1) && (pl2!=pl))
                 	//TODO: Hide the state of other player stealing card in the state environment from other players except the stealer and one who got robbed 
-                    bl.possibilities.addAction(1.0,action, i, pl2, selectRandomResourceInHand(pl2, s));                                
+                    res = selectRandomResourceInHand(pl2, s);
+                	if(res != -1 ){
+                    	bl.possibilities.addAction(1.0,action, i, pl2, res);
+                    }
+                	else{
+                		bl.possibilities.addAction(0.1,action,i,pl2,-1);
+                	}
             }
         }
         
@@ -457,15 +464,21 @@ public abstract class Player implements GameStateConstants
                 str = str + " " + s[i];
             System.out.flush();
         }
-        ind = rnd.nextInt(ncards)+1;
-        j = 0;
-        for (i=0; i<NRESOURCES; i++)
-        {
-            j += s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i];
-            if (j>=ind)
-                break;
+        if(ncards > 0){
+        	ind = rnd.nextInt(ncards)+1;
+            j = 0;
+            for (i=0; i<NRESOURCES; i++)
+            {
+                j += s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i];
+                if (j>=ind)
+                    break;
+            }
+            return Math.min(i, NRESOURCES-1);
         }
-        return Math.min(i, NRESOURCES-1);
+        else{
+        	return -1;
+        }
+        
     }
     //It have to be implement by sub-class
     public abstract int selectMostUselessResourceInHand(int pl, int []s);
@@ -653,11 +666,19 @@ public abstract class Player implements GameStateConstants
                 }
                 break;
             case A_PAYTAX:
-                for (i=0; i<a[1]; i++)
-                {
-                    ind = selectMostUselessResourceInHand(pl, s);
-                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + ind]--;
+            	// If we don't check every time we use selectMostUselessResourceInHand sometime it return -1;
+            	ind = selectMostUselessResourceInHand(pl, s);
+                if(ind < 0){
+                	break;
                 }
+                else{
+                	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + ind]--;
+                }
+            	/*
+            	for (i=0; i<a[1]; i++)
+                {
+                    
+                }*/
                 break;
             case A_ENDTURN:
                 // new cards become old cards

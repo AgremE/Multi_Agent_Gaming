@@ -280,11 +280,13 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             
         }
         System.out.println();
+        
         for(i=0; i<N_SEA_TILES; i++)
         {
             hextiles[SEA_START_INDEX + i] = new HexTile(SEA_COORD[i][0],SEA_COORD[i][1],SEA,-1);
             hexatcoord[SEA_COORD[i][0]][SEA_COORD[i][1]] = SEA_START_INDEX + i;
-        }        
+        }
+        
         for(i=0; i<N_PORT_TILES; i++)
         {
             hextiles[PORT_START_INDEX + i] = new HexTile(PORT_COORD[i][0],PORT_COORD[i][1],portSequence[i],PORT_COORD[i][2]);
@@ -626,6 +628,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         NewGame(state, true); //todo: remove this.
         
         uctTree = new UCT();
+        uctTradinTree = new UCT();
 //        int [] a1 = {1, 2, 3};
 //        int [] a2 = {1, 2, 3};
 //        int [] a3 = {1, 1, 1, 1};
@@ -808,20 +811,21 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         if(statlevel == S_NORMAL){
         	
+        	System.out.println("System start trading");
         	state = hideState(pl, state);
-        	UCTsimulateGame(state);
+        	UCTsimulateTrading(state);
         	winLoseOrigin = uctTradinTree.getAverageWinLose(pl);
         	
         	outerloop:
         		
             for(int i =0 ; i < this.tradingPossibilites.n; i++){
                 //this.UCTsimulateTrading(state);
+            	trad = tradingPossibilites.trad[i];
             	int[] state_trad_simulation = cloneOfState(s);
             	// Chaning a to action of trading posibility
-            	changeState(state_trad_simulation, a, pl, a[3]);
+            	changeState(state_trad_simulation, trad, pl, trad[3]);
             	UCTsimulateTrading(state_trad_simulation);
             	TradingUtil tradutil = new TradingUtil(this);
-            	trad = tradingPossibilites.trad[i];
             	int traind = i;
             	if(winLoseOrigin < uctTradinTree.getAverageWinLose(pl)){
             		// TODO: Start the trading offer
@@ -1029,10 +1033,10 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     public int[] changeState(int[] state_info, int[] chang_info, int pl, int otherplayer){
     	int[] state_after;
     	state_after = cloneOfState(state_info);
-    	state_after[OFS_PLAYERDATA[pl] + OFS_RESOURCES + chang_info[2]] -= chang_info[3];
-    	state_after[OFS_PLAYERDATA[pl] + OFS_RESOURCES + chang_info[5]] += chang_info[6];
-    	state_after[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + chang_info[5]] -= chang_info[6];
-    	state_after[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + chang_info[2]] += chang_info[3];
+    	state_after[OFS_PLAYERDATA[pl] + OFS_RESOURCES + chang_info[1]] -= chang_info[2];
+    	state_after[OFS_PLAYERDATA[pl] + OFS_RESOURCES + chang_info[4]] += chang_info[5];
+    	state_after[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + chang_info[4]] -= chang_info[5];
+    	state_after[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + chang_info[1]] += chang_info[2];
     	return state_after;
     }
     // """Important Function to explain explicitly"""
@@ -1060,7 +1064,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         isLoggingOn = false;
         uctTradingTime ++;
         
-        if (uctTradinTree.tree.size()>100000)
+        if (uctTradinTree.tree.size()>10000)
         	uctTradinTree.tree.clear();
         
         int fsmlevel    = s2[OFS_FSMLEVEL];
@@ -1164,7 +1168,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         isLoggingOn = false;
         uctTime ++;
         
-        if (uctTree.tree.size()>1000000)
+        if (uctTree.tree.size()>10000)
             uctTree.tree.clear();
         
         int fsmlevel    = s2[OFS_FSMLEVEL];
@@ -1176,7 +1180,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].listPossibilities(s2);
 //        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
 //        System.out.printf("!2");
-        int N_IT = 10000;
+        int N_IT = 1000;
         // Only one action left there is nothing to stimulate there
         if (possibilities.n == 1)
             N_IT = 1;

@@ -6,8 +6,8 @@ import smartsettlers.boardlayout.GameStateConstants;
 public class TradingAction implements GameStateConstants{
 	
 	public static final int MAX_ACTIONLISTSIZE = 100;
-	public static final int [] NOOP = {A_NOTHING, 0, 0, 0, 0};
-	public final int TRADINGSIZE = 8;
+	public static final int [] NOOP = {A_NOTHING, 0, 0, 0, 0,0};
+	public final int TRADINGSIZE = 6;
     public int[][] trad;
     Random rnd = new Random();
     public int n = 0;
@@ -15,6 +15,8 @@ public class TradingAction implements GameStateConstants{
     double totalweight = 0.0;
 	public TradingAction(){
         trad = new int[MAX_ACTIONLISTSIZE][TRADINGSIZE];
+        weight = new double[MAX_ACTIONLISTSIZE];
+        this.n = 0;
 	}
 	public void Clear()
     {

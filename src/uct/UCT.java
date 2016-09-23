@@ -271,7 +271,7 @@ public class UCT implements GameStateConstants {
     	return this.loseCount[player];
     }
     public float getAverageWinLose(int player){
-    	return (this.getWinCount(player)/this.getLoseCount(player));
+    	return (this.getWinCount(player)/(this.getLoseCount(player) + this.getWinCount(player)));
     }
 }
 
