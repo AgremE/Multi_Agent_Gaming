@@ -1244,8 +1244,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             }
             uctTree.update(winner, uctTime);
         }
-        // !!! printing takes LOTS of time
-        //System.out.println(uctTree);
+// !!! printing takes LOTS of time
+//System.out.println(uctTree);
 //        s2[3] = 8;
 //        printArray(s);
 //        printArray(s2);

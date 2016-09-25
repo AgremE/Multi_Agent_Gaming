@@ -1,5 +1,7 @@
 package convNNSettler;
-
+/*
+ * Author: Agrem_E (Makara Phav)
+ * */
 
 import smartsettlers.boardlayout.BoardLayout;
 import smartsettlers.boardlayout.Edge;

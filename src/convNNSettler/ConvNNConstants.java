@@ -1,5 +1,9 @@
 package convNNSettler;
 
+/*
+ * Author: Agrem_E (Makara Phav)
+ * */
+
 public interface ConvNNConstants {
 	
 	public final int N_PLAYER = 2;

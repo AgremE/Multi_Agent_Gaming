@@ -1,5 +1,7 @@
 package convNNSettler;
-
+/*
+ * Author: Agrem_E (Makara Phav)
+ * */
 public class Coordinate {
 	private int x;
 	private int y;

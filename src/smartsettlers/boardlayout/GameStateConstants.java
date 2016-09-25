@@ -14,7 +14,7 @@ import java.awt.Color;
 /*Improve by Agreme(Makara Phav)*/
 public interface GameStateConstants extends HexTypeConstants {
 
-    int NPLAYERS = 2;// Change into semi zero sum game
+    int NPLAYERS = 3;// Change into semi zero sum game
     
     int N_VERTICES              = 54;// Number of vertice
     int N_HEXES                 = 19;// Number of hex
@@ -58,13 +58,13 @@ public interface GameStateConstants extends HexTypeConstants {
     int PLAYERSTATESIZE         = OFS_TOTALNDEVCARD      +N_DEVCARDTYPES;
     int[] OFS_PLAYERDATA        = { OFS_VERTICES+N_VERTICES,//WHole game state of the board presenting + player one
                                     OFS_VERTICES+N_VERTICES + PLAYERSTATESIZE,// 
-                                    //OFS_VERTICES+N_VERTICES + 2*PLAYERSTATESIZE,
+                                    OFS_VERTICES+N_VERTICES + 2*PLAYERSTATESIZE
                                     //OFS_VERTICES+N_VERTICES + 3*PLAYERSTATESIZE
                                     };// Change it to semi zero sum game between two players    
     
  // To specific the state information for the game play
     
-    int STATESIZE = OFS_VERTICES+N_VERTICES + 2*PLAYERSTATESIZE;// Change it to semi zero sum game between two players
+    int STATESIZE = OFS_VERTICES+N_VERTICES + 3*PLAYERSTATESIZE;// Change it to semi zero sum game between two players
     
  // Number of action you can do in one turn
  // There are 5 action to follow or 5 turns:
@@ -159,7 +159,7 @@ public interface GameStateConstants extends HexTypeConstants {
     {
         Color.BLUE,
         Color.RED,
-        //Color.WHITE,
+        Color.WHITE,
         //Color.ORANGE,
     };
 

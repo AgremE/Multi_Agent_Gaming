@@ -4,7 +4,9 @@
  * Allot smartsettler to know all the state but close all the hidden information from POMDPsSettler
  * */
 package pomdpSettler;
-
+/*
+ * Author: Agrem_E (Makara Phav)
+ * */
 import java.awt.Color;
 
 import smartsettlers.boardlayout.GameStateConstants;

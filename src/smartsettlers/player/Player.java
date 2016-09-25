@@ -11,6 +11,9 @@ import smartsettlers.util.*;
  *
  * @author szityu
  */
+/*
+ * Improve by Makara Phav
+ * */
 public abstract class Player implements GameStateConstants
 {
     int position;
@@ -86,7 +89,6 @@ public abstract class Player implements GameStateConstants
 //        bl.possibilities.addAction(10.0,A_ENDTURN);
 
         // buy road
-        // TODO: only 15 roads can be built
         if (   (s[OFS_PLAYERDATA[pl]+OFS_RESOURCES+RES_WOOD] >= 1) &&
                (s[OFS_PLAYERDATA[pl]+OFS_RESOURCES+RES_CLAY] >= 1) &&
                (s[OFS_PLAYERDATA[pl]+OFS_NROADS] < 15) )
@@ -113,14 +115,13 @@ public abstract class Player implements GameStateConstants
         }
 
         // buy settlement
-        // TODO: only 5 settlements can be built
         if (   (s[OFS_PLAYERDATA[pl]+OFS_RESOURCES+RES_WOOD] >= 1) &&
                (s[OFS_PLAYERDATA[pl]+OFS_RESOURCES+RES_CLAY] >= 1) &&
                (s[OFS_PLAYERDATA[pl]+OFS_RESOURCES+RES_WHEAT] >= 1) &&
                (s[OFS_PLAYERDATA[pl]+OFS_RESOURCES+RES_SHEEP] >= 1) &&
                (s[OFS_PLAYERDATA[pl]+OFS_NSETTLEMENTS] <= 5) )
         {
-            for (i=0; i<N_VERTICES; i++)
+        	for (i=0; i<N_VERTICES; i++)
             {
                 if (s[OFS_VERTICES+i]==VERTEX_EMPTY) 
                 {
@@ -143,7 +144,7 @@ public abstract class Player implements GameStateConstants
                (s[OFS_PLAYERDATA[pl]+OFS_RESOURCES+RES_WHEAT] >= 2) &&
                (s[OFS_PLAYERDATA[pl]+OFS_NCITIES] <= 4) )
         {
-            for (i=0; i<N_VERTICES; i++)
+        	for (i=0; i<N_VERTICES; i++)
             {
                 if (s[OFS_VERTICES+i]==VERTEX_HASSETTLEMENT + pl) 
                 {
