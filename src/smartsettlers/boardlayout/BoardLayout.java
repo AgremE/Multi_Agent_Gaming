@@ -811,7 +811,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         if(statlevel == S_NORMAL){
         	
-        	System.out.println("System start trading");
+        	//System.out.println("System start trading");
         	state = hideState(pl, state);
         	UCTsimulateTrading(state);
         	winLoseOrigin = uctTradinTree.getAverageWinLose(pl);
@@ -1039,6 +1039,25 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     	state_after[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + chang_info[1]] += chang_info[2];
     	return state_after;
     }
+    //TODO:
+    /*
+     * Upon:
+     * - S_MAKEOFFER
+     * - Make all possible list offer with listpossibleoffer() in Player
+     * - Limited offer time is 5 in case of rejection if there any one accepted we just approve it directly
+     * - Check respond from JSettler with makeOffer in Jsettler
+     * - Wait from respond with function considerOffer in Jsettler
+     * */
+    public void simulateExistingOptionTrading()
+    {
+    	int[] clone_stae = this.cloneOfState(this.state);
+    	int fsmlevel    = clone_stae[OFS_FSMLEVEL];
+        //System.out.println("FSM LEVEL"+fsmlevel);
+        int pl          = clone_stae[OFS_FSMPLAYER+fsmlevel];
+    	UCTsimulateTrading(clone_stae);
+    	double curr_winLoss = uctTradinTree.getAverageWinLose(pl);
+    	
+    }
     // """Important Function to explain explicitly"""
     // Stimulate about 1000 game step to choose which one give the best result of movement
     // Store data and state from this part for training the neural network
@@ -1049,6 +1068,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     // Simulate it
     //Choose the best
     // This function will use inside the GameTick function to simulate for every trading possible situation under current assumption
+    
     public void UCTsimulateTrading(int[] s2){
     	
     	int[] s = null;    

@@ -98,6 +98,7 @@ public interface GameStateConstants extends HexTypeConstants {
     int S_FREEROAD1             = 13;
     int S_FREEROAD2             = 14;
     int S_ROBBERAT7             = 15;
+    int S_MAKEOFFER				= 16;
     int S_FINISHED              = 101;
     
             

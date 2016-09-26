@@ -76,7 +76,51 @@ public abstract class Player implements GameStateConstants
             }
         }        
     }
-    
+    //
+    public void listTradingOption(int[] s){
+    	
+    	int fsmlevel    = s[OFS_FSMLEVEL];
+        int fsmstate    = s[OFS_FSMSTATE+fsmlevel];
+        int pl          = s[OFS_FSMPLAYER+fsmlevel];
+        int i, j, ind, pl2, val;
+        
+        bl.tradingPossibilites.Clear();
+
+    	for ( i=0; i<NRESOURCES; i++)
+        {
+            for ( j = 0; j<NRESOURCES; j++)
+            {
+                if (i==j) continue;
+                double w = 1.0;
+                for(int player = 0; player < NPLAYERS ;player++){
+                	
+                	if (pl == player){continue;}
+                	
+                	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] == 1) && 
+                			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
+                		
+                		bl.tradingPossibilites.addTradOption(w,pl,i,1,player,j,1);
+                		
+                	}
+                	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] > 1) && 
+                			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
+                		
+                		bl.tradingPossibilites.addTradOption(w,pl,i,2,player,j,1);
+                		
+                		
+                	}
+                	else if((s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i] > 2) && 
+                			(s[OFS_PLAYERDATA[player] + OFS_RESOURCES + j] >= 1)){
+                		
+                		bl.tradingPossibilites.addTradOption(w,pl,i,3,player,j,1);
+                		
+                		
+                	}
+                }
+                
+            }
+        }
+    }
     public void listNormalPossibilities(int[] s) 
     {
         int fsmlevel    = s[OFS_FSMLEVEL];
@@ -423,6 +467,10 @@ public abstract class Player implements GameStateConstants
             case S_NORMAL:
                 listNormalPossibilities(s);
                 break;
+            case S_MAKEOFFER:
+            	listTradingOption(s);
+            	break;
+            	
         }
         if (bl.possibilities.n==0)
         {

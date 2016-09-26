@@ -11,6 +11,7 @@ import java.util.Vector;
 
 import smartsettlers.boardlayout.ActionList;
 import smartsettlers.boardlayout.GameStateConstants;
+import smartsettlers.boardlayout.HexTypeConstants;
 import soc.debug.D;
 
 import smartsettlers.player.*;
@@ -30,11 +31,15 @@ import soc.message.*;
 import soc.server.SOCServer;
 import soc.util.CappedQueue;
 import soc.util.SOCRobotParameters;
+import tradingPOMDPs.TradingAction;
 
 /**
  *
  * @author szityu
  */
+/*
+ * Improve by Agreme (Makara Phav)
+ * */
 public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
     
     
@@ -129,19 +134,60 @@ public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
     protected int considerOffer(SOCTradeOffer offer)
     {
         //super.considerOffer(offer); // otherwise the game hangs...
-        
-        // It is just for SmartSettler brain Run nothing more 
-    	
+    	System.out.printf("Trading Consideration\n");        
+        pause(1000);
+        SSRobotClient rc = (SSRobotClient)client;
+        rc.sendStateToSmartSettlers(game,S_NORMAL);         
+        Player p = rc.bl.player[game.getCurrentPlayerNumber()];
         int response = SOCRobotNegotiator.REJECT_OFFER;
+        double curr_averageWinLose = 0.0;
+        boolean tradningSumilation = false;
+        int[] state_clone = rc.bl.hideState(game.getCurrentPlayerNumber(), rc.bl.cloneOfState(rc.bl.state));// Try to hide the state of the game in order to do fair trade simulation
+        int[] offer_give, offer_get;
+        int[] offer_give_INPOMDPs = new int[5];
+        int[] offer_get_INPOMDPs = new int[5];
+        rc.bl.UCTsimulateGame(state_clone);
+        // Current Win and Lose before trading in the game
+        curr_averageWinLose = rc.bl.uctTree.getAverageWinLose(game.getCurrentPlayerNumber());
+        offer_give = offer.getGiveSet().getReourceset();
+        offer_get = offer.getGiveSet().getReourceset();
+        
+        offer_give_INPOMDPs[HexTypeConstants.RES_CLAY] = offer_give[SOCResourceConstants.CLAY];
+    	offer_give_INPOMDPs[HexTypeConstants.RES_SHEEP] = offer_give[SOCResourceConstants.SHEEP];
+    	offer_give_INPOMDPs[HexTypeConstants.RES_STONE] = offer_give[SOCResourceConstants.ORE];
+    	offer_give_INPOMDPs[HexTypeConstants.RES_WHEAT] = offer_give[SOCResourceConstants.WHEAT];
+    	offer_give_INPOMDPs[HexTypeConstants.RES_WOOD] = offer_give[SOCResourceConstants.WOOD];
+    	offer_get_INPOMDPs[HexTypeConstants.RES_CLAY] = offer_get[SOCResourceConstants.CLAY];
+    	offer_get_INPOMDPs[HexTypeConstants.RES_SHEEP] = offer_get[SOCResourceConstants.SHEEP];
+    	offer_get_INPOMDPs[HexTypeConstants.RES_STONE] = offer_get[SOCResourceConstants.ORE];
+    	offer_get_INPOMDPs[HexTypeConstants.RES_WHEAT] = offer_get[SOCResourceConstants.WHEAT];
+    	offer_get_INPOMDPs[HexTypeConstants.RES_WOOD] = offer_get[SOCResourceConstants.WOOD];
+    	
+    	//Performing State change before the trading
+    	for(int i = 0; i < N_RESOURCES; i++ ){
+    		state_clone[OFS_PLAYERDATA[game.getCurrentPlayerNumber()]+OFS_RESOURCES + i] += offer_give_INPOMDPs[i];
+    		state_clone[OFS_PLAYERDATA[offer.getPlayerOffer()]+OFS_RESOURCES + i]		-= offer_get_INPOMDPs[i];
+    	}
+    	
+    	rc.bl.UCTsimulateGame(state_clone);
+    	if(curr_averageWinLose >= rc.bl.uctTree.getAverageWinLose(game.getCurrentPlayerNumber())){
+    		return SOCRobotNegotiator.REJECT_OFFER;
+    	}
+    	else{
+    		return SOCRobotNegotiator.ACCEPT_OFFER;
+    	}
+        // Change the clone state and simulate to get the averageWinLose
+        
         // When they offer run simulation here
         
         //SSRobotClient rc = (SSRobotClient)client;
         //pause(1000);
         //
-        
-        
-        
-        return response;
+    }
+    //Construct offer option of POMDPs Settler
+    public void POMDPsmakeOffer(){
+    	TradingAction test = new TradingAction();
+    	
     }
     boolean checkOfferValide(int[] action){
     	
@@ -505,6 +551,7 @@ public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
     @Override
     public void run()
     {
+    	int offer_from;
         if (pinger != null)
         {
             pinger.start();
@@ -1062,11 +1109,22 @@ public class SSRobotBrain extends SOCRobotBrain implements GameStateConstants {
                     }
 
                     // <editor-fold defaultstate="collapsed" desc="MAKEOFFER">
+                    
+                  //TODO:
+                    /*
+                     * Upon:
+                     * - S_MAKEOFFER
+                     * - Make all possible list offer with listpossibleoffer() in Player
+                     * - Limited offer time is 5 in case of rejection if there any one accepted we just approve it directly
+                     * - Check respond from JSettler with makeOffer in Jsettler
+                     * - Wait from respond with function considerOffer in Jsettler
+                     * */
+                    
                     else if ((robotParameters.getTradeFlag() == 1) && (mesType == SOCMessage.MAKEOFFER))
                     {
                         SOCTradeOffer offer = ((SOCMakeOffer) mes).getOffer();
                         game.getPlayer(offer.getFrom()).setCurrentOffer(offer);
-
+                        offer_from = offer.getFrom();
                         ///
                         /// if another player makes an offer, that's the
                         /// same as a rejection, but still wants to deal

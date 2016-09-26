@@ -240,6 +240,17 @@ public class SOCRobotNegotiator
      * @param targetPiece  the piece that we want to build
      * @return the offer we want to make, or null for no offer
      */
+  //TODO:
+    /*
+     * Upon:
+     * - S_MAKEOFFER
+     * - Make all possible list offer with listpossibleoffer() in Player
+     * - Limited offer time is 5 in case of rejection if there any one accepted we just approve it directly
+     * - Check respond from JSettler with makeOffer in Jsettler
+     * - Wait from respond with function considerOffer in Jsettler
+     * */
+    
+    // This targetPiece: You always want to build something in order to trade but with POMDPsSettler we trad because we know we will win
     public SOCTradeOffer makeOffer(SOCPossiblePiece targetPiece)
     {
         D.ebugPrintln("***** MAKE OFFER *****");
