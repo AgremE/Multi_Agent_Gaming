@@ -333,8 +333,8 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             //this.paintAll(this.getGraphics());
         } while (boardlayout.getWinner(boardlayout.state) == -1);
         //print number trad and trad offer
-        System.out.println("Trading Accepted: " + boardlayout.tradingAccepte);
-        System.out.println("Tradning offer: "+ boardlayout.tradingOffer);
+        //System.out.println("Trading Accepted: " + boardlayout.tradingAccepte);
+        //System.out.println("Tradning offer: "+ boardlayout.tradingOffer);
         boardlayout.GameTick(boardlayout.state,boardlayout.action);
         listModel.addElement(boardlayout.gamelog.toString());
         

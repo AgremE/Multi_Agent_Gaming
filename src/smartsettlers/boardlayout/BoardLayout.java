@@ -856,6 +856,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             		}
             		numTradOffer++;
             		// There is a limit number of offers because the speed of the playing the game
+            		
             		if(numTradOffer > MAX_TRAD_OFFER){
             			break;
             		}

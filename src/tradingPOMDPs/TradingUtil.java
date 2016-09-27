@@ -31,11 +31,11 @@ public class TradingUtil implements  GameStateConstants{
 		}
 		public int[] applyTrad(int[] s, int[] a,int pl){
 			// apply trading action here and update the state before process with monte carlo
-			int otherplayer = a[4];
-        	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[2]] -= a[3];
-            s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[5]] += a[6];
-            s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[5]] -= a[6];
-            s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[2]] += a[3];
+			int otherplayer = a[3];
+        	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[1]] -= a[2];
+            s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[4]] += a[5];
+            s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[4]] -= a[5];
+            s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[1]] += a[2];
             
             return s;
 		}

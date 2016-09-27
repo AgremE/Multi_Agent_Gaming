@@ -2,3 +2,7 @@
 /tradingPOMDPs/
 /uct/
 /smartsettlers/
+/convNNSettler/
+/dataGeneration/
+/experiment/
+/pomdpSettler/
