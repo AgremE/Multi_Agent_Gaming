@@ -161,6 +161,11 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     private int uctTime = 0;
     private int uctTradingTime = 0;
     
+    //Trading Data
+    
+    public int tradingOffer = 0;
+    public int tradingAccepte = 0;
+    
     public void setState(int[] s)
     {
         int i;
@@ -820,6 +825,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         		
             for(int i =0 ; i < this.tradingPossibilites.n; i++){
                 //this.UCTsimulateTrading(state);
+            	tradingOffer++;
             	trad = tradingPossibilites.trad[i];
             	int[] state_trad_simulation = cloneOfState(s);
             	// Chaning a to action of trading posibility
@@ -844,6 +850,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             			
                 		if(offer_answer){
                 			s = tradutil.applyTrad(s, trad, player_ind);
+                			tradingAccepte++;
                 			break outerloop; // break the whole nested loop with this line
                 		}
             		}
