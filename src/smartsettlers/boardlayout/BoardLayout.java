@@ -814,28 +814,38 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int[] trad;
         int numTradOffer = 0;
         boolean offer_answer = false;
-        player[pl].listTradingOption(s);
-        
+       
+        //System.out.println("System start trading");
         if(statlevel == S_NORMAL){
         	
-        	//System.out.println("System start trading");
+        	System.out.println("System start trading");
         	state = hideState(pl, state);
         	UCTsimulateTrading(state);
+        	player[pl].listTradingOption(s);
         	winCount = uctTradinTree.getWinCount(pl);
         	
         	outerloop:
-            
             for(int i =0 ; i < this.tradingPossibilites.n; i++){
+            	
                 //this.UCTsimulateTrading(state);
             	System.out.println("Considering Offer");
-            	try {
-					TimeUnit.SECONDS.sleep(10);
+            	
+            	tradingOffer++;
+            	trad = tradingPossibilites.trad[i];
+            	for(int ind =0 ; ind < this.tradingPossibilites.n; ind++){
+            		System.out.printf("Trading Option: [%d %d %d %d %d %d]\n", tradingPossibilites.trad[ind][0], 
+            												   tradingPossibilites.trad[ind][1], 
+            												   tradingPossibilites.trad[ind][2], 
+            												   tradingPossibilites.trad[ind][3], 
+            												   tradingPossibilites.trad[ind][4], 
+            												   tradingPossibilites.trad[ind][5]);
+            	}
+            	/*try {
+					TimeUnit.SECONDS.sleep(20);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
-            	tradingOffer++;
-            	trad = tradingPossibilites.trad[i];
+				}*/
             	int[] state_trad_simulation = cloneOfState(s);
             	// Chaning a to action of trading posibility
             	changeState(state_trad_simulation, trad);
@@ -1224,7 +1234,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].listPossibilities(s2);
 //        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
 //        System.out.printf("!2");
-        int N_IT = 1000;
+        int N_IT = 2000;
         // Only one action left there is nothing to stimulate there
         if (possibilities.n == 1)
             N_IT = 1;
@@ -1237,6 +1247,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             //Close state s2 in order to protect the original state
             s = cloneOfState(s2);
             uctTree.clearTraces();
+            int round = 0;
             while (true)
             {
                 int hc = UCT.getHashCode(s);
@@ -1276,16 +1287,23 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 }
 
                 a = possibilities.action[aind];
+                // Sometime the simulation hang in this state
 //        System.out.printf("!5");
                 player[pl].performAction(s, a);
                 // Changing state
                 // It also changing tht player number at the same time as we use the state transition
+                // We need to define the optimal simulation round so it able to do it job properly
                 stateTransition(s, a);
                 winner = getWinner(s);
-                
+                round++;
+                /*
+                if(round == 1000){
+                	break;
+                }*/
                 if (winner !=-1)
                     break;
             }
+            System.out.printf("Round :%d and Simulation Round: %d\n", round, it);
             uctTree.update(winner, uctTime);
         }
 // !!! printing takes LOTS of time

@@ -131,21 +131,23 @@ public class UCT implements GameStateConstants {
         TreeNode node;
         Trace tr;
         
-        for (i=0; i<ntraces; i++)
-        {
-            tr = traceList[i];
-            node = getNode(tr.hc);
-            node.nvisits++;
-            node.nwins[tr.aind][winner]++;
-            node.nactionvisits[tr.aind]++;
-            node.timeStamp = timeStamp;            
-            tree.put(tr.hc, node);
-            winCount[winner]++;
-            for(int loser = 0; loser < NPLAYERS; loser++ ){
-            	if(loser == winner){
-            		continue;
-            	}
-            	loseCount[loser]++;
+        if(winner != -1){
+        	for (i=0; i<ntraces; i++)
+            {
+                tr = traceList[i];
+                node = getNode(tr.hc);
+                node.nvisits++;
+                node.nwins[tr.aind][winner]++;
+                node.nactionvisits[tr.aind]++;
+                node.timeStamp = timeStamp;            
+                tree.put(tr.hc, node);
+                winCount[winner]++;
+                for(int loser = 0; loser < NPLAYERS; loser++ ){
+                	if(loser == winner){
+                		continue;
+                	}
+                	loseCount[loser]++;
+                }
             }
         }
         
