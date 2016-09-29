@@ -18,10 +18,11 @@ public class TradingUtil implements  GameStateConstants{
 			// if give better result than current state reuturn true
 			// other wise return false
 			
-			int[] state_clone = bl.changeState(bl.state, trad, trad[0], trad[3]);
+			int[] state_clone = bl.changeState(bl.state, trad);
+			bl.uctTradinTree.clearWinner();
 			bl.UCTsimulateTrading(state_clone);
 			
-			tem_win_lose = bl.uctTradinTree.getAverageWinLose(pl);
+			tem_win_lose = bl.uctTradinTree.getWinCount(pl);
 			if(tem_win_lose > current_win_lose){
 				return true;
 			}
@@ -29,9 +30,10 @@ public class TradingUtil implements  GameStateConstants{
 				return false;
 			}
 		}
-		public int[] applyTrad(int[] s, int[] a,int pl){
+		public int[] applyTrad(int[] s, int[] a){
 			// apply trading action here and update the state before process with monte carlo
 			int otherplayer = a[3];
+			int pl = a[0];
         	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[1]] -= a[2];
             s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[4]] += a[5];
             s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[4]] -= a[5];

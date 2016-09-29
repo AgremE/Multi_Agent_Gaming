@@ -246,6 +246,7 @@ public abstract class Player implements GameStateConstants
         // TODO need to list of all the possible action in trading here
         // We need to do rollout one more time with trading then get the reward from there.
         // I think I should put it with the normal list of possibilities
+        /*
         for (i=0; i<NRESOURCES; i++)
         {
             for (j = 0; j<NRESOURCES; j++)
@@ -279,7 +280,7 @@ public abstract class Player implements GameStateConstants
                 }
                 
             }
-        }
+        }*/
         
     }
     //TODO: Hide the development card of other players in the status of the game environment

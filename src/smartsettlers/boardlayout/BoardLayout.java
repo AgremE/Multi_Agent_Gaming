@@ -9,6 +9,7 @@ import java.awt.*;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import smartsettlers.player.*;
@@ -808,32 +809,42 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int fsmlevel    = s[OFS_FSMLEVEL];
         int statlevel 	= s[OFS_FSMSTATE+ fsmlevel];
         int pl          = s[OFS_FSMPLAYER+ fsmlevel];
-        float winLoseOrigin = 0;
+        int winCount = 0;
         int[] state = cloneOfState(s);
         int[] trad;
         int numTradOffer = 0;
         boolean offer_answer = false;
+        player[pl].listTradingOption(s);
         
         if(statlevel == S_NORMAL){
         	
         	//System.out.println("System start trading");
         	state = hideState(pl, state);
         	UCTsimulateTrading(state);
-        	winLoseOrigin = uctTradinTree.getAverageWinLose(pl);
+        	winCount = uctTradinTree.getWinCount(pl);
         	
         	outerloop:
-        		
+            
             for(int i =0 ; i < this.tradingPossibilites.n; i++){
                 //this.UCTsimulateTrading(state);
+            	System.out.println("Considering Offer");
+            	try {
+					TimeUnit.SECONDS.sleep(10);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
             	tradingOffer++;
             	trad = tradingPossibilites.trad[i];
             	int[] state_trad_simulation = cloneOfState(s);
             	// Chaning a to action of trading posibility
-            	changeState(state_trad_simulation, trad, pl, trad[3]);
+            	changeState(state_trad_simulation, trad);
             	UCTsimulateTrading(state_trad_simulation);
             	TradingUtil tradutil = new TradingUtil(this);
             	int traind = i;
-            	if(winLoseOrigin < uctTradinTree.getAverageWinLose(pl)){
+            	
+            	if(winCount < uctTradinTree.getWinCount(pl)){
+            		System.out.println("Offering");
             		// TODO: Start the trading offer
             		// Wait for offer
             		// Start trading offer accepted otherwise reject
@@ -846,10 +857,11 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             		
             		for(int player_ind = 0; player_ind < N_PLAYER; player_ind++){
             			
-            			offer_answer = tradutil.consdierOffer(trad,player_ind,winLoseOrigin);
+            			offer_answer = tradutil.consdierOffer(trad,player_ind,winCount);
             			
                 		if(offer_answer){
-                			s = tradutil.applyTrad(s, trad, player_ind);
+                			System.out.println("Accepted");
+                			s = tradutil.applyTrad(s, trad);
                 			tradingAccepte++;
                 			break outerloop; // break the whole nested loop with this line
                 		}
@@ -1038,14 +1050,18 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     /*
      * Change the information of the state according to trading offer
      * */
-    public int[] changeState(int[] state_info, int[] chang_info, int pl, int otherplayer){
+    public int[] changeState(int[] state_info, int[] chang_info){
+    	
     	int[] state_after;
+    	int pl = chang_info[0];
+    	int other_pl = chang_info[3];
     	state_after = cloneOfState(state_info);
     	state_after[OFS_PLAYERDATA[pl] + OFS_RESOURCES + chang_info[1]] -= chang_info[2];
     	state_after[OFS_PLAYERDATA[pl] + OFS_RESOURCES + chang_info[4]] += chang_info[5];
-    	state_after[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + chang_info[4]] -= chang_info[5];
-    	state_after[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + chang_info[1]] += chang_info[2];
+    	state_after[OFS_PLAYERDATA[other_pl] + OFS_RESOURCES + chang_info[4]] -= chang_info[5];
+    	state_after[OFS_PLAYERDATA[other_pl] + OFS_RESOURCES + chang_info[1]] += chang_info[2];
     	return state_after;
+    	
     }
     //TODO:
     /*
@@ -1091,7 +1107,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         boolean oldIsLoggingOn = isLoggingOn;
         isLoggingOn = false;
         uctTradingTime ++;
-        
+        uctTradinTree.clearWinner();
         if (uctTradinTree.tree.size()>10000)
         	uctTradinTree.tree.clear();
         

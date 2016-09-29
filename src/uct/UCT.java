@@ -263,6 +263,12 @@ public class UCT implements GameStateConstants {
     	
     }
     
+    public void clearWinner(){
+    	for(int i = 0; i<NPLAYERS; i++){
+    		this.winCount[i] = 0;
+    	}
+    }
+    
     public int getWinCount(int player){
     	return this.winCount[player];
     }
