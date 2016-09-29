@@ -453,6 +453,7 @@ public abstract class Player implements GameStateConstants
                 listRoadPossibilities(s);
                 break;
             case S_PAYTAX:
+            	// This is for just simulation that there is a possibility that we might get cut down by pay tax
                 val = 0;
                 for (i=0; i<NRESOURCES; i++)
                     val += s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i];
@@ -717,19 +718,37 @@ public abstract class Player implements GameStateConstants
                 break;
             case A_PAYTAX:
             	// If we don't check every time we use selectMostUselessResourceInHand sometime it return -1;
-            	ind = selectMostUselessResourceInHand(pl, s);
+            	// Tax Paying in the orginal game of SmartSettler is wrong
+            	
+            	for(int ind_player = 0; ind_player < NPLAYERS; ind_player++){
+            		
+            		int totalCardForEachPlayer = this.getTotalResourceCount(ind_player);
+            		//System.out.printf("Total Resource Card: %d\n", totalCardForEachPlayer);
+            		if(totalCardForEachPlayer > 7){
+            			int reduceCard = totalCardForEachPlayer/2;
+            			for(int ind_cut=0; ind_cut < reduceCard; ind_cut++){
+            				int res_card = this.selectMostUselessResourceInHand(ind_player, s);
+            				if(res_card >= 0){
+            					s[OFS_PLAYERDATA[ind_player] + OFS_RESOURCES + res_card]--;
+            				}
+            			}
+            		}
+            	}
+                
+            	
+            	/*ind = selectMostUselessResourceInHand(pl, s);
                 if(ind < 0){
                 	break;
                 }
                 else{
                 	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + ind]--;
                 }
-            	/*
+            	
             	for (i=0; i<a[1]; i++)
                 {
                     
                 }*/
-                break;
+            	break;
             case A_ENDTURN:
                 // new cards become old cards
                 for (ind=0; ind<NCARDTYPES; ind++)
@@ -754,6 +773,252 @@ public abstract class Player implements GameStateConstants
             	
             	break;*/
         }
+    }
+    public void performAction_simulation(int[] s, int [] a)
+    {
+        int fsmlevel    = s[OFS_FSMLEVEL];
+        int fsmstate    = s[OFS_FSMSTATE+fsmlevel];
+        int pl          = s[OFS_FSMPLAYER+fsmlevel];
+        int i, j, ind, val, ind2, k, ncards;
+        int another_player = 0;
+        // We need to perform to translate every action from this point
+        switch (a[0])
+        {
+            case A_BUILDSETTLEMENT: 
+                s[OFS_VERTICES+a[1]] =  VERTEX_HASSETTLEMENT+ pl;
+                s[OFS_PLAYERDATA[pl]+OFS_NSETTLEMENTS]++;
+                s[OFS_LASTVERTEX] = a[1];
+                boolean[] hasOpponentRoad = new boolean[NPLAYERS];
+                for (j=0; j<6; j++)
+                {
+                    ind = bl.neighborVertexVertex[a[1]][j];
+                    if (ind != -1)
+                    {
+                        s[OFS_VERTICES+ind] = VERTEX_TOOCLOSE;
+                    }
+                    ind = bl.neighborVertexEdge[a[1]][j];
+                    if ((ind != -1) && (s[OFS_EDGES+ind] != EDGE_EMPTY))
+                    {
+                        hasOpponentRoad[s[OFS_EDGES+ind]-EDGE_OCCUPIED] = true;
+                    }
+                }
+                hasOpponentRoad[pl] = false;
+                for (j=0; j<6; j++)
+                {
+                    ind = bl.neighborVertexHex[a[1]][j];
+                    if ((ind != -1) && (bl.hextiles[ind].type == TYPE_PORT))
+                    {
+                        val = bl.hextiles[ind].subtype - PORT_SHEEP;
+                        k = j-2; if (k<0) k+=6;
+                        if (k==bl.hextiles[ind].orientation)
+                            s[OFS_PLAYERDATA[pl] + OFS_ACCESSTOPORT + val] = 1;
+                        k = j-3; if (k<0) k+=6;
+                        if (k==bl.hextiles[ind].orientation)
+                            s[OFS_PLAYERDATA[pl] + OFS_ACCESSTOPORT + val] = 1;
+                    }
+                }
+                for (int pl2=0; pl2<NPLAYERS; pl2++)
+                {
+                    if (hasOpponentRoad[pl2])
+                        bl.recalcLongestRoad(s,pl2);
+                }
+                if (fsmstate == S_SETTLEMENT2)
+                {
+                    int resource;
+                    for (j=0; j<6; j++)
+                    {
+                        ind = bl.neighborVertexHex[a[1]][j];
+                        if (ind !=-1)
+                        {
+                            resource = bl.hextiles[ind].yields();
+                            if (resource != -1)
+                            {
+                                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + resource]++;
+                            }
+                        }
+                    }
+                }
+                else if (fsmstate == S_NORMAL)
+                {
+                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_WOOD]--;
+                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_CLAY]--;                    
+                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_WHEAT]--;
+                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_SHEEP]--;                    
+                }
+
+                break;
+            case A_BUILDCITY: 
+                s[OFS_VERTICES+a[1]] =  VERTEX_HASCITY+ pl;
+                s[OFS_PLAYERDATA[pl]+OFS_NSETTLEMENTS]--;
+                s[OFS_PLAYERDATA[pl]+OFS_NCITIES]++;
+
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_STONE]-= 3;
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_WHEAT]-= 2;
+                break;
+            case A_BUILDROAD:
+                s[OFS_EDGES + a[1]] = EDGE_OCCUPIED + pl;
+                //System.out.println(pl);
+                s[OFS_PLAYERDATA[pl]+OFS_NROADS]++;
+                if (fsmstate == S_NORMAL)
+                {
+                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_WOOD]--;
+                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_CLAY]--;                    
+                }
+                bl.recalcLongestRoad(s,pl);
+                break;
+            //
+            case A_THROWDICE:
+                s[OFS_DIE1] = rnd.nextInt(6)+1;
+                s[OFS_DIE2] = rnd.nextInt(6)+1;
+                val = s[OFS_DIE1] + s[OFS_DIE2];
+                for (ind=0; ind<N_HEXES; ind++)
+                {
+                    if ( (val == bl.hextiles[ind].productionNumber)
+                            && (s[OFS_ROBBERPLACE]!=ind) )
+                    {
+                        for (j = 0; j<6; j++)
+                        {
+                            ind2 = bl.neighborHexVertex[ind][j];
+                            if (ind2 != -1)
+                            {
+                                k = s[OFS_VERTICES + ind2];
+                                // production for settlement
+                                if ((k>=VERTEX_HASSETTLEMENT) && (k<VERTEX_HASSETTLEMENT+NPLAYERS))
+                                {
+                                    pl = k-VERTEX_HASSETTLEMENT;
+                                    s[OFS_PLAYERDATA[pl]+OFS_RESOURCES+bl.hextiles[ind].yields()] ++;
+                                }
+                                // production for city
+                                if ((k>=VERTEX_HASCITY) && (k<VERTEX_HASCITY+NPLAYERS))
+                                {
+                                    pl = k-VERTEX_HASCITY;
+                                    s[OFS_PLAYERDATA[pl]+OFS_RESOURCES+bl.hextiles[ind].yields()] += 2;
+                                }
+                          }
+                        }
+                    }
+                }
+                break;
+            case A_PORTTRADE:
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[2]] -= a[1];
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[4]] += a[3];
+                break;
+            case A_BUYCARD:
+            	
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_WHEAT]--;
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_SHEEP]--;                    
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_STONE]--;
+                
+                val = bl.cardSequence[s[OFS_NCARDSGONE]];
+                
+                if (val==CARD_ONEPOINT)
+                    s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + val]++;
+                else
+                    s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + val]++;
+                
+                s[OFS_NCARDSGONE] ++;
+                break;
+            case A_PLAYCARD_FREERESOURCE:
+                s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
+                s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_FREERESOURCE]--;
+                s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_FREERESOURCE]++;
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[1]] ++;
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[2]] ++;
+                break;
+            case A_PLAYCARD_MONOPOLY:
+                s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
+                s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_MONOPOLY]--;
+                s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_MONOPOLY]++;
+                for (ind = 0; ind<NPLAYERS; ind++)
+                {
+                    if (ind==pl)
+                        continue;
+                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[1]] += s[OFS_PLAYERDATA[ind] + OFS_RESOURCES + a[1]];                    
+                    s[OFS_PLAYERDATA[ind] + OFS_RESOURCES + a[1]] = 0;
+                }
+                break;
+            case A_PLAYCARD_FREEROAD:
+                s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
+                s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_FREEROAD]--;
+                s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_FREEROAD]++;
+                break;
+            case A_PLAYCARD_KNIGHT:
+                s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
+                s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_KNIGHT]--;
+                s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_KNIGHT]++;
+                bl.recalcLargestArmy(s);
+            // flow to next case! 
+            case A_PLACEROBBER:
+                s[OFS_ROBBERPLACE] = a[1];
+                if ((a[2]!=-1) && a[3]!=-1)
+                {
+                    s[OFS_PLAYERDATA[a[2]] + OFS_RESOURCES + a[3]]--;
+                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[3]]++;
+                }
+                break;
+            case A_PAYTAX:
+            	// If we don't check every time we use selectMostUselessResourceInHand sometime it return -1;
+            	// Tax Paying in the orginal game of SmartSettler is wrong
+            	/*for(int ind_player = 0; ind_player < NPLAYERS; ind_player++){
+            		
+            		int totalCardForEachPlayer = this.getTotalResourceCount(ind_player);
+            		//System.out.printf("Total Resource Card: %d\n", totalCardForEachPlayer);
+            		if(totalCardForEachPlayer > 7){
+            			int reduceCard = totalCardForEachPlayer/2;
+            			for(int ind_cut=0; ind_cut < reduceCard; ind_cut++){
+            				int res_card = this.selectMostUselessResourceInHand(ind_player, s);
+            				if(res_card >= 0){
+            					s[OFS_PLAYERDATA[a[2]] + OFS_RESOURCES + res_card]--;
+            				}
+            			}
+            		}
+            	}*/
+                
+            	
+            	ind = selectMostUselessResourceInHand(pl, s);
+                if(ind < 0){
+                	break;
+                }
+                else{
+                	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + ind]--;
+                }
+            	
+            	for (i=0; i<a[1]; i++)
+                {
+                    
+                }
+            	break;
+            case A_ENDTURN:
+                // new cards become old cards
+                for (ind=0; ind<NCARDTYPES; ind++)
+                {
+                    s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + ind] += s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + ind];
+                    s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + ind] = 0;
+                }
+                s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 0;
+                break;
+            /*case A_TRADING:
+            	
+            	//Trading with other player with only one at a time
+            	// This one should be offer accepted
+            	int otherplayer = a[4];
+            	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[2]] -= a[3];
+                s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[5]] += a[6];
+                s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[5]] -= a[6];
+                s[OFS_PLAYERDATA[otherplayer] + OFS_RESOURCES + a[2]] += a[3];
+                break;
+            case A_CONSIDEROFFER:
+            	// Call to trading simulation again here to see whether it is good idea to trade
+            	
+            	break;*/
+        }
+    }
+    public int getTotalResourceCount(int player){
+    	int total = 0;
+    	for(int ind_res = 0; ind_res < N_RESOURCES; ind_res++){
+    		total += bl.state[OFS_PLAYERDATA[player] + OFS_RESOURCES + ind_res];
+    	}
+    	return total;
     }
 
 //    public void listPossibleTrade(int[] s){

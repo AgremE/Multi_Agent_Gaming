@@ -1007,6 +1007,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                     s[OFS_FSMPLAYER + fsmlevel] = 0;                    
                 }
                 break;
+                // There is an error in pay tax state of the game
             case S_PAYTAX:
                 pl++;
                 if (pl<NPLAYERS)
@@ -1143,6 +1144,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             //Close state s2 in order to protect the original state
             s = cloneOfState(s2);
             uctTradinTree.clearTraces();
+            int round = 0;
             while (true)
             {
                 int hc = UCT.getHashCode(s);
@@ -1183,13 +1185,17 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 
                 a = possibilities.action[aind];
 //        System.out.printf("!5");
-                player[pl].performAction(s, a);
+                player[pl].performAction_simulation(s, a);
                 // Changing state
                 // It also changing tht player number at the same time as we use the state transition
                 stateTransition(s, a);
                 //Initi the winner and loser count here
                 //TODO: init the player who win and who lose here from UTC tree
                 winner = getWinner(s);
+                round++;
+                if(round == 1000){
+                	break;
+                }
                 
                 if (winner !=-1)
                     break;
@@ -1289,17 +1295,17 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 a = possibilities.action[aind];
                 // Sometime the simulation hang in this state
 //        System.out.printf("!5");
-                player[pl].performAction(s, a);
+                player[pl].performAction_simulation(s, a);
                 // Changing state
                 // It also changing tht player number at the same time as we use the state transition
                 // We need to define the optimal simulation round so it able to do it job properly
                 stateTransition(s, a);
                 winner = getWinner(s);
                 round++;
-                /*
+                
                 if(round == 1000){
                 	break;
-                }*/
+                }
                 if (winner !=-1)
                     break;
             }
