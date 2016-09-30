@@ -64,7 +64,7 @@ public interface GameStateConstants extends HexTypeConstants {
     
  // To specific the state information for the game play
     
-    int STATESIZE = OFS_VERTICES+N_VERTICES + 3*PLAYERSTATESIZE;// Change it to semi zero sum game between two players
+    int STATESIZE = OFS_VERTICES+N_VERTICES + 2*PLAYERSTATESIZE;// Change it to semi zero sum game between two players
     
  // Number of action you can do in one turn
  // There are 5 action to follow or 5 turns:

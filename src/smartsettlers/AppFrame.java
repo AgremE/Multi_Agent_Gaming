@@ -7,8 +7,12 @@
 
 package smartsettlers;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -317,6 +321,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     public void playOneGame()
     {
         JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
+        int round = 0;
         do
         {
             boardlayout.GameTick(boardlayout.state,boardlayout.action);
@@ -330,11 +335,19 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             scrollbar.setValue(scrollbar.getMaximum());
             settlersPanel1.paintAll(settlersPanel1.getGraphics());
             jList1.paintAll(jList1.getGraphics());
+            round++;
+            if(round>1000){
+            	break;
+            }
             //this.paintAll(this.getGraphics());
         } while (boardlayout.getWinner(boardlayout.state) == -1);
         //print number trad and trad offer
-        System.out.println("Trading Accepted: " + boardlayout.tradingAccepte);
-        System.out.println("Tradning offer: "+ boardlayout.tradingOffer);
+        if(round<1000){
+        	System.out.println("Trading Accepted: " + boardlayout.tradingAccepte);
+            System.out.println("Tradning offer: "+ boardlayout.tradingOffer);
+            boardlayout.GameTick(boardlayout.state,boardlayout.action);
+            listModel.addElement(boardlayout.gamelog.toString());
+        }
         boardlayout.GameTick(boardlayout.state,boardlayout.action);
         listModel.addElement(boardlayout.gamelog.toString());
         
@@ -394,7 +407,9 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
     	//boardlayout.UCTsimulateGame(boardlayout.state);
-    	for(int i =0; i<2;i++){
+    	int[][] game_data_offer = new int[10][1];
+    	int[][] game_data_accepted = new int[10][1];
+    	for(int i =0; i<10;i++){
     		JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
             if(boardlayout.getWinner(boardlayout.state) != -1){
             	initComponents();
@@ -405,6 +420,8 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 boardlayout.InitBoard();
             }
             playOneGame();
+            game_data_offer[i][0] = boardlayout.tradingOffer;
+            game_data_accepted[i][0] = boardlayout.tradingAccepte;
             jList1.validate();
             jScrollPane1.validate();
 
@@ -412,6 +429,32 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             scrollbar.setValue(scrollbar.getMaximum());
             
             settlersPanel1.repaint();
+    	}
+    	//Write data into text file
+    	for(int i =0 ;i<2;i++){
+    		try {
+
+    			String content = "Game "+ i +": Number of Offering: "
+    								+String.valueOf(game_data_offer[i][0])+" Accepted offer: "
+    								+String.valueOf(game_data_accepted[i][0])+"\r\n";
+
+    			File file = new File("C:\\Users\\AILAB\\Documents\\data_from_2_game.txt");
+
+    			// if file doesnt exists, then create it
+    			if (!file.exists()) {
+    				file.createNewFile();
+    			}
+
+    			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+    			BufferedWriter bw = new BufferedWriter(fw);
+    			bw.write(content);
+    			bw.close();
+
+    			System.out.println("Done");
+
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    		}
     	}
     }//GEN-LAST:event_jButton6ActionPerformed
 

@@ -895,6 +895,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         // Start offer to that specific player:
         
         // We always clean up the list before we continues to work on building up the new list of possibility
+        // When we are in the pay tax state that program will perform really bad and the outcomes are unreliable
         player[pl].listPossibilities(s);
         player[pl].selectAction(s,a);
         
@@ -945,8 +946,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     public void stateTransition(int[] s, int[] a)
     {
         int fsmlevel    = s[OFS_FSMLEVEL]; // To access the level of game state
-        int fsmstate    = s[OFS_FSMSTATE+fsmlevel];// To access the state transition
-        int pl          = s[OFS_FSMPLAYER+fsmlevel];// To access the player state
+        int fsmstate    = s[OFS_FSMSTATE+fsmlevel];// To access the state step
+        int pl          = s[OFS_FSMPLAYER+fsmlevel];// To access the player number
         int motherstate;
         if (fsmlevel>0) 
             motherstate = s[OFS_FSMSTATE+fsmlevel-1]; 
@@ -1002,27 +1003,39 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                     //TODO: place robber, pay tax
                     // s[OFS_FSMSTATE+fsmlevel] = S_NORMAL;
                 	
-                    fsmlevel++;  s[OFS_FSMLEVEL] = fsmlevel;
+                    fsmlevel++;  
+                    s[OFS_FSMLEVEL] = fsmlevel;
                     s[OFS_FSMSTATE + fsmlevel] = S_PAYTAX;
                     s[OFS_FSMPLAYER + fsmlevel] = 0;                    
                 }
                 break;
                 // There is an error in pay tax state of the game
+                // I think it should be fine
+                /*
+                 * It works as follow:
+                 * 	Put the child state into S_PAYTAX
+                 * 	Each player pay tax
+                 * 	Init current player
+                 *  Put child state into S_ROBBERAT7
+                 *  Decrease State Step to Motherstep
+                 *  Put Motherstep or current state step into S_NORMAL
+                 * */
             case S_PAYTAX:
                 pl++;
                 if (pl<NPLAYERS)
                 {
-                    s[OFS_FSMPLAYER + fsmlevel] = pl;
+                    s[OFS_FSMPLAYER + fsmlevel] = pl;// Each of the four player start to pay tax
                     s[OFS_FSMSTATE + fsmlevel] = S_PAYTAX;                    
                 }
                 else
                 {
-                    s[OFS_FSMPLAYER + fsmlevel] = s[OFS_FSMPLAYER + fsmlevel-1];
-                    s[OFS_FSMSTATE + fsmlevel] = S_ROBBERAT7;
+                    s[OFS_FSMPLAYER + fsmlevel] = s[OFS_FSMPLAYER + fsmlevel-1];// Current player
+                    s[OFS_FSMSTATE + fsmlevel] = S_ROBBERAT7;// Type of current state
                 }
                 break;
             case S_ROBBERAT7:
-                fsmlevel--;  s[OFS_FSMLEVEL] = fsmlevel;
+                fsmlevel--;  
+                s[OFS_FSMLEVEL] = fsmlevel;
                 s[OFS_FSMSTATE + fsmlevel] = S_NORMAL;
                 break;
             case S_NORMAL:
