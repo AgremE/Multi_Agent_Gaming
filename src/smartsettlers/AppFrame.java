@@ -162,8 +162,8 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
 
         jTextField2.setText("0");
 
-        jButton6.setText("UCT");
-        jButton6.setEnabled(false);
+        jButton6.setText("10 Games Data Collection");
+        jButton6.setEnabled(true);
         jButton6.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton6ActionPerformed(evt);
@@ -246,7 +246,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
         boardlayout.NewGame(boardlayout.state, true);
@@ -333,8 +333,8 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             //this.paintAll(this.getGraphics());
         } while (boardlayout.getWinner(boardlayout.state) == -1);
         //print number trad and trad offer
-        //System.out.println("Trading Accepted: " + boardlayout.tradingAccepte);
-        //System.out.println("Tradning offer: "+ boardlayout.tradingOffer);
+        System.out.println("Trading Accepted: " + boardlayout.tradingAccepte);
+        System.out.println("Tradning offer: "+ boardlayout.tradingOffer);
         boardlayout.GameTick(boardlayout.state,boardlayout.action);
         listModel.addElement(boardlayout.gamelog.toString());
         
@@ -342,7 +342,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
-
+        
         playOneGame();
         jList1.validate();
         jScrollPane1.validate();
@@ -393,7 +393,26 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
 
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
-        boardlayout.UCTsimulateGame(boardlayout.state);
+    	//boardlayout.UCTsimulateGame(boardlayout.state);
+    	for(int i =0; i<2;i++){
+    		JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
+            if(boardlayout.getWinner(boardlayout.state) != -1){
+            	initComponents();
+                listModel = new DefaultListModel();
+                jList1.setModel(listModel);
+                boardlayout = new BoardLayout(settlersPanel1.getWidth(),settlersPanel1.getHeight());
+                settlersPanel1.SetBoardLayout(boardlayout);
+                boardlayout.InitBoard();
+            }
+            playOneGame();
+            jList1.validate();
+            jScrollPane1.validate();
+
+            jList1.setSelectedIndex(listModel.getSize()-1);
+            scrollbar.setValue(scrollbar.getMaximum());
+            
+            settlersPanel1.repaint();
+    	}
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed

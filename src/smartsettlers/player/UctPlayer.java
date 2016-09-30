@@ -66,6 +66,10 @@ public class UctPlayer extends Player {
         s2=null;
     }
     
+    //Reject all the time
+    public boolean considerOfferUCT(int pl, int[] s){
+    	return false;
+    }
     
     public int selectMostUselessResourceInHand(int pl, int []s)
     {

@@ -1240,7 +1240,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].listPossibilities(s2);
 //        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
 //        System.out.printf("!2");
-        int N_IT = 2000;
+        int N_IT = 1000;
         // Only one action left there is nothing to stimulate there
         if (possibilities.n == 1)
             N_IT = 1;
