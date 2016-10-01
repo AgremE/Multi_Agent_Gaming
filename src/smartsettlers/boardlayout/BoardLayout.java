@@ -818,7 +818,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         //System.out.println("System start trading");
         if(statlevel == S_NORMAL){
         	
-        	System.out.println("System start trading");
+        	//System.out.println("System start trading");
         	state = hideState(pl, state);
         	UCTsimulateTrading(state);
         	player[pl].listTradingOption(s);
@@ -828,18 +828,18 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             for(int i =0 ; i < this.tradingPossibilites.n; i++){
             	
                 //this.UCTsimulateTrading(state);
-            	System.out.println("Considering Offer");
+            	//System.out.println("Considering Offer");
             	
             	tradingOffer++;
             	trad = tradingPossibilites.trad[i];
-            	for(int ind =0 ; ind < this.tradingPossibilites.n; ind++){
+            	/*for(int ind =0 ; ind < this.tradingPossibilites.n; ind++){
             		System.out.printf("Trading Option: [%d %d %d %d %d %d]\n", tradingPossibilites.trad[ind][0], 
             												   tradingPossibilites.trad[ind][1], 
             												   tradingPossibilites.trad[ind][2], 
             												   tradingPossibilites.trad[ind][3], 
             												   tradingPossibilites.trad[ind][4], 
             												   tradingPossibilites.trad[ind][5]);
-            	}
+            	}*/
             	/*try {
 					TimeUnit.SECONDS.sleep(20);
 				} catch (InterruptedException e) {
@@ -854,7 +854,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             	int traind = i;
             	
             	if(winCount < uctTradinTree.getWinCount(pl)){
-            		System.out.println("Offering");
+            		//System.out.println("Offering");
             		// TODO: Start the trading offer
             		// Wait for offer
             		// Start trading offer accepted otherwise reject
@@ -870,7 +870,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             			offer_answer = tradutil.consdierOffer(trad,player_ind,winCount);
             			
                 		if(offer_answer){
-                			System.out.println("Accepted");
+                			//System.out.println("Accepted");
                 			s = tradutil.applyTrad(s, trad);
                 			tradingAccepte++;
                 			break outerloop; // break the whole nested loop with this line
@@ -937,13 +937,13 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         }
         if (isLoggingOn)
             gamelog.addAction(a);
-        
+        //TODO: NEED to check whether state transition between those medium is finish
         player[pl].performAction(s, a);
 
         stateTransition(s, a);
     }
 
-    public void stateTransition(int[] s, int[] a)
+    public int stateTransition(int[] s, int[] a)
     {
         int fsmlevel    = s[OFS_FSMLEVEL]; // To access the level of game state
         int fsmstate    = s[OFS_FSMSTATE+fsmlevel];// To access the state step
@@ -1068,6 +1068,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         if (isLoggingOn)
             gamelog.addState(s);
+        return fsmstate;
         
         
     }
@@ -1144,7 +1145,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].listPossibilities(s2);
 //        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
 //        System.out.printf("!2");
-        int N_IT = 1000;
+        int N_IT = 100000;
         // Only one action left there is nothing to stimulate there
         if (possibilities.n == 1)
             N_IT = 1;
@@ -1253,7 +1254,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].listPossibilities(s2);
 //        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
 //        System.out.printf("!2");
-        int N_IT = 1000;
+        int N_IT = 100000;
         // Only one action left there is nothing to stimulate there
         if (possibilities.n == 1)
             N_IT = 1;
@@ -1316,7 +1317,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 winner = getWinner(s);
                 round++;
                 
-                if(round == 1000){
+                if(round == 600){
                 	break;
                 }
                 if (winner !=-1)

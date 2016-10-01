@@ -431,7 +431,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             settlersPanel1.repaint();
     	}
     	//Write data into text file
-    	for(int i =0 ;i<2;i++){
+    	for(int i =0 ;i<10;i++){
     		try {
 
     			String content = "Game "+ i +": Number of Offering: "

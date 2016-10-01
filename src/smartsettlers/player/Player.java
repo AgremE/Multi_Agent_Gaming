@@ -507,6 +507,7 @@ public abstract class Player implements GameStateConstants
             ncards += s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i];
         if (ncards == 0)
             return -1;
+        
         if (ncards<= 0)
         {
             String str = "";
@@ -515,6 +516,7 @@ public abstract class Player implements GameStateConstants
                 str = str + " " + s[i];
             System.out.flush();
         }
+        
         if(ncards > 0){
         	ind = rnd.nextInt(ncards)+1;
             j = 0;
@@ -712,8 +714,10 @@ public abstract class Player implements GameStateConstants
                 s[OFS_ROBBERPLACE] = a[1];
                 if ((a[2]!=-1) && a[3]!=-1)
                 {
-                    s[OFS_PLAYERDATA[a[2]] + OFS_RESOURCES + a[3]]--;
-                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[3]]++;
+                    if(s[OFS_PLAYERDATA[a[2]] + OFS_RESOURCES + a[3]] > 0){
+                    	s[OFS_PLAYERDATA[a[2]] + OFS_RESOURCES + a[3]]--;
+                        s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[3]]++;
+                    }
                 }
                 break;
             case A_PAYTAX:
@@ -981,11 +985,6 @@ public abstract class Player implements GameStateConstants
                 }
                 else{
                 	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + ind]--;
-                }
-            	
-            	for (i=0; i<a[1]; i++)
-                {
-                    
                 }
             	break;
             case A_ENDTURN:
