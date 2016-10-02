@@ -28,6 +28,7 @@ import convNNSettler.*;
 /*Improve by Agreme(Makara Phav)*/
 public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
 {
+	public int NUM_IT = 1000;
     public static final int[][] PORT_COORD = {
         { 3, 0, 1},
         { 5, 0, 2},
@@ -772,11 +773,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS; pl++)
+        for (pl=0; pl<NPLAYERS-1; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
         }
+        player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
         
         s = new int[STATESIZE];
         s[OFS_FSMLEVEL] = 0;
@@ -816,7 +818,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         boolean offer_answer = false;
        
         //System.out.println("System start trading");
-        if(statlevel == S_NORMAL){
+        /*if(statlevel == S_NORMAL){
         	
         	//System.out.println("System start trading");
         	state = hideState(pl, state);
@@ -845,7 +847,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}*/
+				}
             	int[] state_trad_simulation = cloneOfState(s);
             	// Chaning a to action of trading posibility
             	changeState(state_trad_simulation, trad);
@@ -885,7 +887,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             	}
             	
             }
-        }
+        }*/
         // doing stuff
         // We copy the state from here
         
@@ -1133,7 +1135,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         isLoggingOn = false;
         uctTradingTime ++;
         uctTradinTree.clearWinner();
-        if (uctTradinTree.tree.size()>10000)
+        if (uctTradinTree.tree.size()>1000000)
         	uctTradinTree.tree.clear();
         
         int fsmlevel    = s2[OFS_FSMLEVEL];
@@ -1145,7 +1147,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].listPossibilities(s2);
 //        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
 //        System.out.printf("!2");
-        int N_IT = 100000;
+        int N_IT = NUM_IT;
         // Only one action left there is nothing to stimulate there
         if (possibilities.n == 1)
             N_IT = 1;
@@ -1242,7 +1244,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         isLoggingOn = false;
         uctTime ++;
         
-        if (uctTree.tree.size()>10000)
+        if (uctTree.tree.size()>1000000)
             uctTree.tree.clear();
         
         int fsmlevel    = s2[OFS_FSMLEVEL];
@@ -1254,7 +1256,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].listPossibilities(s2);
 //        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
 //        System.out.printf("!2");
-        int N_IT = 100000;
+        int N_IT = NUM_IT;
         // Only one action left there is nothing to stimulate there
         if (possibilities.n == 1)
             N_IT = 1;
@@ -1323,7 +1325,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 if (winner !=-1)
                     break;
             }
-            System.out.printf("Round :%d and Simulation Round: %d\n", round, it);
+            //System.out.printf("Round :%d and Simulation Round: %d\n", round, it);
             uctTree.update(winner, uctTime);
         }
 // !!! printing takes LOTS of time

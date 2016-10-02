@@ -409,7 +409,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     	//boardlayout.UCTsimulateGame(boardlayout.state);
     	int[][] game_data_offer = new int[10][1];
     	int[][] game_data_accepted = new int[10][1];
-    	for(int i =0; i<10;i++){
+    	for(int i =0; i<2;i++){
     		JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
             if(boardlayout.getWinner(boardlayout.state) != -1){
             	initComponents();
@@ -431,7 +431,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             settlersPanel1.repaint();
     	}
     	//Write data into text file
-    	for(int i =0 ;i<10;i++){
+    	for(int i =0 ;i<2;i++){
     		try {
 
     			String content = "Game "+ i +": Number of Offering: "

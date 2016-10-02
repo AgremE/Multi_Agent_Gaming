@@ -520,6 +520,7 @@ public abstract class Player implements GameStateConstants
         if(ncards > 0){
         	ind = rnd.nextInt(ncards)+1;
             j = 0;
+            //Should find a better way of selecting the card
             for (i=0; i<NRESOURCES; i++)
             {
                 j += s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + i];
@@ -661,10 +662,12 @@ public abstract class Player implements GameStateConstants
                     }
                 }
                 break;
+                
             case A_PORTTRADE:
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[2]] -= a[1];
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[4]] += a[3];
                 break;
+                
             case A_BUYCARD:
             	
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + RES_WHEAT]--;
@@ -733,7 +736,9 @@ public abstract class Player implements GameStateConstants
             			for(int ind_cut=0; ind_cut < reduceCard; ind_cut++){
             				int res_card = this.selectMostUselessResourceInHand(ind_player, s);
             				if(res_card >= 0){
-            					s[OFS_PLAYERDATA[ind_player] + OFS_RESOURCES + res_card]--;
+            					if(s[OFS_PLAYERDATA[ind_player] + OFS_RESOURCES + res_card] > 0){
+            						s[OFS_PLAYERDATA[ind_player] + OFS_RESOURCES + res_card]--;
+            					}
             				}
             			}
             		}
