@@ -6,12 +6,19 @@
 package smartsettlers.boardlayout;
 
 import java.awt.*;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+
 import smartsettlers.player.*;
 import smartsettlers.util.*;
 import tradingPOMDPs.TradingAction;
@@ -28,7 +35,7 @@ import convNNSettler.*;
 /*Improve by Agreme(Makara Phav)*/
 public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
 {
-	public int NUM_IT = 1000;
+	public int NUM_IT = 10000;
     public static final int[][] PORT_COORD = {
         { 3, 0, 1},
         { 5, 0, 2},
@@ -773,12 +780,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS-1; pl++)
+        for (pl=0; pl<NPLAYERS; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
         }
-        player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
+        //player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
         
         s = new int[STATESIZE];
         s[OFS_FSMLEVEL] = 0;
@@ -818,10 +825,10 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         boolean offer_answer = false;
        
         //System.out.println("System start trading");
-        /*if(statlevel == S_NORMAL){
+        if(statlevel == S_NORMAL){
         	
         	//System.out.println("System start trading");
-        	state = hideState(pl, state);
+        	//state = hideState(pl, state);
         	UCTsimulateTrading(state);
         	player[pl].listTradingOption(s);
         	winCount = uctTradinTree.getWinCount(pl);
@@ -841,13 +848,13 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             												   tradingPossibilites.trad[ind][3], 
             												   tradingPossibilites.trad[ind][4], 
             												   tradingPossibilites.trad[ind][5]);
-            	}*/
+            	}
             	/*try {
 					TimeUnit.SECONDS.sleep(20);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}*/
             	int[] state_trad_simulation = cloneOfState(s);
             	// Chaning a to action of trading posibility
             	changeState(state_trad_simulation, trad);
@@ -887,7 +894,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             	}
             	
             }
-        }*/
+        }
         // doing stuff
         // We copy the state from here
         
@@ -1244,7 +1251,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         isLoggingOn = false;
         uctTime ++;
         
-        if (uctTree.tree.size()>1000000)
+        if (uctTree.tree.size()>100000)
             uctTree.tree.clear();
         
         int fsmlevel    = s2[OFS_FSMLEVEL];
@@ -1691,5 +1698,37 @@ public void recalcLongestRoad(int[] s, int pl)
     	}
     	return s;
     	
-    }
+    }/*
+    public boolean writeDataIntoExecl(int[] data){
+    	
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        HSSFSheet sheet = workbook.createSheet("Data_Generation_on_Trading");
+        outputFileName = outPut.getAbsolutePath();
+        int rownum = 0;
+        for (int i = 0; i < dataList.size(); i++) {
+            Object[] objArr = dataList.get(i);
+            HSSFRow row = sheet.createRow(rownum++);
+
+            int cellnum = 0;
+            for (Object obj : objArr) {
+                Cell cell = row.createCell(cellnum++);
+                sheet.autoSizeColumn((short) cellnum);
+                if (obj instanceof Date) {
+                    cell.setCellValue((Date) obj);
+                } else if (obj instanceof Boolean) {
+                    cell.setCellValue((Boolean) obj);
+                } else if (obj instanceof String) {
+                    cell.setCellValue((String) obj);
+                } else if (obj instanceof Double) {
+                    cell.setCellValue((Double) obj);
+                }
+            }
+        }
+        if (outPut.exists()) {
+            outPut.delete();
+        }
+        FileOutputStream out =
+                new FileOutputStream(outPut);
+        workbook.write(out);
+    }*/
 }

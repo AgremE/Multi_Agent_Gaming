@@ -501,6 +501,7 @@ public abstract class Player implements GameStateConstants
     //Important to understand mote carlo implementation
     public int selectRandomResourceInHand(int pl, int[] s)
     {
+    	// There is something wrong here which always show player_sth have -sth card in the simulation stage
         int i, ind, j;
         int ncards = 0;
         for (i=0; i<NRESOURCES; i++)
@@ -961,8 +962,11 @@ public abstract class Player implements GameStateConstants
                 s[OFS_ROBBERPLACE] = a[1];
                 if ((a[2]!=-1) && a[3]!=-1)
                 {
-                    s[OFS_PLAYERDATA[a[2]] + OFS_RESOURCES + a[3]]--;
-                    s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[3]]++;
+                    if(s[OFS_PLAYERDATA[a[2]] + OFS_RESOURCES + a[3]] > 0)
+                    {
+                    	s[OFS_PLAYERDATA[a[2]] + OFS_RESOURCES + a[3]]--;
+                        s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[3]]++;
+                    }
                 }
                 break;
             case A_PAYTAX:
@@ -989,7 +993,9 @@ public abstract class Player implements GameStateConstants
                 	break;
                 }
                 else{
-                	s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + ind]--;
+                	if(s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + ind] > 0){
+                		s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + ind]--;
+                	}
                 }
             	break;
             case A_ENDTURN:

@@ -51,7 +51,7 @@ public interface GameStateConstants extends HexTypeConstants {
     int OFS_HASPLAYEDCARD       = 5;
     int OFS_RESOURCES           = OFS_HASPLAYEDCARD   +1;
     int OFS_ACCESSTOPORT        = OFS_RESOURCES     +NRESOURCES;
-    int OFS_USEDCARDS           = OFS_ACCESSTOPORT  +(NRESOURCES+1);
+    int OFS_USEDCARDS           = OFS_ACCESSTOPORT  +N_DEVCARDTYPES;
     int OFS_OLDCARDS            = OFS_USEDCARDS     +N_DEVCARDTYPES;// this one is only store the victory card
     int OFS_NEWCARDS            = OFS_OLDCARDS      +N_DEVCARDTYPES;// this one is store the development card other than victory point card
     int OFS_TOTALNDEVCARD 		= OFS_NEWCARDS + 1;
