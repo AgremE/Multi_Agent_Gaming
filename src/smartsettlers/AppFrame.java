@@ -410,80 +410,58 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     	int[][] game_data_offer = new int[10][1];
     	int[][] game_data_accepted = new int[10][1];
     	for(int i =0; i<10;i++){
-        		JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
-                if(boardlayout.getWinner(boardlayout.state) != -1){
-                	initComponents();
-                    listModel = new DefaultListModel();
-                    jList1.setModel(listModel);
-                    boardlayout = new BoardLayout(settlersPanel1.getWidth(),settlersPanel1.getHeight());
-                    settlersPanel1.SetBoardLayout(boardlayout);
-                    boardlayout.InitBoard();
-                }
-                playOneGame();
-                game_data_offer[i][0] = boardlayout.tradingOffer;
-                game_data_accepted[i][0] = boardlayout.tradingAccepte;
-                try {
+        	JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
+            if(boardlayout.getWinner(boardlayout.state) != -1){
+                initComponents();
+                listModel = new DefaultListModel();
+                jList1.setModel(listModel);
+                boardlayout = new BoardLayout(settlersPanel1.getWidth(),settlersPanel1.getHeight());
+                settlersPanel1.SetBoardLayout(boardlayout);
+                boardlayout.InitBoard();
+            }
+            playOneGame();
+            game_data_offer[i][0] = boardlayout.tradingOffer;
+            game_data_accepted[i][0] = boardlayout.tradingAccepte;
+            jList1.validate();
+            jScrollPane1.validate();
 
-        			String content = "Game "+i+" Number of Iteration "+ boardlayout.NUM_IT + " Number Offer: "
-        							+game_data_offer[i][0]+" Accepted offer: "+game_data_accepted[i][0]+"\r\n";
-
-        			File file = new File("C:\\Users\\AILAB\\Documents\\data_from_2_game.txt");
-
-        			// if file doesnt exists, then create it
-        			if (!file.exists()) {
-        				file.createNewFile();
-        			}
-
-        			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
-        			BufferedWriter bw = new BufferedWriter(fw);
-        			bw.write(content);
-        			bw.close();
-
-        			System.out.println("Done");
-
-        		} catch (IOException e) {
-        			e.printStackTrace();
-        		}
-                jList1.validate();
-                jScrollPane1.validate();
-
-                jList1.setSelectedIndex(listModel.getSize()-1);
-                scrollbar.setValue(scrollbar.getMaximum());
+            jList1.setSelectedIndex(listModel.getSize()-1);
+            scrollbar.setValue(scrollbar.getMaximum());
                 
-                settlersPanel1.repaint();
-        	}
-        	//Write data into text file
-    		float rate = 0;
-    		float total_offer = 0, total_accepted = 0;
-    		int i;
-        	for( i=0 ;i<10;i++){
-        		total_offer += (float)game_data_offer[i][0];
-        		total_accepted += (float)game_data_accepted[i][0];
-        		rate = (float)(total_accepted/total_offer);
-        		
-        	}
-        	try {
+            settlersPanel1.repaint();
+		}
+    	//Write data into text file
+		float rate = 0;
+		float total_offer = 0, total_accepted = 0;
+		int i;
+    	for( i=0 ;i<10;i++){
+    		total_offer += (float)game_data_offer[i][0];
+    		total_accepted += (float)game_data_accepted[i][0];
+    		rate = (float)(total_accepted/total_offer);
+    		
+    	}
+    	try {
 
-    			String content = "Final Game Statistic with Number of Iteration "+ boardlayout.NUM_IT +": Rate: "
-    							+rate;
+			String content = "Final Game Statistic with Number of Iteration "+ boardlayout.NUM_IT +": Rate: "
+							+rate;
 
-    			File file = new File("C:\\Users\\AILAB\\Documents\\data_from_2_game.txt");
+			File file = new File("C:\\Users\\AILAB\\Documents\\data_from_2_game.txt");
 
-    			// if file doesnt exists, then create it
-    			if (!file.exists()) {
-    				file.createNewFile();
-    			}
+			// if file doesnt exists, then create it
+			if (!file.exists()) {
+				file.createNewFile();
+			}
 
-    			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
-    			BufferedWriter bw = new BufferedWriter(fw);
-    			bw.write(content);
-    			bw.close();
+			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(content);
+			bw.close();
 
-    			System.out.println("Done");
+			System.out.println("Done");
 
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    		}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed

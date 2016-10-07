@@ -17,7 +17,7 @@ public class TradingUtil implements  GameStateConstants{
 			// Simulate the game after trading
 			// if give better result than current state reuturn true
 			// other wise return false
-			
+			// Should hide it from here as well
 			int[] state_clone = bl.changeState(bl.state, trad);
 			bl.uctTradinTree.clearWinner();
 			bl.UCTsimulateTrading(state_clone);

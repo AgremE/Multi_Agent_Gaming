@@ -35,7 +35,8 @@ import convNNSettler.*;
 /*Improve by Agreme(Makara Phav)*/
 public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
 {
-	public int NUM_IT = 10000;
+	public int NUM_IT = 100000;
+	public int MAX_HEAP = 100000;
     public static final int[][] PORT_COORD = {
         { 3, 0, 1},
         { 5, 0, 2},
@@ -819,6 +820,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int statlevel 	= s[OFS_FSMSTATE+ fsmlevel];
         int pl          = s[OFS_FSMPLAYER+ fsmlevel];
         int winCount = 0;
+        int[] players_winningRate;
         int[] state = cloneOfState(s);
         int[] trad;
         int numTradOffer = 0;
@@ -832,14 +834,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         	UCTsimulateTrading(state);
         	player[pl].listTradingOption(s);
         	winCount = uctTradinTree.getWinCount(pl);
-        	
+        	players_winningRate = uctTradinTree.getWinnersCount();
         	outerloop:
             for(int i =0 ; i < this.tradingPossibilites.n; i++){
             	
                 //this.UCTsimulateTrading(state);
             	//System.out.println("Considering Offer");
-            	
-            	tradingOffer++;
             	trad = tradingPossibilites.trad[i];
             	/*for(int ind =0 ; ind < this.tradingPossibilites.n; ind++){
             		System.out.printf("Trading Option: [%d %d %d %d %d %d]\n", tradingPossibilites.trad[ind][0], 
@@ -863,6 +863,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             	int traind = i;
             	
             	if(winCount < uctTradinTree.getWinCount(pl)){
+            		tradingOffer++;
             		//System.out.println("Offering");
             		// TODO: Start the trading offer
             		// Wait for offer
@@ -876,14 +877,16 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             		
             		for(int player_ind = 0; player_ind < N_PLAYER; player_ind++){
             			
-            			offer_answer = tradutil.consdierOffer(trad,player_ind,winCount);
-            			
-                		if(offer_answer){
-                			//System.out.println("Accepted");
-                			s = tradutil.applyTrad(s, trad);
-                			tradingAccepte++;
-                			break outerloop; // break the whole nested loop with this line
-                		}
+            			if(player_ind != pl){
+            				offer_answer = tradutil.consdierOffer(trad,player_ind,players_winningRate[player_ind]);
+            				if(offer_answer){
+                    			//System.out.println("Accepted");
+                    			s = tradutil.applyTrad(s, trad);
+                    			tradingAccepte++;
+                    			break outerloop; // break the whole nested loop with this line
+                    		}
+            			}
+                		
             		}
             		numTradOffer++;
             		// There is a limit number of offers because the speed of the playing the game
@@ -1142,7 +1145,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         isLoggingOn = false;
         uctTradingTime ++;
         uctTradinTree.clearWinner();
-        if (uctTradinTree.tree.size()>1000000)
+        if (uctTradinTree.tree.size()>MAX_HEAP)
         	uctTradinTree.tree.clear();
         
         int fsmlevel    = s2[OFS_FSMLEVEL];
@@ -1251,7 +1254,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         isLoggingOn = false;
         uctTime ++;
         
-        if (uctTree.tree.size()>100000)
+        if (uctTree.tree.size()>MAX_HEAP)
             uctTree.tree.clear();
         
         int fsmlevel    = s2[OFS_FSMLEVEL];
