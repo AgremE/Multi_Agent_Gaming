@@ -35,8 +35,8 @@ import convNNSettler.*;
 /*Improve by Agreme(Makara Phav)*/
 public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
 {
-	public int NUM_IT = 100000;
-	public int MAX_HEAP = 100000;
+	public int NUM_IT = 1000;
+	public int MAX_HEAP = 1000;
     public static final int[][] PORT_COORD = {
         { 3, 0, 1},
         { 5, 0, 2},
@@ -830,7 +830,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         if(statlevel == S_NORMAL){
         	
         	//System.out.println("System start trading");
-        	//state = hideState(pl, state);
+        	state = hideState(pl, state);
         	UCTsimulateTrading(state);
         	player[pl].listTradingOption(s);
         	winCount = uctTradinTree.getWinCount(pl);

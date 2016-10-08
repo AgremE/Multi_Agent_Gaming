@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import org.apache.poi.hslf.record.InteractiveInfo;
@@ -17,7 +18,7 @@ import smartsettlers.boardlayout.GameStateConstants;
 public class BelieveStatePool implements BelieveStateConstance{
 	public final int NUMBER_PARTICLE_ADDED = 10;
 	ArrayList<BelifeState> history = new ArrayList<BelifeState>();
-	Map<Integer, BelifeState[]> belifePool = new HashMap<Integer,BelifeState[]>();
+	HashMap<Integer, BelifeState[]> belifePool = new HashMap<Integer,BelifeState[]>();
 	//BelifeState[][] belifePool;
 	BoardLayout bl;
 	int[] current_belife_states;
@@ -41,13 +42,17 @@ public class BelieveStatePool implements BelieveStateConstance{
 		//Try to initialized the based on the prior probability to each state of the game
 		for(int ind_card = 0; ind_card < number_card; ind_card++){
 			 for(int ind_pl = 0; ind_pl < GameStateConstants.NPLAYERS; ind_pl++){
+				 BelifeState[] belife_state_pl = this.belifePool.get(ind_pl);
 				 for(int ind_belifeState = 0; ind_belifeState < BelifePoolSize; ind_belifeState++){
 					 // Selected the card randomized uniformly distributed with the prior probability
 					 //TODO: Check again on the how we pick up the card
 					 int cardPickRandom = this.randomizedCard();
 					 // map->BelifePool->BelifeState->addOneCard
-					 this.belifePool.get(ind_pl)[ind_belifeState].addOneCard(cardPickRandom);
+					 
+					 belife_state_pl[ind_belifeState].addOneCard(cardPickRandom);
+					 
 				 }
+				 belifePool.put(ind_pl, belife_state_pl);
 			 }
 		}
 	}
@@ -138,16 +143,19 @@ public class BelieveStatePool implements BelieveStateConstance{
 	//Send signal to other player that there is a player in the game buy the card from the deck of development card
 	public void notifyBelifeState(int pl, int numberCardBuying){
 		// randomized selecting the card to get the uniformly distributed poopl of cards
+		BelifeState[] belifeState = belifePool.get(pl);
 		for(int ind_card = 0; ind_card < numberCardBuying; ind_card++){
-			
 			for(int ind_belifeState = 0; ind_belifeState < BelifePoolSize; ind_belifeState++){
 				 // Selected the card randomized uniformly distributed with the prior probability
 				 int cardPickRandom = this.randomizedCard();
-				 belifePool.get(pl)[ind_belifeState].addOneCard(cardPickRandom);
+				 belifeState[ind_belifeState].addOneCard(cardPickRandom);
 			 }
 		}
+		//update the belifestate about player pl
+		belifePool.put(pl, belifeState);
 		
 	}
+	
 	// compare an acceptable belife state
 	public boolean acceptedBelifeState(int[] curr_knowleadge,int[] belifeparticle){
 		for(int ind_card = 0 ; ind_card < GameStateConstants.N_DEVCARDTYPES; ind_card++){
@@ -157,6 +165,7 @@ public class BelieveStatePool implements BelieveStateConstance{
 		}
 		return true;
 	}
+	
 	//Select the card at the random fashion
 	public int randomizedCard(){
 		int indCardSelected;
@@ -167,14 +176,19 @@ public class BelieveStatePool implements BelieveStateConstance{
 		}
 		return cardType;
 	}
+	
 	//Build a distribution for the belief state it self and pick the one with the highest probability of specific player
 	public BelifeState getCurrentBeliefStateFromPlayer(int pl){
-		BelifeState[] pool = this.belifePool.get(pl);
 		
+		BelifeState[] pool = this.belifePool.get(pl);
 		Map<Integer[], Integer> distribution = new HashMap<Integer[],Integer>();
 		// Make a probablity distribution from this point
+		BelifeState[] belifestatetemp = belifePool.get(pl);
+		
 		for(int ind_pool = 0; ind_pool < BelifePoolSize; ind_pool++){
-			int[] temp_state = this.belifePool.get(pl)[ind_pool].getBelifeState();
+			
+			Integer[] temp_state = belifestatetemp[ind_pool].getBelifeStateInteger();
+			
 			if(distribution.containsKey(temp_state)){
 				int count = 0;
 				count = distribution.get(temp_state);
@@ -182,28 +196,31 @@ public class BelieveStatePool implements BelieveStateConstance{
 				distribution.put(temp_state, count);
 			}
 			else{
-				distribution.put(this.belifePool.get(pl)[ind_pool].getBelifeState(), 1);
+				distribution.put(temp_state, 1);
 			}
 		}
-		// Loop through the whole map to get the highest count as belife state
+		
+		// Loop through the whole map to get the highest count as beliefe state
 		int index_belife = 0;
 		int temp_count = 0;
-		int[] temp_state;
-		Iterator it = distribution.entrySet().iterator();
+		int[] temp_state = new int[GameStateConstants.N_DEVCARDTYPES];
+		
+		Iterator<Entry<Integer[], Integer>> it = distribution.entrySet().iterator();
 	    while (it.hasNext()) {
 	        Map.Entry pair = (Map.Entry)it.next();
-	        int pair_value = pair.getValue();
+	        int pair_value = (int) pair.getValue();
 	        if(temp_count < pair_value){
 	        	temp_count = pair_value;
-	        	temp_count = pair.getKey();
+	        	temp_state = (int[]) pair.getKey();
 	        }
 	    }
-	    BelifeState belife = new BelifeState(temp_state);
+	    
+	    BelifeState belife = new BelifeState((int [])temp_state);
 		return belife;
 	}
+	
 	// Compare development card only because it is a key for the information asymmetric problem that we have
 	public boolean compareState(BelifeState revealState, BelifeState belifeState){
-		
 		for(int ind_dev = 0; ind_dev < GameStateConstants.N_DEVCARDTYPES; ind_dev++){
 			
 			if(revealState.getBelifeState()[ind_dev] > belifeState.getBelifeState()[ind_dev]){
