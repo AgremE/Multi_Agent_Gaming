@@ -56,6 +56,7 @@ public interface GameStateConstants extends HexTypeConstants {
     int OFS_NEWCARDS            = OFS_OLDCARDS      +N_DEVCARDTYPES;// this one is store the development card other than victory point card
     int OFS_TOTALNDEVCARD 		= OFS_NEWCARDS + 1;
     int PLAYERSTATESIZE         = OFS_TOTALNDEVCARD      +N_DEVCARDTYPES;
+    
     int[] OFS_PLAYERDATA        = { OFS_VERTICES+N_VERTICES,//WHole game state of the board presenting + player one
                                     OFS_VERTICES+N_VERTICES + PLAYERSTATESIZE,// 
                                     //OFS_VERTICES+N_VERTICES + 2*PLAYERSTATESIZE

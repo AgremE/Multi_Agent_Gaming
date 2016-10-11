@@ -30,4 +30,7 @@ public class Vertex implements HexTypeConstants
 //        screenCoord = new Point[2];
         // screenCoord values are set externally by BoardLayout!
     }
+    public void setIndex(int i){
+    	this.n_vertex_to_hex = i;
+    }
 }

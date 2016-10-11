@@ -6,12 +6,20 @@ package convNNSettler;
 
 public interface ConvNNConstants {
 	
-	public final int N_PLAYER = 2;
-	public final int N_PORT = 18;
+	final int N_PLAYER = 2;
+	final int N_PORT = 18;
 	//TODO: Finalize all the number
-	public final int OFS_CONVVERTECES = 0;
-	public final int OFS_CONVEDGES = 1;
-	public final int OFS_PORT = 2;
+	final int OFS_CONVVERTECES = 0;
+	final int OFS_CONVEDGES = 1;
+	final int OFS_PORT = 2;
+	final int TOTAL_LAND_TILE = 19;
+	final int NUM_VER_TO_HEX = 6;
+	final int NUM_EDGE_TO_HEX = 6;
+	
+	int COVN_N_VERTICES              = 54;// Number of vertice
+	int COVN_N_EDGES                 = 72;// Number of Edge
+	int COVN_N_RESOURCES             = 5; // Number of resources
+	int COVN_N_DEVCARDTYPES          = 5; // Number Development Cards
 	
 	/* There are six types of ports we can have on the board present int the constant below
 	int PORT_SHEEP	: 
@@ -39,17 +47,28 @@ public interface ConvNNConstants {
 	public final int OFS_VERTECES_NUMELEVEN = 10;
 	public final int OFS_VERTECES_NUMTWELVE= 10;
 	public final int OFS_RESOURCE_PRODUCE_SINCE = 10;
-	//Layer of ConvNN translate data from the board for player zeor
-	public final int OFS_PLAYER_ZERO_VER = 8;
-	public final int OFS_PLAYER_ZERO_EDGES = 9;
-	public final int OFS_PLAYER_ZERO_RESOURCESSHEEP = 10;
-	public final int OFS_PLAYER_ZERO_RESOURCESWOOD = 11;
-	public final int OFS_PLAYER_ZERO_RESOURCESCLAY = 12;
-	public final int OFS_PLAYER_ZERO_RESOURCESWHEAT = 13;
-	public final int OFS_PLAYER_ZERO_RESOURCESSTONE = 14;
-	public final int OFS_PLAYER_ZERO_SETTLEMENTS = 15;
-	public final int OFS_PLAYER_ZERO_CITIES = 15;
-	public final int OFS_PLAYER_ZERO_DEVCARD = 16;
+	
+	//Translate the whole player data into ConvNN form of input
+	
+    int OFS_COVN_VER = 8;
+	int OFS_COVN_EDGE = OFS_COVN_VER + 1;
+	int OFS_COVN_RES = OFS_COVN_EDGE + COVN_N_RESOURCES;
+	int OFS_COVN_VERPRODUCTION_SINCE = OFS_COVN_RES + COVN_N_RESOURCES;
+	int OFS_COVN_ROAD = OFS_COVN_VERPRODUCTION_SINCE + 1;
+	int OFS_COVN_SETTLEMENTS = OFS_COVN_ROAD + 1;
+	int OFS_COVN_CITIES = OFS_COVN_SETTLEMENTS + 1;
+	int OFS_COVN_DEVCARD = OFS_COVN_CITIES + 1;
+	int COVN_PLAYERSTATESIZE         = OFS_COVN_DEVCARD + COVN_N_DEVCARDTYPES;
+    
+    
+    int[] OFS_COVN_PLAYERDATA        = { COVN_PLAYERSTATESIZE,//Whole game state of the board presenting + player one
+    								2*COVN_PLAYERSTATESIZE,// 
+                                    //OFS_VERTICES+N_VERTICES + 2*PLAYERSTATESIZE
+                                    //OFS_VERTICES+N_VERTICES + 3*PLAYERSTATESIZE
+                                    };// Change it to semi zero sum game between two players
+}
+    /*
+	
 	//Layer of ConvNN translate data from the board for player 1
 	//TODO: Think about how can you represent the development card in this kind of state
 	public final int OFS_PLAYER_ONE_VER = 8;
@@ -62,7 +81,6 @@ public interface ConvNNConstants {
 	public final int OFS_PLAYER_ONE_SETTLEMENTS = 15;
 	public final int OFS_PLAYER_ONE_CITIES = 15;
 	public final int OFS_PLAYER_ONE_DEVCARD = 16;
-	
 	//Layer of ConvNN translate data from the board for player 2
 	public final int OFS_PLAYER_TWO_VER = 15;
 	public final int OFS_PLAYER_TWO_EDGES = 16;
@@ -74,6 +92,16 @@ public interface ConvNNConstants {
 	public final int OFS_PLAYER_TWO_SETTLEMENTS = 15;
 	public final int OFS_PLAYER_TWO_CITIES = 15;
 	public final int OFS_PLAYER_TWO_DEVCARD = 16;
-	//TODO: Make the data layer for player 3 and 4
-	
-}
+	//TODO: Make the data layer for player 3
+	public final int OFS_PLAYER_THREE_VER = 15;
+	public final int OFS_PLAYER_THREE_EDGES = 16;
+	public final int OFS_PLAYER_THREE_RESOURCESSHEEP = 17;
+	public final int OFS_PLAYER_THREE_RESOURCESWOOD = 18;
+	public final int OFS_PLAYER_THREE_RESOURCESCLAY = 19;
+	public final int OFS_PLAYER_THREE_RESOURCESWHEAT = 20;
+	public final int OFS_PLAYER_THREE_RESOURCESSTONE = 21;
+	public final int OFS_PLAYER_THREE_SETTLEMENTS = 15;
+	public final int OFS_PLAYER_THREE_CITIES = 15;
+	public final int OFS_PLAYER_THREE_DEVCARD = 16;
+	*/
+

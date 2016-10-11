@@ -549,7 +549,7 @@ public abstract class Player implements GameStateConstants
         switch (a[0])
         {
             case A_BUILDSETTLEMENT: 
-                s[OFS_VERTICES+a[1]] =  VERTEX_HASSETTLEMENT+ pl;
+                s[OFS_VERTICES+a[1]] =  VERTEX_HASSETTLEMENT+ pl;// At vertices index a[1] already have settlement with player number pl
                 s[OFS_PLAYERDATA[pl]+OFS_NSETTLEMENTS]++;
                 s[OFS_LASTVERTEX] = a[1];
                 boolean[] hasOpponentRoad = new boolean[NPLAYERS];

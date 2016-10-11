@@ -283,6 +283,14 @@ public class TranslationState implements ConvNNConstants{
 		int[][] state = new int[23][23];
 		return state;
 	}
+	/*
+	public int[][][] verProduction(int vertex_ind){
+		for(int ind_res = 0; ind_res < GameStateConstants.N_RESOURCES; ind_res++){
+			for(int ind_pl = 0; ind_pl < GameStateConstants.NPLAYERS; ind_pl++){
+				
+			}
+		}
+	}*/
 	// Translate the whole state input into three dimensional array with dimension of [23][23][16]
 	//TODO: Translate all the resources with its type and player data into this 2 dimensional array
 	// Change this function to no return statement
@@ -299,26 +307,31 @@ public class TranslationState implements ConvNNConstants{
 			vertex = getVertex(centerofHexTile[i]);
 			edge = getEdge(centerofHexTile[i]);
 			
-			if( i < 18){
+			/*if( i < 18){
+				
 				try{
-					this.state[OFS_CONVEDGES][this.centerofHexTile[i].getX()][this.centerofHexTile[i].getY()] = bl.hextiles[bl.LAND_START_INDEX + i].subtype;
+					this.state[OFS_CONVEDGES][this.centerofHexTile[i].getX()][this.centerofHexTile[i].getY()] = bl.hextiles[BoardLayout.LAND_START_INDEX + i].subtype;
 					
-				}catch (Exception e) {
+				}
+				catch (Exception e) {
 					// TODO: handle exception
 					System.out.println("Vertex: " + this.centerofHexTile[i].getX() + " , " + this.centerofHexTile[i].getY());
 				}
 				//System.out.println("index :" + i + " land type: " + bl.hexnumberSequence[i] );
-			}
+			}*/
 			
-			//this.state[OFS_CONVEDGES][centerofHexTile[i].getX()][centerofHexTile[i].getY()] = bl.hexnumberSequence[i];
+			//this.state[OFS_CONVVERTECES][centerofHexTile[i].getX()][centerofHexTile[i].getY()] = bl.currentProductionNumber[i];
 			for(int j = 0; j<vertex.length; j++){
+				
 				try{
 					this.state[OFS_CONVVERTECES][vertex[j].getX()][vertex[j].getY()] = 1;
 					this.state[OFS_CONVEDGES][edge[j].getX()][edge[j].getY()] = 1;
-				}catch (Exception e) {
+				}
+				catch (Exception e) {
 					// TODO: handle exception
 					System.out.println("Vertex: " + vertex[j].getX() + " , " + vertex[j].getY());
 					}
+				
 				}
 			
 			// We can improve a bit of performent if we include the for loop inside the case
@@ -359,25 +372,144 @@ public class TranslationState implements ConvNNConstants{
 				default:
 					System.out.println(bl.landSequence[i]);
 					break;
+					
 			/*Finish translate the resource types, verteces and edges into CNN layers*/	
 			/*Initialize the production number layer of Convolutional Neural network*/
 				
 			}
 
 		}
+		
 		// Initialize the port coordinate and type of port from the bl
 		// "NOTICE": It have to be after the array is being shuffle
+		
 		// 18 is total number of port
+		
 		for(int i = 0; i< N_PORT;i++){
+			
     		if( i % 2 == 0){
+    			
     			int port_type = bl.hextiles[BoardLayout.PORT_START_INDEX+i/2].subtype;
         		this.state[OFS_PORT][this.portCoord[i].getX()][this.portCoord[i].getY()] = port_type;
         		this.state[OFS_PORT][this.portCoord[i+1].getX()][this.portCoord[i+1].getY()] = port_type;
 
     		}
     	}
-		/*Finish Translate port*/
-		//Translate the vertices with city or settlerment
+		
+		/*Testing
+		for(int i = 0 ; i < GameStateConstants.N_VERTICES; i++){
+			System.out.print("Screen coordinate: "+bl.vertices[i].screenCoord.getX()+" "+bl.vertices[i].screenCoord.getY()+"\n");
+		}*/
+		
+		// Translate the player data of having settlement and city being build
+		for(int ind_hex = 0; ind_hex < TOTAL_LAND_TILE; ind_hex++){
+			
+			for(int ind_ver = 0; ind_ver < NUM_VER_TO_HEX; ind_ver++){
+				int ver_ind = bl.neighborHexVertex[ind_hex][ind_ver];
+				
+				
+				if(ver_ind != -1){
+					int player_construction = bl.state[GameStateConstants.OFS_VERTICES + ver_ind];
+					vertex = getVertex(centerofHexTile[ind_hex]);
+					int player = player_construction - GameStateConstants.VERTEX_HASSETTLEMENT;
+					switch (player) {
+					// n_vertex_to_hex is index of an id of the vertex respected to the the one in the board
+					case 0:
+						this.state[OFS_COVN_PLAYERDATA[player]+OFS_COVN_SETTLEMENTS]
+								[vertex[ind_ver].getX()]
+										[vertex[ind_ver].getY()] = 1;
+						break;
+					case 1:
+						this.state[OFS_COVN_PLAYERDATA[player]+OFS_COVN_SETTLEMENTS]
+								[vertex[ind_ver].getX()]
+										[vertex[ind_ver].getY()] = 1;
+						break;
+					default:
+						break;
+					}
+				}
+				else{
+					int player_construction = bl.state[GameStateConstants.OFS_VERTICES + ver_ind];
+					vertex = getVertex(centerofHexTile[ind_hex]);
+					int player = player_construction - GameStateConstants.VERTEX_HASSETTLEMENT;
+					player = player_construction - GameStateConstants.VERTEX_HASCITY;
+					switch (player) {
+					case 0:
+						this.state[OFS_COVN_PLAYERDATA[player]+OFS_COVN_CITIES]
+								[vertex[ind_ver].getX()]
+										[vertex[ind_ver].getY()] = 1;
+						break;
+					case 1:
+						this.state[OFS_COVN_PLAYERDATA[player]+OFS_COVN_CITIES]
+								[vertex[ind_ver].getX()]
+										[vertex[ind_ver].getY()] = 1;
+						break;
+					default:
+						break;
+					}
+				}
+			}
+			
+		}
+		
+		//Translate the edge that being occuppied
+		
+		for(int ind_hex = 0; ind_hex < TOTAL_LAND_TILE; ind_hex++){
+			
+			for(int ind_edge = 0; ind_edge < NUM_EDGE_TO_HEX; ind_edge++){
+				
+				int edge_ind = bl.neighborHexVertex[ind_hex][ind_edge];
+				
+				if(edge_ind != -1){
+					
+					edge = getEdge(centerofHexTile[ind_hex]);
+					int player_construction = bl.state[GameStateConstants.OFS_EDGES + edge_ind];
+					int player = player_construction - GameStateConstants.EDGE_OCCUPIED;
+					
+					switch (player) {
+					// n_vertex_to_hex is index of an id of the vertex respected to the the one in the board
+					case 0:
+						this.state[OFS_COVN_PLAYERDATA[player] + OFS_COVN_ROAD]
+								[edge[ind_edge].getX()]
+										[edge[ind_edge].getY()] = 1;
+						break;
+						
+					case 1:
+						this.state[OFS_COVN_PLAYERDATA[player] + OFS_COVN_ROAD]
+								[edge[ind_edge].getX()]
+										[edge[ind_edge].getY()] = 1;
+						break;
+						
+					default:
+						break;
+						
+					}
+				}
+			}
+		}
+		// Translate the resource that each player have in case of two players
+		/*Finish*/
+		
+		
+		/*Start translating resource type*/
+		//TODO: Translate resource produce with vertex with also the layer with resource produce since
+		
+		
+		/*Put all the resource into vertex center of the hex when that number produce*/
+		
+		/*Finish the resource translation*/
+		
+		/*The development card will represent into two dimensional state*/
+		//TODO: Translate the development card state
+		
+		
+		/*Start to translate the player data into Layer I decide to write another function to help out this part*/
+		return this.state;
+	}
+		/* Finish Translate port*/
+		/* Translate the vertices with city or settlerment
+		 * Wrong
+		 * 
 		for(int i = 0; i < GameStateConstants.N_VERTICES; i++){
 			
 			int player_settlerment = bl.state[GameStateConstants.OFS_VERTICES+i];
@@ -389,6 +521,7 @@ public class TranslationState implements ConvNNConstants{
 				int player = player_settlerment - GameStateConstants.VERTEX_HASSETTLEMENT;
 				if(player < 2){
 					switch (player) {
+					// n_vertex_to_hex is index of an id of the vertex respected to the the one in the board
 					case 0:
 						this.state[OFS_PLAYER_ZERO_SETTLEMENTS]
 								[vertex[vertiecs.n_vertex_to_hex].getX()]
@@ -407,7 +540,7 @@ public class TranslationState implements ConvNNConstants{
 					player = player_settlerment - GameStateConstants.VERTEX_HASCITY;
 					switch (player) {
 					case 0:
-						this.state[OFS_PLAYER_ONE_CITIES]
+						this.state[OFS_PLAYER_ZERO_CITIES]
 								[vertex[vertiecs.n_vertex_to_hex].getX()]
 										[vertex[vertiecs.n_vertex_to_hex].getY()] = 1;
 						break;
@@ -422,9 +555,16 @@ public class TranslationState implements ConvNNConstants{
 				}
 			}
 		}
-		/*Finis the translation part from city, settlement into ConvNN*/
+
 		
-		/*Translate the edge into ConvNN*/
+		//Finis the translation part from city, settlement into ConvNN
+		
+		//Translate the edge into ConvNN
+		 // Wrong
+		 //
+		// Translate this one using neighborHexVetex
+		 */
+		/*
 		for(int i = 0; i < GameStateConstants.N_EDGES; i++){
 			
 			int player_settlerment = bl.state[GameStateConstants.OFS_EDGES+i];
@@ -449,22 +589,11 @@ public class TranslationState implements ConvNNConstants{
 						break;
 				}
 			}
-		}
-		/*Finish*/
-		
-		/*Start translating resource type*/
-		//TODO: Translate resource produce with vertex with also the layer with resource produce since
-		/*Put all the resource into vertex center of the hex when that number produce*/
-		
-		/*Finish the resource translation*/
-		
-		/*The development card will represent into two dimensional state*/
-		//TODO: Translate the development card state
+		}*/
 		
 		
-		/*Start to translate the player data into Layer I decide to write another function to help out this part*/
 		
- 		return this.state;
-	}
-
+			
+		
+		
 }

@@ -37,6 +37,11 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 {
 	public int NUM_IT = 1000;
 	public int MAX_HEAP = 1000;
+	public int[] currentProductionNumber = new int[19];
+	//For translating the production into ConvNN input form
+	public int[][][] production_since = new int[N_PLAYER][N_VERTICES][N_RESOURCES];
+	public int[][] total_production_since = new int[N_VERTICES][N_RESOURCES];
+	
     public static final int[][] PORT_COORD = {
         { 3, 0, 1},
         { 5, 0, 2},
@@ -365,6 +370,9 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 p = VectorToScreenCoord(hextiles[j].pos.Add(HEX_EDGES[i]));
                 
                 hexagon.addPoint(p.x, p.y);
+                if(j <= N_LAND_TILES){
+                	System.out.print("Hexagon coordinate: "+p.x+" "+p.y+"\n");
+                }
             }
             hextiles[j].screenCoord = hexagon;
             hextiles[j].centerScreenCord = VectorToScreenCoord(hextiles[j].pos);// It is the center of each hex tile
@@ -608,23 +616,21 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         //printArray(portSequence);
         InitProductionNumbers();
         //Check the good condition of the board 
-        //betterBoard();
+        betterBoard();
         TranslationState test = new TranslationState(action, this);
         int[][][] testState = test.translateFromHEXto2D();
-        /*for(i = 0 ; i < 5; i++){
-        	
-        }
+        
         for(int x = 0; x < testState[1].length; x++){
         	try{
         		for(int y = 0; y < testState[1][x].length; y++){
-        			System.out.print(testState[ConvNNConstants.OFS_RESOURCESSHEEP ][x][y] + " ");
+        			System.out.print(testState[ConvNNConstants.OFS_CONVVERTECES][x][y] + " ");
             	}
         	}catch (Exception e) {
 				// TODO: handle exception
         		System.err.println("The error Messeange"+e.getMessage()+" with " + testState[x][8]);
 			}
         	System.out.print("\n");
-        }*/
+        }
         /*
         int seqind = 0;
         for (int x=0; x<MAXX; x++)
@@ -716,7 +722,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     {
         boolean goodarrangement = false;
         int x, y, k, ind, ind2;// ind stand for index 
-        int seqind;
+        int seqind, curreDesSeq;
+        boolean desertapply;
         
         while (!goodarrangement)
         {
@@ -724,6 +731,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
             ShuffleIntArray(hexnumberSequence);
             seqind = 0;
+            curreDesSeq = 0;
+            desertapply = false;
             // deal numberts to hexes
             for (x=0; x<MAXX; x++)
                 for (y=0; y<MAXY; y++)
@@ -732,7 +741,15 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                     if ((ind != -1) && hextiles[ind].type == TYPE_LAND && hextiles[ind].subtype != LAND_DESERT)
                     {
                     	hextiles[ind].productionNumber = hexnumberSequence[seqind];
+                    	currentProductionNumber[curreDesSeq] = hexnumberSequence[seqind];
                         seqind++;
+                        curreDesSeq++;
+                    }
+                    if((ind != -1) && (hextiles[ind].type == TYPE_LAND )&& (hextiles[ind].subtype == LAND_DESERT )&& (!desertapply)){
+                    	System.out.println("Land Desert Assign");
+                    	currentProductionNumber[curreDesSeq] = 1;// Number 1 represent land of desert
+                    	curreDesSeq++;
+                    	desertapply = true;
                     }
                 }
             
@@ -762,6 +779,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 }
             
         }
+        printArray(currentProductionNumber);
     }
     /*
      * */
@@ -1445,7 +1463,7 @@ void lrDepthFirstSearch(int[] s, int pl, int ind, int []lrVertices, boolean[] lr
         isstartind = false;
         lrVertices[cind] = CHECKEDVALUE;
         vertices[cind].debugLRstatus = CHECKEDVALUE;
-        // TODO: if search starts in a "broken" vertex, the algorithm believes that it is connected
+        // TODO: if search starts in a "broken" OFS_RESOURCESSHEEP, the algorithm believes that it is connected
         if ((cind==ind) || (lrPlayerPresent[cind]) || (!lrOpponentPresent[cind]) )
         {
             for (j=cpos; j<6; j++)

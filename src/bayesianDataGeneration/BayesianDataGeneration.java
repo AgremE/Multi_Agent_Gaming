@@ -20,7 +20,7 @@ public class BayesianDataGeneration implements GameStateConstants {
 	public static Random rnd = new Random();
 	public static int MAX_LENGHT = 1000000;// For now just play 1000 games first
 	public int timeStep = 0; // There are total of 25 time step
-	public static int[][][] likelihoodData = new int[NCARDS][MAX_LENGHT][N_DEVCARDTYPES];
+	public static float[][] likelihoodDataTimeStemp = new float[NCARDS][N_DEVCARDTYPES];
 	// Card sequence for the game 25
 	public static int[] cardSequence = {       
 	        //14
@@ -86,10 +86,13 @@ public class BayesianDataGeneration implements GameStateConstants {
 		
 		Map<Integer[],Integer> collectionState = new HashMap<Integer[], Integer>();
 		Integer[] setCard;
+		int[] cardDesk;
 		
 		// start constructing the data table from here
 		for(int ind = 0; ind < MAX_LENGHT; ind++){
-			setCard = convertInteger(fisherYateShuffle(cardSequence));
+			
+			cardDesk = fisherYateShuffle(cardSequence);
+			setCard = convertInteger(cardDesk);
 			
 			if(collectionState.containsKey(setCard)){
 				int value = collectionState.get(setCard);
@@ -97,7 +100,22 @@ public class BayesianDataGeneration implements GameStateConstants {
 				collectionState.put(setCard, value);
 			}
 			
-			setCard
+			for(int ind_card = 0; ind_card < NCARDS; ind_card++){
+				likelihoodDataTimeStemp[ind_card][cardDesk[ind]]++;
+			}
+			
+		}
+		// Constructing the likelihood data spreadsheet
+		// Prior will change after each of iteration
+		for(int ind_card = 0; ind_card < NCARDS; ind_card++){
+			
+			for(int ind = 0; ind < N_DEVCARDTYPES; ind++){
+					
+				float numberCardTypeAppear = likelihoodDataTimeStemp[ind_card][ind];
+				float fraction = numberCardTypeAppear/MAX_LENGHT;
+				likelihoodDataTimeStemp[ind_card][ind] = fraction;
+			}
+			
 		}
 		
 	}
