@@ -1,4 +1,4 @@
-package bayesianDataGeneration;
+package bayesianInference;
 
 import java.util.HashMap;
 import java.util.Map;

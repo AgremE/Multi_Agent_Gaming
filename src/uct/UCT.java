@@ -70,7 +70,7 @@ public class UCT implements GameStateConstants {
             switch (possibilities.action[i][0])
             {
                 case A_BUILDSETTLEMENT:
-                    if ((state!=S_SETTLEMENT1) && (state != S_SETTLEMENT2))
+                    if ((state != S_SETTLEMENT1) && (state != S_SETTLEMENT2))
                         vwins[i] = 20;
                     break;
                 case A_BUILDCITY:

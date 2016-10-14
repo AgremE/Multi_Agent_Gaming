@@ -1276,14 +1276,10 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             uctTree.tree.clear();
         
         int fsmlevel    = s2[OFS_FSMLEVEL];
-        //System.out.println("FSM LEVEL"+fsmlevel);
         int pl          = s2[OFS_FSMPLAYER+fsmlevel];
-//        System.out.printf("!1");
         
         //Calculate all the possible option of action like dev_card, building, or whatever
         player[pl].listPossibilities(s2);
-//        System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
-//        System.out.printf("!2");
         int N_IT = NUM_IT;
         // Only one action left there is nothing to stimulate there
         if (possibilities.n == 1)
@@ -1291,8 +1287,6 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         for(it=0; it<N_IT; it++)
         {
-//            if (it%10 == 0)
-//                System.out.printf(".");
             isKnownState = true;
             //Close state s2 in order to protect the original state
             s = cloneOfState(s2);
@@ -1317,7 +1311,6 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                     //aind = possibilities.randomInd();                
                     aind = uctTree.selectAction(hc,pl,false);
                     uctTree.addTrace(hc, pl, aind);
-//        System.out.printf("!7");
 
                 }
                 else if ((isKnownState) && (node==null))
@@ -1327,18 +1320,15 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                     aind = possibilities.randomInd();                
                     uctTree.addState(s,hc, possibilities);
                     uctTree.addTrace(hc, pl, aind);
-//        System.out.printf("!8");
                 }
                 else
                 {
                     // further unknown states
-                    aind = possibilities.randomInd();                
-//        System.out.printf("!9");
+                    aind = possibilities.randomInd(); 
                 }
 
                 a = possibilities.action[aind];
                 // Sometime the simulation hang in this state
-//        System.out.printf("!5");
                 player[pl].performAction_simulation(s, a);
                 // Changing state
                 // It also changing tht player number at the same time as we use the state transition
@@ -1353,7 +1343,6 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 if (winner !=-1)
                     break;
             }
-            //System.out.printf("Round :%d and Simulation Round: %d\n", round, it);
             uctTree.update(winner, uctTime);
         }
 // !!! printing takes LOTS of time

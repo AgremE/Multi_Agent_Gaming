@@ -19,6 +19,7 @@ public class BelieveStatePool implements BelieveStateConstance{
 	public final int NUMBER_PARTICLE_ADDED = 10;
 	ArrayList<BelifeState> history = new ArrayList<BelifeState>();
 	HashMap<Integer, BelifeState[]> belifePool = new HashMap<Integer,BelifeState[]>();
+	int[] cardDesk;
 	//BelifeState[][] belifePool;
 	BoardLayout bl;
 	int[] current_belife_states;

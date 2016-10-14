@@ -1,4 +1,4 @@
-package bayesianDataGeneration;
+package bayesianInference;
 
 public class BayesianUtili {
 	
