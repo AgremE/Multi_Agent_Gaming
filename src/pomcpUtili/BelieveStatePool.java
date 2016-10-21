@@ -15,7 +15,7 @@ import smartsettlers.boardlayout.GameStateConstants;
 //Author: Makara Phav
 //This class use only with POMCPPlayer Only
 
-public class BelieveStatePool implements BelieveStateConstance{
+public class BelieveStatePool implements POMCPConstance{
 	public final int NUMBER_PARTICLE_ADDED = 10;
 	ArrayList<BelifeState> history = new ArrayList<BelifeState>();
 	HashMap<Integer, BelifeState[]> belifePool = new HashMap<Integer,BelifeState[]>();

@@ -2,12 +2,12 @@ package pomcpUtili;
 
 import smartsettlers.boardlayout.BoardLayout;
 import smartsettlers.boardlayout.GameStateConstants;
-
+/*
+ * Makara Phav @ Agreme
+ * */
 public class BelifeState {
 	
 	private int[] belifeState;
-	
-	
 	
 	// belife state initialized
 	public BelifeState(){

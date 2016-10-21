@@ -13,12 +13,12 @@ import smartsettlers.boardlayout.GameStateConstants;
  */
 public class TreeNode implements GameStateConstants {
 
-    int nvisits;
-    int[][] nwins;
-    double[][] values;
-    int nactions;
-    int[] nactionvisits;
-    int timeStamp;
+    public int nvisits;
+    public int[][] nwins;
+    public double[][] values;
+    public int nactions;
+    public int[] nactionvisits;
+    public int timeStamp;
     
     public TreeNode(int nactions)
     {

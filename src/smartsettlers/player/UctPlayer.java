@@ -35,7 +35,7 @@ public class UctPlayer extends Player {
         int[] s2 = BoardLayout.cloneOfState(s);  
         if (bl.uctTree != null)
         {
-        	s2 = bl.hideState(pl, s2);
+        	//s2 = bl.hideState(pl, s2);
             bl.player[pl].listPossibilities(s2);
             for (j=0; j<bl.possibilities.n; j++)
             {

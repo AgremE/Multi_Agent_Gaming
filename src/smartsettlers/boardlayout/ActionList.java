@@ -6,7 +6,6 @@
 package smartsettlers.boardlayout;
 
 import java.util.Random;
-import pomdpSettler.*;
 
 /**
  *

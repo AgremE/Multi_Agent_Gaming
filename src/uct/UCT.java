@@ -31,7 +31,7 @@ public class UCT implements GameStateConstants {
     
     public UCT()
     {
-        tree = new Hashtable(10000000);
+        tree = new Hashtable(1000000);
         ntraces = 0;
         traceList = new Trace[MAXNTRACES];
         for (int i=0; i<MAXNTRACES; i++)

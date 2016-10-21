@@ -1,9 +1,3 @@
-/smartsettlers/
-/experiment/
 /pomcpUtili/
+/smartsettlers/
 /soc/
-/weightedParticleFilter/
-/tradingPOMDPs/
-/uct/
-/bayesianDataGeneration/
-/convNNSettler/

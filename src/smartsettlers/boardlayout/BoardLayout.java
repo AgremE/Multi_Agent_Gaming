@@ -35,6 +35,11 @@ import convNNSettler.*;
 /*Improve by Agreme(Makara Phav)*/
 public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
 {
+	//Help parameters for POMCP
+	public int[] eachPlayerNewCard = new int[NPLAYERS];
+	public int numberCardBoughtThisRound = 0;
+	
+	// Help Parameters for Simulation of trading
 	public int NUM_IT = 1000;
 	public int MAX_HEAP = 1000;
 	public int[] currentProductionNumber = new int[19];
@@ -845,6 +850,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         boolean offer_answer = false;
        
         //System.out.println("System start trading");
+        /*
         if(statlevel == S_NORMAL){
         	
         	//System.out.println("System start trading");
@@ -859,7 +865,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 //this.UCTsimulateTrading(state);
             	//System.out.println("Considering Offer");
             	trad = tradingPossibilites.trad[i];
-            	/*for(int ind =0 ; ind < this.tradingPossibilites.n; ind++){
+            	for(int ind =0 ; ind < this.tradingPossibilites.n; ind++){
             		System.out.printf("Trading Option: [%d %d %d %d %d %d]\n", tradingPossibilites.trad[ind][0], 
             												   tradingPossibilites.trad[ind][1], 
             												   tradingPossibilites.trad[ind][2], 
@@ -867,12 +873,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             												   tradingPossibilites.trad[ind][4], 
             												   tradingPossibilites.trad[ind][5]);
             	}
-            	/*try {
+            	try {
 					TimeUnit.SECONDS.sleep(20);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}*/
+				}
             	int[] state_trad_simulation = cloneOfState(s);
             	// Chaning a to action of trading posibility
             	changeState(state_trad_simulation, trad);
@@ -915,7 +921,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             	}
             	
             }
-        }
+        }*/
         // doing stuff
         // We copy the state from here
         
@@ -1304,7 +1310,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 player[pl].listPossibilities(s);
                 int nactions = possibilities.n; //Number of action available
                 int aind; //action index (ind is stand for index)
-
+                // using UCT to improve the greedy in action selection  if the node is not in the tree yet
                 if ((isKnownState) && (node!=null))
                 {
                     // known states
@@ -1313,14 +1319,18 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                     uctTree.addTrace(hc, pl, aind);
 
                 }
+                //Add state into the UCT just one time because at the end of the second stage only one onde is added and
+                // it is history
                 else if ((isKnownState) && (node==null))
                 {
                     // first unknown state
                     isKnownState = false;
+                    // They doing random rollout policy which might lead to bad outcome
                     aind = possibilities.randomInd();                
                     uctTree.addState(s,hc, possibilities);
                     uctTree.addTrace(hc, pl, aind);
                 }
+              //Random rollout version of policy
                 else
                 {
                     // further unknown states
@@ -1354,7 +1364,13 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         s=null;
         a=null;
     }
-            
+    // Need to do POMCP simulation one more as an option for POMCP
+    public void POMCPSimulation(int[] state){
+    	
+    }
+    
+    
+    // Get the winner for the current state
     public int getWinner(int[] s)
     {
         int pl;
