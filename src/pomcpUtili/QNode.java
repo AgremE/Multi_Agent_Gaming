@@ -20,7 +20,7 @@ public class QNode implements POMCPConstance{
 	int[] action;
 	Random rnd = new Random();
 	BoardLayout bl;
-	public Hashtable<Integer[][], VNode> Children = new Hashtable<>();// key is action as an array of integer
+	public Hashtable<int[][], VNode> Children = new Hashtable<>();// key is action as an array of integer
 	public QNode(BoardLayout bl, int[] action){
 		this.action = action;
 		this.bl = bl;
@@ -30,7 +30,7 @@ public class QNode implements POMCPConstance{
 	public int observation(){
 		return rnd.nextInt();
 	}
-	public Integer[][] convIntToInteger(int[][] obser){
+	public static Integer[][] convIntToInteger(int[][] obser){
 		Integer[][] new_obser = new Integer[GameStateConstants.NPLAYERS][GameStateConstants.N_DEVCARDTYPES];
 		for(int i=0; i < obser.length; i++){
 			for(int j = 0; j < obser[i].length; j++){
@@ -72,7 +72,7 @@ public class QNode implements POMCPConstance{
 		}
 		if(node != null){
 			depth++;
-			Children.put(convIntToInteger(observation), node);
+			Children.put(observation, node);
 			delayReward = node.simulation_v(state_clone, node, depth);
 		}
 		else{
@@ -80,6 +80,7 @@ public class QNode implements POMCPConstance{
 			delayReward = rollout(state_clone, depth);
 			//doing the random rollout from here
 		}
+		depth--;
 		
 		total_reward = immReward + delayReward*DISCOUNT_FACTOR;
 		return total_reward;
@@ -102,7 +103,6 @@ public class QNode implements POMCPConstance{
 		int[] state_clone = bl.cloneOfState(state);
 		double total_reward = 0.0;
 		double discount = 1.0;
-		boolean terminal = false;
 		int numSteps;
 		
 		for ( numSteps = 0; numSteps +  depth < MAX_DEPTH; numSteps++){
@@ -136,7 +136,7 @@ public class QNode implements POMCPConstance{
 	// Expending the node from provided observation (in case it is not in the hashtable)
 	public VNode expand_vnode(int[][] observation, int depth){
 		
-		if(depth < MAX_DEPTH){
+		if(depth < MAX_DEPTH_ROLLOUT){
 			return null;
 		}
 		VNode node = new VNode(this.bl, observation);

@@ -25,12 +25,13 @@ public class VNode implements POMCPConstance{
 	int[][] observed;
 	boolean ACTION_LIST_EMPTY = false;
 	final double EXPLORATION_CONSTANCE = 1.5;
+	int[] belief_state;// need to approximate by unweighted particle filter
 	BoardLayout bl;
 	Random rnd = new Random();
 	ActionList possibilities_list;
-	public Hashtable<Integer[], QNode> Children = new Hashtable<>();// Key is action which pick in random manner
+	public Hashtable<int[], QNode> Children = new Hashtable<>();// Key is action which pick in random manner
 	
-	public Integer[] changeINT2INTEGER(int[] action){
+	public static Integer[] changeINT2INTEGER(int[] action){
 		Integer[] action_cov = new Integer[action.length];
 		for(int i = 0 ; i< action.length; i++){
 			action_cov[i] = (Integer) action[i];
@@ -51,7 +52,7 @@ public class VNode implements POMCPConstance{
 			int[] action = bl.possibilities.action[i];
 			QNode node = new QNode(bl, bl.possibilities.action[i]);
 			node.setValue(0, 0);
-			Children.put(this.changeINT2INTEGER(action), node);
+			Children.put(action, node);
 			
 		}
 	}
@@ -134,6 +135,9 @@ public class VNode implements POMCPConstance{
 	public void setValue(double value, int count){
 		this.REWARD = value;
 		this.VISIT = count;
+	}
+	public int[] getBelifeState(){
+		
 	}
 	
 }

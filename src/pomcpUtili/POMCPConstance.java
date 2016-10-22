@@ -10,12 +10,12 @@ public interface POMCPConstance{
 	public int USEDCARD = 0;
 	public int OLDCARD  = 1;
 	public int NEWCARD = 2;
-	
 	public int OBSERVATION = 25;
 	//Game State
 	public final int TERMINATE_STATE = 0;
 	public final int NORMAL_STATE = 1;
 	public final int MAX_DEPTH = 10000; // Need to think about this number why?
+	public final int MAX_DEPTH_ROLLOUT  = MAX_DEPTH + 1000;
 	public final double DISCOUNT_FACTOR = 0.3;
 	
 	
