@@ -15,6 +15,10 @@ import smartsettlers.boardlayout.GameStateConstants;
 //Author: Makara Phav
 //This class use only with POMCPPlayer Only
 
+
+/*
+ * This class has serious conflict with the class belief state that we need to fix 
+ * */
 public class BelieveStatePool implements POMCPConstance{
 	public final int NUMBER_PARTICLE_ADDED = 10;
 	ArrayList<BelifeState> history = new ArrayList<BelifeState>();
@@ -50,7 +54,7 @@ public class BelieveStatePool implements POMCPConstance{
 					 int cardPickRandom = this.randomizedCard();
 					 // map->BelifePool->BelifeState->addOneCard
 					 
-					 belife_state_pl[ind_belifeState].addOneCard(cardPickRandom);
+					 belife_state_pl[ind_belifeState].addOneCard(pl,cardPickRandom);
 					 
 				 }
 				 belifePool.put(ind_pl, belife_state_pl);
@@ -62,7 +66,7 @@ public class BelieveStatePool implements POMCPConstance{
 	// for Checking particle deprivation problem
 	public boolean checkParticleDeprivation(BelifeState curr_knowleadge,int pl){
 		for(int ind_pool = 0; ind_pool < BelifePoolSize; ind_pool++){
-			if(acceptedBelifeState(curr_knowleadge.getBelifeState(), belifePool.get(pl)[ind_pool].getBelifeState())){
+			if(acceptedBelifeState(curr_knowleadge.getBelifeState(bl), belifePool.get(pl)[ind_pool].getBelifeState(bl))){
 				return false;
 			}
 		}
@@ -88,7 +92,7 @@ public class BelieveStatePool implements POMCPConstance{
 												+ GameStateConstants.OFS_USEDCARDS 
 												+ ind_card];
 			}
-			BelifeState curr_revealState = new BelifeState(curr_knowleadge);
+			BelifeState curr_revealState = new BelifeState(bl);
 			
 			boolean finish_updating = false;
 			int number_cadidate = 0;
@@ -106,8 +110,8 @@ public class BelieveStatePool implements POMCPConstance{
 			do{
 				int ind_pool = rnd.nextInt(BelifePoolSize)+1;
 				number_round++;
-				if(acceptedBelifeState(curr_revealState.getBelifeState(),
-						this.belifePool.get(pl)[ind_pool].getBelifeState())){
+				if(acceptedBelifeState(curr_revealState.getBelifeState(bl),
+						this.belifePool.get(pl)[ind_pool].getBelifeState(bl))){
 					newBelifeState[number_cadidate] = belifePool.get(pl)[ind_pool];
 					number_cadidate++;
 				}
@@ -149,7 +153,7 @@ public class BelieveStatePool implements POMCPConstance{
 			for(int ind_belifeState = 0; ind_belifeState < BelifePoolSize; ind_belifeState++){
 				 // Selected the card randomized uniformly distributed with the prior probability
 				 int cardPickRandom = this.randomizedCard();
-				 belifeState[ind_belifeState].addOneCard(cardPickRandom);
+				 belifeState[ind_belifeState].addOneCard(pl,cardPickRandom);
 			 }
 		}
 		//update the belifestate about player pl
@@ -187,9 +191,10 @@ public class BelieveStatePool implements POMCPConstance{
 		BelifeState[] belifestatetemp = belifePool.get(pl);
 		
 		for(int ind_pool = 0; ind_pool < BelifePoolSize; ind_pool++){
+			// Check this line
+			//Integer[] temp_state = belifestatetemp[ind_pool].getBelifeStateInteger();
 			
-			Integer[] temp_state = belifestatetemp[ind_pool].getBelifeStateInteger();
-			
+			Integer[] temp_state  = new Integer[BelifePoolSize];
 			if(distribution.containsKey(temp_state)){
 				int count = 0;
 				count = distribution.get(temp_state);
@@ -215,8 +220,8 @@ public class BelieveStatePool implements POMCPConstance{
 	        	temp_state = (int[]) pair.getKey();
 	        }
 	    }
-	    
-	    BelifeState belife = new BelifeState((int [])temp_state);
+	    // wrong
+	    BelifeState belife = new BelifeState(bl);
 		return belife;
 	}
 	
@@ -224,7 +229,7 @@ public class BelieveStatePool implements POMCPConstance{
 	public boolean compareState(BelifeState revealState, BelifeState belifeState){
 		for(int ind_dev = 0; ind_dev < GameStateConstants.N_DEVCARDTYPES; ind_dev++){
 			
-			if(revealState.getBelifeState()[ind_dev] > belifeState.getBelifeState()[ind_dev]){
+			if(revealState.getBelifeState(bl)[ind_dev] > belifeState.getBelifeState(bl)[ind_dev]){
 				
 				return false;
 			

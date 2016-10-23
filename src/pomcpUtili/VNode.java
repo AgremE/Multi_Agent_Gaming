@@ -25,19 +25,16 @@ public class VNode implements POMCPConstance{
 	int[][] observed;
 	boolean ACTION_LIST_EMPTY = false;
 	final double EXPLORATION_CONSTANCE = 1.5;
-	int[] belief_state;// need to approximate by unweighted particle filter
+	BelifeState belief_state;// need to approximate by unweighted particle filter
 	BoardLayout bl;
 	Random rnd = new Random();
 	ActionList possibilities_list;
+	
+	
 	public Hashtable<int[], QNode> Children = new Hashtable<>();// Key is action which pick in random manner
 	
-	public static Integer[] changeINT2INTEGER(int[] action){
-		Integer[] action_cov = new Integer[action.length];
-		for(int i = 0 ; i< action.length; i++){
-			action_cov[i] = (Integer) action[i];
-		}
-		return action_cov;
-	}
+	
+	
 	
 	public VNode(BoardLayout bl, int[][] observation){
 		
@@ -57,6 +54,15 @@ public class VNode implements POMCPConstance{
 		}
 	}
 	
+	public static Integer[] changeINT2INTEGER(int[] action){
+		Integer[] action_cov = new Integer[action.length];
+		for(int i = 0 ; i< action.length; i++){
+			action_cov[i] = (Integer) action[i];
+		}
+		return action_cov;
+	}
+	
+	// Simulated this VNode 
 	public double simulation_v(int[] state,VNode v_node, int treeDepth){
 		
 		int fsmlevel    = state[GameStateConstants.OFS_FSMLEVEL]; // To access the level of game state
@@ -123,6 +129,7 @@ public class VNode implements POMCPConstance{
 		}
 		
 	}
+	
 	// This fucntion used to help in GREEDYUCB action selection
 	public double UCB_FAST(int N, int n, double logN){
 		if(n == 0){
@@ -132,12 +139,16 @@ public class VNode implements POMCPConstance{
 			return EXPLORATION_CONSTANCE*(Math.sqrt(logN / n));
 		}
 	}
+	
+	// Set specific value to this VNode
 	public void setValue(double value, int count){
 		this.REWARD = value;
 		this.VISIT = count;
 	}
+	
+	// get belife state withing this VNode
 	public int[] getBelifeState(){
-		
+		return belief_state.getBelifeState(bl);
 	}
 	
 }

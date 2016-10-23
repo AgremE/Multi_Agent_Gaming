@@ -52,8 +52,6 @@ public class QNode implements POMCPConstance{
         q_node.VISIT++;
 		int[] state_clone = bl.cloneOfState(state);
 		
-		// TODO: Need to apply action to get observation(Guessing card by randomizing)
-		
 		int winner = bl.getWinner(state_clone);
 
 		if(winner != -1 ){
@@ -85,6 +83,7 @@ public class QNode implements POMCPConstance{
 		total_reward = immReward + delayReward*DISCOUNT_FACTOR;
 		return total_reward;
 	}
+	// Make a randomized card selection for the observation overhead
 	public int[][] makeObservation(int[] state, int[] action){
 		int[][] current_guess = new int[GameStateConstants.NPLAYERS][GameStateConstants.N_DEVCARDTYPES];
 		if(bl.numberCardBoughtThisRound == 0){
@@ -98,6 +97,7 @@ public class QNode implements POMCPConstance{
 		}
 		return current_guess;
 	}
+	// Random rollout policy which needed to run before running the UCT algorithm
 	public double rollout(int[] state, int depth){
 		
 		int[] state_clone = bl.cloneOfState(state);
@@ -143,11 +143,12 @@ public class QNode implements POMCPConstance{
 		node.setValue(0.0, 0);
 		return node;
 	}
-	
+	// Get action with this specific node
 	public int[] getAction(){
 		
 		return this.action;
 	}
+	// Set value into this specific node
 	public void setValue(double reward, int count){
 		this.VISIT = count;
 		this.REWARD = reward;

@@ -32,13 +32,21 @@ public class UCT_POCMP implements GameStateConstants{
 	// Update is mostly related to update the belife state accordingly
 	public void mtcs_update(int[] action, int[][] observation, double reward){
 		history.addNode(new Entry(action, observation));
-		BelifeState belifes;
+		int[] belifes;
 		
 		QNode qnode = root.Children.get(action);
 		VNode vnode = qnode.Children.get(observation);
 		if(vnode != null){
+			if(vnode.belief_state.getBelifeState(bl) != null){
+				belifes = vnode.belief_state.getBelifeState(bl);
+			}
+		}
+		else{
 			
 		}
+		
+	}
+	public void mtcs_update_particle(){
 		
 	}
 	// for shuffle the array of action
@@ -63,7 +71,7 @@ public class UCT_POCMP implements GameStateConstants{
 	// This method is called only when there a new tree need to construct in order to give uct a basic idea on what to do
 	public void mtcs_randome_rollout(int pl){
 		int history_depth = history.size();
-		int[] bliefe_state = root.belief_state;
+		int[] bliefe_state = root.belief_state.getBelifeState(bl);
 		int[] state = BoardLayout.cloneOfState(bliefe_state);
 		int[][] action_pool;
 		if(bl.possibilities.n != 0){
@@ -87,7 +95,7 @@ public class UCT_POCMP implements GameStateConstants{
 				if(v_node == null){
 					// This is basically try to extend the node from vnode which not exist to step further down
 					// By further down I mean put in the hashtable
-					root.Children.get(action).Children.put(QNode.convIntToInteger(observation), 
+					root.Children.get(action).Children.put(observation, 
 							q_node.expand_vnode(observation, history_depth));
 				}
 			}
@@ -101,14 +109,14 @@ public class UCT_POCMP implements GameStateConstants{
 	}
 	// this function is the same as the one define in QNode class
 	public int[][] makeObservation(int[] state, int[] action){
-		int[][] current_guess = new int[GameStateConstants.NPLAYERS][GameStateConstants.N_DEVCARDTYPES];
+		int[][] current_guess = new int[NPLAYERS][N_DEVCARDTYPES];
 		if(bl.numberCardBoughtThisRound == 0){
 			
 		}
-		for(int ind_player = 0; ind_player < GameStateConstants.NPLAYERS; ind_player++ ){
+		for(int ind_player = 0; ind_player < NPLAYERS; ind_player++ ){
 			int lenght = bl.eachPlayerNewCard[ind_player];
 			for(int ind_card = 0; ind_card < lenght; ind_card++){
-				current_guess[ind_card][cardSequence[rnd.nextInt(cardSequence.length)]]++;
+				current_guess[ind_card][POMCPConstance.cardSequence[rnd.nextInt(POMCPConstance.cardSequence.length)]]++;
 			}
 		}
 		return current_guess;
@@ -119,7 +127,7 @@ public class UCT_POCMP implements GameStateConstants{
 		int historyDepth = history.size();
 		for(int i = 0; i < NUM_SIMULATION; i++){
 			
-			int[] card_believe_state = root.belief_state;
+			int[] card_believe_state = root.belief_state.getBelifeState(bl);
 			// Change the state according to the belife approximation
 			treeDepth = 0;
 			PeakTreeDepth = 0;
@@ -130,8 +138,9 @@ public class UCT_POCMP implements GameStateConstants{
 			
 		}
 	}
-	public void mtcs_addSample(){
-		
+	public void mtcs_addSample(VNode node, int[] state){
+		int[] state_clone = bl.cloneOfState(state);
+		node.belief_state.addBelife(state_clone);
 	}
 	
 

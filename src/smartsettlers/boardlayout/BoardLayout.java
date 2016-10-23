@@ -38,6 +38,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	//Help parameters for POMCP
 	public int[] eachPlayerNewCard = new int[NPLAYERS];
 	public int numberCardBoughtThisRound = 0;
+	public int[] numberCardPullOut = new int[N_DEVCARDTYPES];
 	
 	// Help Parameters for Simulation of trading
 	public int NUM_IT = 1000;
