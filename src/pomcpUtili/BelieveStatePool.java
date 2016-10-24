@@ -12,9 +12,9 @@ import org.apache.poi.hslf.record.InteractiveInfo;
 import smartsettlers.boardlayout.BoardLayout;
 import smartsettlers.boardlayout.GameStateConstants;
 
-//Author: Makara Phav
-//This class use only with POMCPPlayer Only
-
+/*
+ * Makara Phav @ Agreme
+ * */
 
 /*
  * This class has serious conflict with the class belief state that we need to fix 

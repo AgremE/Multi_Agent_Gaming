@@ -1,5 +1,7 @@
 package bayesianInference;
-
+/*
+ * Makara Phav @ Agreme
+ * */
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;

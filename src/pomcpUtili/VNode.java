@@ -29,19 +29,23 @@ public class VNode implements POMCPConstance{
 	BoardLayout bl;
 	Random rnd = new Random();
 	ActionList possibilities_list;
-	
+
+	public enum SEARCH_STAGE{
+		RANDOME_ROLLOUT,
+		UCT_ROLLOUT,
+		FINISH
+	}
+	SEARCH_STAGE stage;
 	
 	public Hashtable<int[], QNode> Children = new Hashtable<>();// Key is action which pick in random manner
 	
-	
-	
-	
-	public VNode(BoardLayout bl, int[][] observation){
+	// Initialize for the root node
+	public VNode(BoardLayout bl	){
 		
 		this.bl = bl;
 		NUM_ACTION = bl.possibilities.n;
 		possibilities_list = bl.possibilities;
-		this.observed = observation;
+		this.belief_state = new BelifeState(bl.eachPlayerCardNotReveal,bl.eachPlayerCardPlaiedThisRound,bl);
 		
 		// put all the result of the possible action inside the list of children
 		for(int i = 0; i < this.NUM_ACTION; i++){
@@ -52,8 +56,30 @@ public class VNode implements POMCPConstance{
 			Children.put(action, node);
 			
 		}
+		stage = SEARCH_STAGE.RANDOME_ROLLOUT;
 	}
 	
+	// Initialized for other nodes
+	public VNode(BoardLayout bl, int[][] observation){
+		
+		this.bl = bl;
+		NUM_ACTION = bl.possibilities.n;
+		possibilities_list = bl.possibilities;
+		this.observed = observation;
+		this.belief_state = new BelifeState(bl.eachPlayerCardNotReveal,bl.eachPlayerCardPlaiedThisRound,bl);
+		
+		// put all the result of the possible action inside the list of children
+		for(int i = 0; i < this.NUM_ACTION; i++){
+			
+			int[] action = bl.possibilities.action[i];
+			QNode node = new QNode(bl, bl.possibilities.action[i]);
+			node.setValue(0, 0);
+			Children.put(action, node);
+		}
+		stage = SEARCH_STAGE.RANDOME_ROLLOUT;
+	}
+	
+	// Converting 1-D array of int into Integer
 	public static Integer[] changeINT2INTEGER(int[] action){
 		Integer[] action_cov = new Integer[action.length];
 		for(int i = 0 ; i< action.length; i++){
@@ -97,26 +123,35 @@ public class VNode implements POMCPConstance{
 
 	//For helping in UCT Searching
 	public int[] UCBGreedy(VNode v_node){
+		
 		ArrayList<int[]> action_pool = new ArrayList<>();
 		double bestq = Double.NEGATIVE_INFINITY;
 		int v_visit = v_node.VISIT;
 		double logN = Math.log(v_visit + 1);
+		
 		//TODO: Will put alpha value later
 		for(int ind_action = 0; ind_action < NUM_ACTION; ind_action++){
+			
 			double q_value;
 			int q_visit;
 			QNode q_node = v_node.Children.get(possibilities_list.action[ind_action]);
 			q_visit = q_node.VISIT;
 			q_value = q_node.REWARD;
 			q_value += this.UCB_FAST(v_visit, q_visit, logN);
+			
 			if(bestq <= q_value){
+				
 				if(q_value > bestq){
+					
 					action_pool.clear();
+					
 				}
+				
 				bestq = q_value;
 				action_pool.add(possibilities_list.action[ind_action]);
 			}
 		}
+		
 		if(action_pool.isEmpty()){
 			
 			v_node.ACTION_LIST_EMPTY = true;
@@ -126,29 +161,40 @@ public class VNode implements POMCPConstance{
 		else{
 			v_node.ACTION_LIST_EMPTY = false;
 			return action_pool.get(rnd.nextInt(action_pool.size()));
-		}
-		
+		}	
 	}
 	
 	// This fucntion used to help in GREEDYUCB action selection
 	public double UCB_FAST(int N, int n, double logN){
+		
 		if(n == 0){
 			return Double.POSITIVE_INFINITY;
 		}
 		else{
 			return EXPLORATION_CONSTANCE*(Math.sqrt(logN / n));
 		}
+		
 	}
 	
 	// Set specific value to this VNode
 	public void setValue(double value, int count){
+		
 		this.REWARD = value;
 		this.VISIT = count;
+		
 	}
 	
 	// get belife state withing this VNode
 	public int[] getBelifeState(){
+		
 		return belief_state.getBelifeState(bl);
+		
 	}
+	
+	// return only belief_state as a object not the state in the form of int[]
+	public BelifeState getBelife(){
+		return this.belief_state;
+	}
+	
 	
 }

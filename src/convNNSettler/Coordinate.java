@@ -1,6 +1,6 @@
 package convNNSettler;
 /*
- * Author: Agrem_E (Makara Phav)
+ * Makara Phav @ Agreme
  * */
 public class Coordinate {
 	private int x;

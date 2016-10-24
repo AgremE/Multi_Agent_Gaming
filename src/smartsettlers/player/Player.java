@@ -22,7 +22,7 @@ public abstract class Player implements GameStateConstants
     //int lastvertex; // last vertex where a settlement has been placed. 
                     // needed for initial road placement
     
-    
+    boolean POMCP = false;
     BoardLayout bl;
     Random rnd;
     
@@ -31,6 +31,18 @@ public abstract class Player implements GameStateConstants
         this.bl = bl;
         this.position = position;
         rnd = new Random();
+    }
+    
+    public Player(BoardLayout bl, int position, boolean isPOMCP)
+    {
+        this.bl = bl;
+        this.position = position;
+        rnd = new Random();
+        POMCP = isPOMCP;
+    }
+    
+    public boolean isPOMCP(){
+    	return this.POMCP;
     }
     
     public void listMonopolyPossibilities(int []s)
@@ -688,6 +700,9 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_FREERESOURCE]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_FREERESOURCE]++;
+                
+                bl.eachPlayerCardPlaiedThisRound[pl][CARD_FREERESOURCE]++;
+                
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[1]] ++;
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[2]] ++;
                 break;
@@ -695,6 +710,9 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_MONOPOLY]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_MONOPOLY]++;
+                
+                bl.eachPlayerCardPlaiedThisRound[pl][CARD_MONOPOLY]++;
+                
                 for (ind = 0; ind<NPLAYERS; ind++)
                 {
                     if (ind==pl)
@@ -707,11 +725,17 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_FREEROAD]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_FREEROAD]++;
+                
+                bl.eachPlayerCardPlaiedThisRound[pl][CARD_FREEROAD]++;
+                
                 break;
             case A_PLAYCARD_KNIGHT:
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_KNIGHT]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_KNIGHT]++;
+                
+                bl.eachPlayerCardPlaiedThisRound[pl][CARD_KNIGHT]++;
+                
                 bl.recalcLargestArmy(s);
             // flow to next case! 
             case A_PLACEROBBER:
@@ -733,12 +757,18 @@ public abstract class Player implements GameStateConstants
             		int totalCardForEachPlayer = this.getTotalResourceCount(ind_player);
             		//System.out.printf("Total Resource Card: %d\n", totalCardForEachPlayer);
             		if(totalCardForEachPlayer > 7){
+            			
             			int reduceCard = totalCardForEachPlayer/2;
+            			
             			for(int ind_cut=0; ind_cut < reduceCard; ind_cut++){
+            				
             				int res_card = this.selectMostUselessResourceInHand(ind_player, s);
+            				
             				if(res_card >= 0){
+            					
             					if(s[OFS_PLAYERDATA[ind_player] + OFS_RESOURCES + res_card] > 0){
             						s[OFS_PLAYERDATA[ind_player] + OFS_RESOURCES + res_card]--;
+            						
             					}
             				}
             			}
@@ -761,13 +791,25 @@ public abstract class Player implements GameStateConstants
             	break;
             case A_ENDTURN:
                 // new cards become old cards
+            	
+            	int cardBought = 0;
+            	int cardAvailable = 0;
+            	
                 for (ind=0; ind<NCARDTYPES; ind++)
                 {
                     s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + ind] += s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + ind];
+                    cardBought += s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + ind];
                     s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + ind] = 0;
+                    cardAvailable += s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + ind];
+                    
                 }
+                
+                bl.newlyBoughtCardEachPlayer[pl] = cardBought;
+                bl.eachPlayerCardNotReveal[pl] = cardAvailable;
+                
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 0;
                 break;
+                
             /*case A_TRADING:
             	
             	//Trading with other player with only one at a time

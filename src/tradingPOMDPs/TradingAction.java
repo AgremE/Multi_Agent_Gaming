@@ -2,7 +2,9 @@ package tradingPOMDPs;
 
 import java.util.Random;
 import smartsettlers.boardlayout.GameStateConstants;
-
+/*
+ * Makara Phav @ Agreme
+ * */
 public class TradingAction implements GameStateConstants{
 	
 	public static final int MAX_ACTIONLISTSIZE = 100;

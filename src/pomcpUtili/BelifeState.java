@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
 
+
 import smartsettlers.boardlayout.BoardLayout;
 import smartsettlers.boardlayout.GameStateConstants;
 /*
@@ -15,30 +16,50 @@ import smartsettlers.boardlayout.GameStateConstants;
  * */
 public class BelifeState implements GameStateConstants{
 	
-	private int[][] belifeState;
+	
 	private HashMap<int[][], Integer> belife_pool = new HashMap<>();
 	Random rnd;
 	BoardLayout bl;
-	final int TOTAL_PARTICLE = 100;
 	
 	// belife state initialized
 	
 	public BelifeState(BoardLayout bl){
-		this.belifeState = new int[NPLAYERS][N_DEVCARDTYPES];
 		this.bl = bl;
 		rnd = new Random();
 	}
 	
 	
 	// state should come in with the size of N_DEVCARDTYPES
-	public BelifeState(int[][] cardinfo, BoardLayout bl){
+	public BelifeState(int[] cardinfo, int[][] cardUsedInThisRound, BoardLayout bl){
 		
-		this.belifeState = cardinfo;
+
 		this.bl = bl;
 		rnd = new Random();
 		
 	}
 	
+	// use when the particle is first created
+	/*public int[][] createSamplebBelief(int[] cardStillHidden, int[][] cardUsedInThisRound){
+		
+		int[][] particle;
+		int[] belife;
+		private HashMap<int[][], Integer> new_belife_pool = new HashMap<>();
+		
+		for(int i = 0; i < POMCPConstance.TOTAL_PARTICLE; i++){
+			
+		}
+		
+		for(int ind_card = 0; ind_card < N_DEVCARDTYPES; ind_card++){
+			
+			for(int ind_player = 0; ind_player < NPLAYERS; ind_player++){
+				
+				state[OFS_PLAYERDATA[ind_player]+OFS_OLDCARDS+ind_card] = belife_particle[ind_player][ind_card];
+				
+			}
+			
+		}
+		return belife;
+	}*/
 	//Get the whole state translate properly from the belife particle
 	// By assuming we have the right particle which lead to construct the whole belife state
 	public int[] getBelifeState(BoardLayout bl){
@@ -82,12 +103,17 @@ public class BelifeState implements GameStateConstants{
 		}
 	
 		int lenght = belife_pool_new.size();
-		belifeState = belife_pool_new.get(rnd.nextInt(lenght));
+		int[][] belifeState = belife_pool_new.get(rnd.nextInt(lenght));
 		
 		return belifeState;
 	}
+	
+	// This function used to help the belief pool
+	// Check on this function
 	public Integer[] getBelifeSateInteger(){
-		for
+		Integer[] beliefState = null;
+		
+		return beliefState;
 	}
 	// Convert from Integer[][] to int[][]: needed sometime for Hashmap
 	public int[][] converIntegertoInt(Integer[][] state){
@@ -132,7 +158,7 @@ public class BelifeState implements GameStateConstants{
 			
 			int[][] particle;
 			
-			for(int i = 0; i < TOTAL_PARTICLE; i++){
+			for(int i = 0; i < POMCPConstance.TOTAL_PARTICLE; i++){
 				
 				particle = addParticle(cardUsed,num_card_notreveal);
 				
@@ -149,11 +175,11 @@ public class BelifeState implements GameStateConstants{
 		belife_pool.putAll(new_belife_pool);
 		new_belife_pool.clear();
 		
-		if((total_particle != 0) && (total_particle < TOTAL_PARTICLE)){
+		if((total_particle != 0) && (total_particle < POMCPConstance.TOTAL_PARTICLE)){
 			
 			int[][] particle;
 	
-			for(int ind_particle_add = 0 ; ind_particle_add < TOTAL_PARTICLE - total_particle; ind_particle_add++){
+			for(int ind_particle_add = 0 ; ind_particle_add < POMCPConstance.TOTAL_PARTICLE - total_particle; ind_particle_add++){
 				
 				// to increase number of particle by select the particle at random and increase its frequency 
 				List<int[][]> keys = new ArrayList<int[][]>(belife_pool.keySet());
@@ -198,9 +224,13 @@ public class BelifeState implements GameStateConstants{
 					}
 				}
 			}
-			
 		}
-		
+	}
+	
+	// update particle one the state is fully observable
+	// when there is no card in other player hand.
+	public void updateFullyObservable(){
+		// Should I just put the cards there or Should I continue update the particle with the previous version?
 	}
 	
 	//To add new particle into the pool
@@ -239,6 +269,7 @@ public class BelifeState implements GameStateConstants{
 		// construct the beliefe particle with random card selecting
 		return belife_particle;
 	}
+	
 	
 	// Used only in addParticle function for the reminding card in the desk
 	public int[] cardRemindingNotReveal(int cardNotReveal){
@@ -309,17 +340,12 @@ public class BelifeState implements GameStateConstants{
         return a;
     }
 	
-	// Use to add one more card into the current belife state of the game
-	public void addOneCard(int pl,int card){
-		
-		this.belifeState[pl][card]++;
-		
-	}
 	
 	// Compare the belife state
 	public boolean compareBelifeState(int[][] compare_state, int[][] exist_blifestate){
 		
 		if(compare_state.length >= exist_blifestate.length){
+			
 			for(int ind_first = 0; ind_first < exist_blifestate.length; ind_first++){
 				
 				for(int ind_second = 0; ind_second < exist_blifestate[0].length; ind_second++){
@@ -348,6 +374,7 @@ public class BelifeState implements GameStateConstants{
 		return true;
 	}
 	
+	/*
 	//get belife state in Integer form
 	public Integer[][] coverIntToInteger(){
 		
@@ -360,7 +387,7 @@ public class BelifeState implements GameStateConstants{
 		}
 		
 		return belife;
-	}
+	}*/
 	
 	public void addBelife(int[] state){
 		// add the particle into the pool

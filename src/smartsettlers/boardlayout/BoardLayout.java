@@ -36,9 +36,13 @@ import convNNSettler.*;
 public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
 {
 	//Help parameters for POMCP
-	public int[] eachPlayerNewCard = new int[NPLAYERS];
-	public int numberCardBoughtThisRound = 0;
-	public int[] numberCardPullOut = new int[N_DEVCARDTYPES];
+	public int[] eachPlayerCardNotReveal = new int[NPLAYERS];// done
+	public int[] newlyBoughtCardEachPlayer = new int[NPLAYERS];// done
+	public int[][] eachPlayerCardPlaiedThisRound = new int[NPLAYERS][N_DEVCARDTYPES];// done
+	public int numberCardBoughtThisRound = 0;// done
+	public int card_play_this_round = 0 ;
+	public boolean hiddenInfo = false;
+	
 	
 	// Help Parameters for Simulation of trading
 	public int NUM_IT = 1000;
@@ -805,11 +809,13 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS; pl++)
+        for (pl=0; pl<NPLAYERS - 1; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
         }
+        // POMCPPlayer player created
+        player[pl] = new POMCPPlayer(this,pl, true);
         //player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
         
         s = new int[STATESIZE];
@@ -849,6 +855,11 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int[] trad;
         int numTradOffer = 0;
         boolean offer_answer = false;
+        
+        if(player[pl].isPOMCP()){
+        	getNumberOfCardPurchase(pl);
+        }
+        
        
         //System.out.println("System start trading");
         /*
@@ -942,6 +953,11 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].performAction(s, a);
         
         stateTransition(s, a);
+        // Assumming that POMCP is agent number 4 in the list
+        
+        if(player[pl].isPOMCP()){
+        	clearHELPPOMCP();
+        }
     }
     
     public static void printArray(int[] s)
@@ -1687,17 +1703,73 @@ public void recalcLongestRoad(int[] s, int pl)
         
     }
     
-    //TODO: to return the appropriate state of the game due to player number:
+    //Get data of how many cards other players have bought
+    public int getNumberOfCardPurchase(int pl){
+    	
+    	int total = 0;
+    	
+    	for(int i = 0; i < NPLAYERS; i++){
+    		
+    		if(i == pl){
+    			continue;
+    		}
+    		total += newlyBoughtCardEachPlayer[i];
+    	
+    	}
+    	return total;
+    }
     
+    //Clear data for POMCP which use to help POMCP player
+    public void clearHELPPOMCP(){
+    	for(int ind_pl = 0; ind_pl < N_PLAYER; ind_pl++){
+    		
+    		eachPlayerCardNotReveal[ind_pl] = 0;
+    		newlyBoughtCardEachPlayer[ind_pl] = 0;
+    		for(int ind_card = 0 ; ind_card < N_DEVCARDTYPES; ind_card++){
+    			
+    			eachPlayerCardPlaiedThisRound[ind_pl][ind_card] = 0;
+    			
+    		}
+    	}
+    	numberCardBoughtThisRound = 0;
+    }
+    
+    //TODO: to return the appropriate state of the game due to player number:
     public int[] getState(int pl, int[] s2){
+    	
     	int[] s = s2.clone(); // Clone the state of the environment to protect the original state
+    	
     	for(int in_pl = 0; in_pl < NPLAYERS; in_pl++){
+    		
     		for( int in_resType = 0; in_resType < N_RESOURCES; in_resType++){
+    			
     			s[OFS_FSMLEVEL+OFS_FSMPLAYER] = -1;
+    			
     		}
     	}
     	return s;
     }
+    
+    // checking whether there is hidden information inside the game or not ir not I will just used the UCT state for simulation
+    public boolean hasHiddenInfo(){
+    	
+    	int numberCardinotherPlayerHand = 0;
+    	for(int i = 0; i < NPLAYERS ; i++){
+    		
+    		if(player[i].isPOMCP()){
+    			continue;
+    		}
+    		for(int ind_card = 0; ind_card < N_DEVCARDTYPES; ind_card++){
+    			numberCardinotherPlayerHand += state[OFS_PLAYERDATA[i] + OFS_OLDCARDS + ind_card];
+    		}
+    	}
+    	if(numberCardinotherPlayerHand > 0){
+    		return true;
+    	}
+    	return false;
+    	
+    }
+    
     /*
      * Criterial to hide all the data from other player:
      *  1- Development Card Need to hide

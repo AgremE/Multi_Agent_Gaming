@@ -1,8 +1,7 @@
 package convNNSettler;
 /*
- * Author: Agrem_E (Makara Phav)
+ * Makara Phav @ Agreme
  * */
-
 import smartsettlers.boardlayout.BoardLayout;
 import smartsettlers.boardlayout.Edge;
 import smartsettlers.boardlayout.GameStateConstants;

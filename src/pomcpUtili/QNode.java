@@ -21,15 +21,20 @@ public class QNode implements POMCPConstance{
 	Random rnd = new Random();
 	BoardLayout bl;
 	public Hashtable<int[][], VNode> Children = new Hashtable<>();// key is action as an array of integer
-	public QNode(BoardLayout bl, int[] action){
+	
+	public QNode(BoardLayout bl, int[] actiown){
 		this.action = action;
 		this.bl = bl;
 		
 	}
+	
+	
 	// randomizing the observation in the hope of getting the best guess from the pool
 	public int observation(){
 		return rnd.nextInt();
 	}
+	
+	// For converting the two dimensional array of int into Integer
 	public static Integer[][] convIntToInteger(int[][] obser){
 		Integer[][] new_obser = new Integer[GameStateConstants.NPLAYERS][GameStateConstants.N_DEVCARDTYPES];
 		for(int i=0; i < obser.length; i++){
@@ -39,6 +44,8 @@ public class QNode implements POMCPConstance{
 		}
 		return new_obser;
 	}
+	
+	// Simulate Q value function
 	public double simulate_q(QNode q_node, int[] state, int depth){
 		
 		
@@ -65,9 +72,10 @@ public class QNode implements POMCPConstance{
 		int[][] observation = makeObservation(state, q_node.action);
 		node = q_node.Children.get(observation);
 		
-		if(q_node.Children.get(observation) != null){
+		if(q_node.Children.get(observation) == null){
 			node = expand_vnode(observation, depth);
 		}
+		
 		if(node != null){
 			depth++;
 			Children.put(observation, node);
@@ -83,20 +91,27 @@ public class QNode implements POMCPConstance{
 		total_reward = immReward + delayReward*DISCOUNT_FACTOR;
 		return total_reward;
 	}
-	// Make a randomized card selection for the observation overhead
+	
+	
+	// Make a randomized card selection for the observation overhead0
+	// Let change the observation method to define in term of number of card in each other player hand and guess it
 	public int[][] makeObservation(int[] state, int[] action){
+		
 		int[][] current_guess = new int[GameStateConstants.NPLAYERS][GameStateConstants.N_DEVCARDTYPES];
-		if(bl.numberCardBoughtThisRound == 0){
-			
-		}
+
+		
 		for(int ind_player = 0; ind_player < GameStateConstants.NPLAYERS; ind_player++ ){
-			int lenght = bl.eachPlayerNewCard[ind_player];
+			
+			int lenght = bl.eachPlayerCardinHand[ind_player];
 			for(int ind_card = 0; ind_card < lenght; ind_card++){
 				current_guess[ind_card][cardSequence[rnd.nextInt(cardSequence.length)]]++;
 			}
+			
 		}
 		return current_guess;
 	}
+	
+	
 	// Random rollout policy which needed to run before running the UCT algorithm
 	public double rollout(int[] state, int depth){
 		
@@ -133,6 +148,8 @@ public class QNode implements POMCPConstance{
 		}
 		return total_reward;
 	}
+	
+	
 	// Expending the node from provided observation (in case it is not in the hashtable)
 	public VNode expand_vnode(int[][] observation, int depth){
 		
@@ -143,16 +160,22 @@ public class QNode implements POMCPConstance{
 		node.setValue(0.0, 0);
 		return node;
 	}
+	
+	
 	// Get action with this specific node
 	public int[] getAction(){
 		
 		return this.action;
 	}
+	
+	
 	// Set value into this specific node
 	public void setValue(double reward, int count){
 		this.VISIT = count;
 		this.REWARD = reward;
 	}
+	
+	
 	// Give some potential rewarding system
 	public double rewardingModel(int action){
 		switch(action){

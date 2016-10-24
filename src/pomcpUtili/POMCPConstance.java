@@ -18,6 +18,8 @@ public interface POMCPConstance{
 	public final int MAX_DEPTH_ROLLOUT  = MAX_DEPTH + 1000;
 	public final double DISCOUNT_FACTOR = 0.3;
 	
+	final int TOTAL_PARTICLE = 100;
+	
 	
 	// for card gussing
     int CARD_KNIGHT             = 0;

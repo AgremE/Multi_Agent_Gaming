@@ -1,5 +1,7 @@
 package tradingPOMDPs;
-
+/*
+ * Makara Phav @ Agreme
+ * */
 public interface TradingConstance {
 	
 	final int OFFER_ACCEPT = 1;
