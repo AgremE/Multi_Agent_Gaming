@@ -66,7 +66,7 @@ public class BelieveStatePool implements POMCPConstance{
 	// for Checking particle deprivation problem
 	public boolean checkParticleDeprivation(BelifeState curr_knowleadge,int pl){
 		for(int ind_pool = 0; ind_pool < BelifePoolSize; ind_pool++){
-			if(acceptedBelifeState(curr_knowleadge.getBelifeState(bl), belifePool.get(pl)[ind_pool].getBelifeState(bl))){
+			if(acceptedBelifeState(curr_knowleadge.getBelifeState(), belifePool.get(pl)[ind_pool].getBelifeState())){
 				return false;
 			}
 		}
@@ -110,8 +110,8 @@ public class BelieveStatePool implements POMCPConstance{
 			do{
 				int ind_pool = rnd.nextInt(BelifePoolSize)+1;
 				number_round++;
-				if(acceptedBelifeState(curr_revealState.getBelifeState(bl),
-						this.belifePool.get(pl)[ind_pool].getBelifeState(bl))){
+				if(acceptedBelifeState(curr_revealState.getBelifeState(),
+						this.belifePool.get(pl)[ind_pool].getBelifeState())){
 					newBelifeState[number_cadidate] = belifePool.get(pl)[ind_pool];
 					number_cadidate++;
 				}
@@ -229,7 +229,7 @@ public class BelieveStatePool implements POMCPConstance{
 	public boolean compareState(BelifeState revealState, BelifeState belifeState){
 		for(int ind_dev = 0; ind_dev < GameStateConstants.N_DEVCARDTYPES; ind_dev++){
 			
-			if(revealState.getBelifeState(bl)[ind_dev] > belifeState.getBelifeState(bl)[ind_dev]){
+			if(revealState.getBelifeState()[ind_dev] > belifeState.getBelifeState()[ind_dev]){
 				
 				return false;
 			

@@ -2,6 +2,7 @@ package pomcpUtili;
 
 import java.awt.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Random;
 
@@ -20,11 +21,15 @@ public class QNode implements POMCPConstance{
 	int[] action;
 	Random rnd = new Random();
 	BoardLayout bl;
-	public Hashtable<int[][], VNode> Children = new Hashtable<>();// key is action as an array of integer
-	
-	public QNode(BoardLayout bl, int[] actiown){
+	public Hashtable<Integer, VNode> Children;// key is observation as an array of integer
+	/*
+	 * Observation is in the form of the state with some guessing of the card at random in which its card's desk is updated accordingly 
+	 * due to the number of reminding cards
+	 * */
+	public QNode(BoardLayout bl, int[] action){
 		this.action = action;
 		this.bl = bl;
+		Children = new Hashtable<>();
 		
 	}
 	
@@ -51,15 +56,11 @@ public class QNode implements POMCPConstance{
 		
 		double immReward, delayReward;
 		immReward = rewardingModel(q_node.action[0]);
-		int fsmlevel    = state[GameStateConstants.OFS_FSMLEVEL]; // To access the level of game state
-        int fsmstate    = state[GameStateConstants.OFS_FSMSTATE+fsmlevel];// To access the state step
-        int pl          = state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];// To access the player number
         
         //Selected action in greedy manner to see whether it good to selection capability
         q_node.VISIT++;
-		int[] state_clone = bl.cloneOfState(state);
 		
-		int winner = bl.getWinner(state_clone);
+		int winner = bl.getWinner(state);
 
 		if(winner != -1 ){
 			return 0;
@@ -69,21 +70,23 @@ public class QNode implements POMCPConstance{
 		
 		// Making an observation for this round base on current belife state
 		
-		int[][] observation = makeObservation(state, q_node.action);
-		node = q_node.Children.get(observation);
+		int[] observation_array = makeObservation(q_node.action);
+		int hash_code_observation = getHashCodeFromArray(observation_array);
 		
-		if(q_node.Children.get(observation) == null){
-			node = expand_vnode(observation, depth);
+		node = q_node.Children.get(hash_code_observation);
+		
+		if(q_node.Children.get(hash_code_observation) == null){
+			node = expand_vnode(observation_array, depth);
 		}
 		
 		if(node != null){
 			depth++;
-			Children.put(observation, node);
-			delayReward = node.simulation_v(state_clone, node, depth);
+			Children.put(hash_code_observation, node);
+			delayReward = node.simulation_v(state, node, depth);
 		}
 		else{
 			depth++;
-			delayReward = rollout(state_clone, depth);
+			delayReward = rollout(state, depth);
 			//doing the random rollout from here
 		}
 		depth--;
@@ -95,51 +98,71 @@ public class QNode implements POMCPConstance{
 	
 	// Make a randomized card selection for the observation overhead0
 	// Let change the observation method to define in term of number of card in each other player hand and guess it
-	public int[][] makeObservation(int[] state, int[] action){
+	public int[] makeObservation(int[] action){
 		
-		int[][] current_guess = new int[GameStateConstants.NPLAYERS][GameStateConstants.N_DEVCARDTYPES];
-
-		
+		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
+        int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+ fsmlevel];
+        int[] gussingObservation = bl.hideState(pl, bl.cloneOfState(bl.state));
+        
 		for(int ind_player = 0; ind_player < GameStateConstants.NPLAYERS; ind_player++ ){
-			
-			int lenght = bl.eachPlayerCardinHand[ind_player];
+			// TODO: Check this function to update accordingly
+			int lenght = bl.eachPlayerCardNotReveal[ind_player];
 			for(int ind_card = 0; ind_card < lenght; ind_card++){
-				current_guess[ind_card][cardSequence[rnd.nextInt(cardSequence.length)]]++;
+				
+				gussingObservation[GameStateConstants.OFS_PLAYERDATA[pl]+
+				                   GameStateConstants.OFS_OLDCARDS
+				                   +cardSequence[rnd.nextInt(cardSequence.length)]]++;
+				
 			}
-			
 		}
-		return current_guess;
+		gussingObservation = bl.stateActionObservation(gussingObservation, action);
+		return gussingObservation;
 	}
 	
+	// get hash code for each of the observation state
+	
+	public int getHashCodeFromArray(int[] state){
+		{
+	        int [] s2 = state.clone();
+	        
+	        state[GameStateConstants.OFS_TURN] = 0;
+	        state[GameStateConstants.OFS_FSMLEVEL] = 0;
+	        state[GameStateConstants.OFS_DIE1] = 0;
+	        state[GameStateConstants.OFS_DIE2] = 0;
+
+	        return(Arrays.hashCode(s2));
+	        
+	    }
+	}
 	
 	// Random rollout policy which needed to run before running the UCT algorithm
 	public double rollout(int[] state, int depth){
 		
-		int[] state_clone = bl.cloneOfState(state);
+		
 		double total_reward = 0.0;
 		double discount = 1.0;
 		int numSteps;
 		
+		// TODO: check the condition of MAX_DEPTH
 		for ( numSteps = 0; numSteps +  depth < MAX_DEPTH; numSteps++){
 			
-			int observation;
 	        double reward;
 	        
 	        int fsmlevel    = state[GameStateConstants.OFS_FSMLEVEL]; // To access the level of game state
-	        int fsmstate    = state[GameStateConstants.OFS_FSMSTATE+fsmlevel];// To access the state step
 	        int pl          = state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];// To access the player number
 	        
-	        bl.player[pl].listPossibilities(state_clone);
+	        state = bl.hideState(pl, state);
+	        bl.player[pl].listPossibilities(state);
 	        int[] action = bl.possibilities.action[rnd.nextInt(bl.possibilities.n)];
-	        bl.player[pl].performAction_simulation(state_clone, action);
+	        bl.player[pl].performAction_simulation(state, action);
 	        reward = rewardingModel(action[0]);
 	        
             // Changing state
             // It also changing tht player number at the same time as we use the state transition
             // We need to define the optimal simulation round so it able to do it job properly
 	        
-            bl.stateTransition(state_clone, action);
-            int winner = bl.getWinner(state_clone);
+            bl.stateTransition(state, action);
+            int winner = bl.getWinner(state);
             
             total_reward += reward*discount;
             if(winner != -1){
@@ -150,13 +173,10 @@ public class QNode implements POMCPConstance{
 	}
 	
 	
-	// Expending the node from provided observation (in case it is not in the hashtable)
-	public VNode expand_vnode(int[][] observation, int depth){
+	// Expending the node from provided observation (in case it is not in the hash table)
+	public VNode expand_vnode(int[] observation, int depth){
 		
-		if(depth < MAX_DEPTH_ROLLOUT){
-			return null;
-		}
-		VNode node = new VNode(this.bl, observation);
+		VNode node = new VNode(this.bl,BelifeState.getStateBeforeHashCompare(observation));
 		node.setValue(0.0, 0);
 		return node;
 	}

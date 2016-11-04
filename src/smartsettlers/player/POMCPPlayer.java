@@ -20,7 +20,7 @@ public class POMCPPlayer extends smartsettlers.player.Player{
 	public POMCPPlayer(BoardLayout bl, int position, boolean trues){
 		
 		super(bl,position,true);
-		pomcp_settler  = new UCT_POCMP(bl);
+		pomcp_settler  = new UCT_POCMP(bl,position);
 	}
 
 	@Override
@@ -44,58 +44,33 @@ public class POMCPPlayer extends smartsettlers.player.Player{
       // Add back later
       
       // No trading involve yet
+      // running normal UCT for trading
+	  /*
+	   * Just assuming for now that the beliefState from POMCP is the current actual state
+	   * and start offer the trading options
+	   * Noted: Should change the condition of deciding whether to trade with the providing option all not is need to consider
+	   * with Virtual win as well
+	   * */
+  
       if(bl.hasHiddenInfo()){
-    	  // using POMCP
-    	  
-    	  // Simulate is already in the function action_selection
-    	  int[] state = pomcp_settler.getBliefState();
-    	  // running normal UCT for trading
-    	  /*
-    	   * Just assuming for now that the beliefState from POMCP is the current actual state
-    	   * and start offer the trading options
-    	   * Noted: Should change the condition of deciding whether to trade with the providing option all not is need to consider
-    	   * with Virtual win as well
-    	   * 
-    	   * */
-    	  
+    
     	  // update particle for the simulation belief state
     	  pomcp_settler.mtcs_update_particle();
+    	  // Simulate is already in the function action_selection
+    	  int[] state = pomcp_settler.getBliefState();
+    	 
     	  // action selection
     	  a =  pomcp_settler.action_selection();
-    	  // update the root node after action is already selected by using UCB selection scheme
-    	  int[][] observation = pomcp_settler.getRootObservation();
-    	  boolean thereStillParticle = pomcp_settler.mtcs_update(a, observation);
-    	  
-    	  if(!thereStillParticle){
-    		  // Just make a random seletion of the action
-    	  }
-    	  
+
     	  state = null;
       }
       else{
     	  
     	  // Clear up the particle and update according the full state information
     	  pomcp_settler.getRoot().getBelife().updateFullyObservable();
+    	  int[] state = pomcp_settler.getBliefState();
     	  // using normal UCT search with UCT tree
-    	  if (bl.uctTree != null)
-          {
-              bl.player[pl].listPossibilities(s2);
-              bl.UCTsimulateGame(s2);
-              int aind = bl.uctTree.selectAction(s, pl, true);// action index of the maximun return
-              bl.player[pl].listPossibilities(s);
-              for (i=0; i<a.length; i++)
-                  a[i] = bl.possibilities.action[aind][i];
-          
-          }
-          else
-          {
-        	  // let them do the random search then use UCB to select the action from there
-              bl.player[pl].listPossibilities(s);
-              int[] a2 = bl.possibilities.randomAction();
-              for (i=0; i<a2.length; i++)
-                  a[i] = a2[i];
-          }
-    	  
+    	  a = pomcp_settler.action_selection();
           s2=null;
       }
 	}

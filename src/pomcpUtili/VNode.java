@@ -1,6 +1,7 @@
 package pomcpUtili;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Random;
 
@@ -22,7 +23,7 @@ public class VNode implements POMCPConstance{
 	int VISIT = 0;
 	double REWARD  = 0;
 	int NUM_ACTION;
-	int[][] observed;
+	int[] observed;
 	boolean ACTION_LIST_EMPTY = false;
 	final double EXPLORATION_CONSTANCE = 1.5;
 	BelifeState belief_state;// need to approximate by unweighted particle filter
@@ -37,15 +38,21 @@ public class VNode implements POMCPConstance{
 	}
 	SEARCH_STAGE stage;
 	
-	public Hashtable<int[], QNode> Children = new Hashtable<>();// Key is action which pick in random manner
+	public Hashtable<Integer, QNode> Children = new Hashtable<>();// Key is action which pick in random manner
 	
 	// Initialize for the root node
-	public VNode(BoardLayout bl	){
+	public VNode(BoardLayout bl){
 		
+		
+		this.belief_state = new BelifeState(bl.eachPlayerCardNotReveal,bl.eachPlayerCardPlaiedThisRound,bl);
+		
+		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
+	    int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
+	    
+		bl.player[pl].listPossibilities(bl.state);
 		this.bl = bl;
 		NUM_ACTION = bl.possibilities.n;
 		possibilities_list = bl.possibilities;
-		this.belief_state = new BelifeState(bl.eachPlayerCardNotReveal,bl.eachPlayerCardPlaiedThisRound,bl);
 		
 		// put all the result of the possible action inside the list of children
 		for(int i = 0; i < this.NUM_ACTION; i++){
@@ -53,20 +60,29 @@ public class VNode implements POMCPConstance{
 			int[] action = bl.possibilities.action[i];
 			QNode node = new QNode(bl, bl.possibilities.action[i]);
 			node.setValue(0, 0);
-			Children.put(action, node);
+			int action_hash_code = getHashCodeFromArray(action);
+			Children.put(action_hash_code, node);
 			
 		}
 		stage = SEARCH_STAGE.RANDOME_ROLLOUT;
 	}
 	
+	
 	// Initialized for other nodes
-	public VNode(BoardLayout bl, int[][] observation){
+	public VNode(BoardLayout bl, int[] observation){
+		
+		
+		
+		this.observed = BelifeState.getStateBeforeHashCompare(observation);
+		this.belief_state = new BelifeState(bl.eachPlayerCardNotReveal,bl.eachPlayerCardPlaiedThisRound,bl);
+		
+		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
+	    int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
+		bl.player[pl].listPossibilities(bl.state);
 		
 		this.bl = bl;
 		NUM_ACTION = bl.possibilities.n;
 		possibilities_list = bl.possibilities;
-		this.observed = observation;
-		this.belief_state = new BelifeState(bl.eachPlayerCardNotReveal,bl.eachPlayerCardPlaiedThisRound,bl);
 		
 		// put all the result of the possible action inside the list of children
 		for(int i = 0; i < this.NUM_ACTION; i++){
@@ -74,7 +90,8 @@ public class VNode implements POMCPConstance{
 			int[] action = bl.possibilities.action[i];
 			QNode node = new QNode(bl, bl.possibilities.action[i]);
 			node.setValue(0, 0);
-			Children.put(action, node);
+			int action_hash_code = getHashCodeFromArray(action);
+			Children.put(action_hash_code, node);
 		}
 		stage = SEARCH_STAGE.RANDOME_ROLLOUT;
 	}
@@ -88,11 +105,17 @@ public class VNode implements POMCPConstance{
 		return action_cov;
 	}
 	
-	// Simulated this VNode 
+	// get hash code for each of the observation action
+	public int getHashCodeFromArray(int[] action){
+		{
+			 return(Arrays.hashCode(action));
+		}
+	}
+	
+	// Simulated this VNode
 	public double simulation_v(int[] state,VNode v_node, int treeDepth){
 		
 		int fsmlevel    = state[GameStateConstants.OFS_FSMLEVEL]; // To access the level of game state
-        int fsmstate    = state[GameStateConstants.OFS_FSMSTATE+fsmlevel];// To access the state step
         int pl          = state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];// To access the player number
         
         //Selected action in greedy manner to see whether it good to selection capability
@@ -102,6 +125,7 @@ public class VNode implements POMCPConstance{
 		int[] state_clone = bl.cloneOfState(state);
 		
 		int winner = bl.getWinner(state_clone);
+		
 		if(treeDepth > MAX_DEPTH){
 			return 0;
 		}
@@ -113,12 +137,12 @@ public class VNode implements POMCPConstance{
 			STATUS = NORMAL_STATE;
 		}
 		
-		QNode q_node = Children.get(action);
+		QNode q_node = Children.get(getHashCodeFromArray(action));
 		
 		double total_reward = q_node.simulate_q(q_node, state_clone, treeDepth);
 		v_node.REWARD = total_reward;
-		return total_reward;
 		
+		return total_reward;
 	}
 
 	//For helping in UCT Searching
@@ -134,7 +158,7 @@ public class VNode implements POMCPConstance{
 			
 			double q_value;
 			int q_visit;
-			QNode q_node = v_node.Children.get(possibilities_list.action[ind_action]);
+			QNode q_node = v_node.Children.get(getHashCodeFromArray(possibilities_list.action[ind_action]));
 			q_visit = q_node.VISIT;
 			q_value = q_node.REWARD;
 			q_value += this.UCB_FAST(v_visit, q_visit, logN);
@@ -155,7 +179,8 @@ public class VNode implements POMCPConstance{
 		if(action_pool.isEmpty()){
 			
 			v_node.ACTION_LIST_EMPTY = true;
-			return new int[5];
+			System.out.println("We are doom because there is no way we get empty action");
+			return possibilities_list.action[rnd.nextInt(possibilities_list.n)];
 			
 		}
 		else{
@@ -187,7 +212,7 @@ public class VNode implements POMCPConstance{
 	// get belife state withing this VNode
 	public int[] getBelifeState(){
 		
-		return belief_state.getBelifeState(bl);
+		return belief_state.getBelifeState();
 		
 	}
 	

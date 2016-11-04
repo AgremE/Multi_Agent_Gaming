@@ -7,6 +7,7 @@ package smartsettlers.player;
 
 import java.util.Random;
 import smartsettlers.boardlayout.BoardLayout;
+import smartsettlers.boardlayout.GameStateConstants;
 
 /**
  *
@@ -24,6 +25,7 @@ public class UctPlayer extends Player {
 //        this.bl = bl;
 //        this.position = position;
 //        rnd = new Random(2);
+       
     }
     
     public void selectAction(int[] s, int [] a)

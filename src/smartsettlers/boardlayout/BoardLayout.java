@@ -815,7 +815,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 //            player[pl] = new RandomPlayer(this, pl);
         }
         // POMCPPlayer player created
-        player[pl] = new POMCPPlayer(this,pl, true);
+        player[NPLAYERS - 1] = new POMCPPlayer(this,NPLAYERS - 1, true);
         //player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
         
         s = new int[STATESIZE];
@@ -1121,9 +1121,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         if (isLoggingOn)
             gamelog.addState(s);
-        return fsmstate;
-        
-        
+        return fsmstate; 
     }
     /*
      * Change the information of the state according to trading offer
@@ -1785,19 +1783,146 @@ public void recalcLongestRoad(int[] s, int pl)
     		
     		if(i != pl){
     			//Hide victory point card
-    			s[OFS_PLAYERDATA[i] + OFS_TOTALNDEVCARD] += s[OFS_PLAYERDATA[i] + OFS_OLDCARDS + CARD_ONEPOINT];
-    			s[OFS_PLAYERDATA[i] + OFS_OLDCARDS + CARD_ONEPOINT] = 0;
+    			
     			// Hide other development card
     			for(int DEV_IND = 0; DEV_IND < N_DEVCARDTYPES; DEV_IND ++){
     				s[OFS_PLAYERDATA[i] + OFS_TOTALNDEVCARD] += s[OFS_PLAYERDATA[i] + OFS_NEWCARDS + DEV_IND];
     				s[OFS_PLAYERDATA[i] + OFS_NEWCARDS + DEV_IND] = 0;
+    				s[OFS_PLAYERDATA[i] + OFS_TOTALNDEVCARD] += s[OFS_PLAYERDATA[i] + OFS_OLDCARDS + DEV_IND];
+        			s[OFS_PLAYERDATA[i] + OFS_OLDCARDS + DEV_IND] = 0;
     			}
     		}
     		
     	}
     	return s;
     	
-    }/*
+    }
+    public int[] stateActionObservation(int[] s, int[] a)
+    {
+        int fsmlevel    = s[OFS_FSMLEVEL]; // To access the level of game state
+        int fsmstate    = s[OFS_FSMSTATE+fsmlevel];// To access the state step
+        int pl          = s[OFS_FSMPLAYER+fsmlevel];// To access the player number
+        int motherstate;
+        if (fsmlevel>0) 
+            motherstate = s[OFS_FSMSTATE+fsmlevel-1]; 
+        else
+            motherstate = -1;
+        //System.out.println(fsmlevel);
+        switch (fsmstate)
+        {
+            case S_GAME:
+                fsmlevel++;  
+                s[OFS_FSMLEVEL] = fsmlevel;
+                s[OFS_FSMSTATE+fsmlevel] = S_SETTLEMENT1;
+                break;
+            case S_SETTLEMENT1:
+                s[OFS_FSMSTATE+fsmlevel] = S_ROAD1;
+                break;
+            case S_ROAD1:
+                if (pl==NPLAYERS-1)
+                {
+                    pl = NPLAYERS-1;
+                    s[OFS_FSMSTATE+fsmlevel] = S_SETTLEMENT2;
+                }
+                else
+                {
+                    pl++;
+                    s[OFS_FSMPLAYER+fsmlevel] = pl;
+                    s[OFS_FSMSTATE+fsmlevel] = S_SETTLEMENT1;
+                }
+                break;
+            case S_SETTLEMENT2:
+                s[OFS_FSMSTATE+fsmlevel] = S_ROAD2;
+                break;
+            case S_ROAD2:
+                if (pl==0)
+                {
+                    pl = 0;
+                    s[OFS_FSMSTATE+fsmlevel] = S_BEFOREDICE;
+                }
+                else
+                {
+                    pl--;
+                    s[OFS_FSMPLAYER+fsmlevel] = pl;
+                    s[OFS_FSMSTATE+fsmlevel] = S_SETTLEMENT2;
+                }
+                break;
+            case S_BEFOREDICE:
+                if ((a[0]==A_THROWDICE) && (s[OFS_DIE1]+s[OFS_DIE2] != 7) )
+                {
+                    s[OFS_FSMSTATE+fsmlevel] = S_NORMAL;
+                }
+                else if ((a[0]==A_THROWDICE) && (s[OFS_DIE1]+s[OFS_DIE2] == 7) )
+                {
+                    //TODO: place robber, pay tax
+                    // s[OFS_FSMSTATE+fsmlevel] = S_NORMAL;
+                	
+                    fsmlevel++;  
+                    s[OFS_FSMLEVEL] = fsmlevel;
+                    s[OFS_FSMSTATE + fsmlevel] = S_PAYTAX;
+                    s[OFS_FSMPLAYER + fsmlevel] = 0;                    
+                }
+                break;
+                // There is an error in pay tax state of the game
+                // I think it should be fine
+                /*
+                 * It works as follow:
+                 * 	Put the child state into S_PAYTAX
+                 * 	Each player pay tax
+                 * 	Init current player
+                 *  Put child state into S_ROBBERAT7
+                 *  Decrease State Step to Motherstep
+                 *  Put Motherstep or current state step into S_NORMAL
+                 * */
+            case S_PAYTAX:
+                pl++;
+                if (pl<NPLAYERS)
+                {
+                    s[OFS_FSMPLAYER + fsmlevel] = pl;// Each of the four player start to pay tax
+                    s[OFS_FSMSTATE + fsmlevel] = S_PAYTAX;                    
+                }
+                else
+                {
+                    s[OFS_FSMPLAYER + fsmlevel] = s[OFS_FSMPLAYER + fsmlevel-1];// Current player
+                    s[OFS_FSMSTATE + fsmlevel] = S_ROBBERAT7;// Type of current state
+                }
+                break;
+            case S_ROBBERAT7:
+                fsmlevel--;  
+                s[OFS_FSMLEVEL] = fsmlevel;
+                s[OFS_FSMSTATE + fsmlevel] = S_NORMAL;
+                break;
+            case S_NORMAL:
+                switch (a[0])
+                {
+                    case A_ENDTURN:
+                        pl++;
+                        if (pl>=NPLAYERS) pl=0; 
+                        s[OFS_FSMPLAYER+fsmlevel] = pl;
+                        s[OFS_FSMSTATE+fsmlevel] = S_BEFOREDICE;                        
+                        break;
+                    case A_PLAYCARD_FREEROAD:
+                        s[OFS_FSMSTATE+fsmlevel] = S_FREEROAD1;                        
+                        break;
+                }
+                break;
+            case S_FREEROAD1:
+                    s[OFS_FSMSTATE+fsmlevel] = S_FREEROAD2;                 
+                break;
+            case S_FREEROAD2:
+                    s[OFS_FSMSTATE+fsmlevel] = S_NORMAL;                 
+                break;
+                    
+        }
+        recalcScores(s);
+        if (getWinner(s) != -1)
+        {
+            s[OFS_FSMSTATE+fsmlevel] = S_FINISHED;
+        }
+        
+        return s; 
+    }
+    /*
     public boolean writeDataIntoExecl(int[] data){
     	
         HSSFWorkbook workbook = new HSSFWorkbook();

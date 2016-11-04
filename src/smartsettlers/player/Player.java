@@ -295,7 +295,7 @@ public abstract class Player implements GameStateConstants
         }*/
         
     }
-    //TODO: Hide the development card of other players in the status of the game environment
+    // When we stimulate the possible action we only consider the card that we have and ignore the other player possibility
     public void listDevCardPossibilities(int []s)
     {
         int fsmlevel    = s[OFS_FSMLEVEL];
@@ -427,6 +427,7 @@ public abstract class Player implements GameStateConstants
         }
         
     }
+    
     
     public void listPossibilities(int[] s)
     {
