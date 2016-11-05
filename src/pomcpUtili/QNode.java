@@ -54,8 +54,11 @@ public class QNode implements POMCPConstance{
 	public double simulate_q(QNode q_node, int[] state, int depth){
 		
 		
-		double immReward, delayReward;
+		double immReward = 0, delayReward = 0;
 		immReward = rewardingModel(q_node.action[0]);
+		
+		int fsmlevel    = state[GameStateConstants.OFS_FSMLEVEL];
+        int pl          = state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
         
         //Selected action in greedy manner to see whether it good to selection capability
         q_node.VISIT++;
@@ -82,6 +85,14 @@ public class QNode implements POMCPConstance{
 		if(node != null){
 			depth++;
 			Children.put(hash_code_observation, node);
+			bl.player[pl].performAction_simulation(state, q_node.action);
+            bl.stateTransition(state, q_node.action);
+            winner = bl.getWinner(state);
+            immReward = rewardingModel(action[0]);
+            if(winner != -1){
+            	total_reward = immReward + delayReward*DISCOUNT_FACTOR;
+            	return total_reward;
+            }
 			delayReward = node.simulation_v(state, node, depth);
 		}
 		else{
@@ -102,7 +113,7 @@ public class QNode implements POMCPConstance{
 		
 		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
         int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+ fsmlevel];
-        int[] gussingObservation = bl.hideState(pl, bl.cloneOfState(bl.state));
+        int[] gussingObservation = bl.hideState(pl,bl.state);
         
 		for(int ind_player = 0; ind_player < GameStateConstants.NPLAYERS; ind_player++ ){
 			// TODO: Check this function to update accordingly
@@ -123,14 +134,24 @@ public class QNode implements POMCPConstance{
 	
 	public int getHashCodeFromArray(int[] state){
 		{
-	        int [] s2 = state.clone();
+			int turn = state[GameStateConstants.OFS_TURN];
+	        int sfmlevel = state[GameStateConstants.OFS_FSMLEVEL];
+	        int die1 = state[GameStateConstants.OFS_DIE1];
+	        int die2 = state[GameStateConstants.OFS_DIE2];
 	        
 	        state[GameStateConstants.OFS_TURN] = 0;
 	        state[GameStateConstants.OFS_FSMLEVEL] = 0;
 	        state[GameStateConstants.OFS_DIE1] = 0;
 	        state[GameStateConstants.OFS_DIE2] = 0;
+	        
+	        int hasing_code = Arrays.hashCode(state);
+	        
+	        state[GameStateConstants.OFS_TURN] = turn;
+	        state[GameStateConstants.OFS_FSMLEVEL] = sfmlevel;
+	        state[GameStateConstants.OFS_DIE1] = die1;
+	        state[GameStateConstants.OFS_DIE2] = die2;
 
-	        return(Arrays.hashCode(s2));
+	        return hasing_code;
 	        
 	    }
 	}
@@ -151,7 +172,6 @@ public class QNode implements POMCPConstance{
 	        int fsmlevel    = state[GameStateConstants.OFS_FSMLEVEL]; // To access the level of game state
 	        int pl          = state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];// To access the player number
 	        
-	        state = bl.hideState(pl, state);
 	        bl.player[pl].listPossibilities(state);
 	        int[] action = bl.possibilities.action[rnd.nextInt(bl.possibilities.n)];
 	        bl.player[pl].performAction_simulation(state, action);
@@ -200,9 +220,9 @@ public class QNode implements POMCPConstance{
 	public double rewardingModel(int action){
 		switch(action){
 			case GameStateConstants.A_BUILDCITY:
-				return 5;
+				return 10;
 			case GameStateConstants.A_BUILDROAD:
-				return 2;
+				return 1;
 			case GameStateConstants.A_BUILDSETTLEMENT:
 				return 5;
 			case GameStateConstants.A_BUYCARD:
@@ -223,6 +243,8 @@ public class QNode implements POMCPConstance{
 				return 2;
 			case GameStateConstants.A_THROWDICE:
 				return 0;
+			case GameStateConstants.A_PORTTRADE:
+				return 2;
 			default:
 				return 0;
 		}

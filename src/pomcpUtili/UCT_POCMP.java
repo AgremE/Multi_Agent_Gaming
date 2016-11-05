@@ -22,7 +22,7 @@ import uct.UCT;
 public class UCT_POCMP implements GameStateConstants{
 	
 	History history;
-	int NUM_SIMULATION = 3000;
+	int NUM_SIMULATION = 1000;
 	int treeDepth = 0;
 	int PeakTreeDepth = 0;
 	int[] state;
@@ -105,14 +105,25 @@ public class UCT_POCMP implements GameStateConstants{
 	// get hash code for each of the observation state
 	public int getHashCodeFromObservationArray(int[] state){
 		{
-		    int [] s2 = state.clone();
 		        
-		    state[GameStateConstants.OFS_TURN] = 0;
-		    state[GameStateConstants.OFS_FSMLEVEL] = 0;
-		    state[GameStateConstants.OFS_DIE1] = 0;
-		    state[GameStateConstants.OFS_DIE2] = 0;
+		    int turn = state[GameStateConstants.OFS_TURN];
+	        int sfmlevel = state[GameStateConstants.OFS_FSMLEVEL];
+	        int die1 = state[GameStateConstants.OFS_DIE1];
+	        int die2 = state[GameStateConstants.OFS_DIE2];
+	        
+	        state[GameStateConstants.OFS_TURN] = 0;
+	        state[GameStateConstants.OFS_FSMLEVEL] = 0;
+	        state[GameStateConstants.OFS_DIE1] = 0;
+	        state[GameStateConstants.OFS_DIE2] = 0;
+	        
+	        int hasing_code = Arrays.hashCode(state);
+	        
+	        state[GameStateConstants.OFS_TURN] = turn;
+	        state[GameStateConstants.OFS_FSMLEVEL] = sfmlevel;
+	        state[GameStateConstants.OFS_DIE1] = die1;
+	        state[GameStateConstants.OFS_DIE2] = die2;
 
-		    return(Arrays.hashCode(s2));
+	        return hasing_code;
 		        
 		}
 	}
@@ -142,7 +153,7 @@ public class UCT_POCMP implements GameStateConstants{
 		}
 		
 		this.mtcs_uctsearch();
-		return root.UCBGreedy(root);
+		return root.UCBGreedy(root,false);
 	
 	}
 	
@@ -252,7 +263,7 @@ public class UCT_POCMP implements GameStateConstants{
 			// Change the state according to the belife approximation
 			treeDepth = 0;
 			PeakTreeDepth = 0;
-			double totalReward = root.simulation_v(root.belief_state.getBelifeState(), root, treeDepth);
+			double totalReward = root.simulation_v(root.belief_state.getBelifeState().clone(), root, treeDepth);
 			StateTotalReward.add(totalReward);
 			StateTreeDepth.add(totalReward);
 			history.resize(historyDepth);

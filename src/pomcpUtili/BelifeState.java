@@ -23,12 +23,20 @@ public class BelifeState implements GameStateConstants{
 	BoardLayout bl;
 	
 	// belife state initialized
-	
 	public BelifeState(BoardLayout bl){
 		this.bl = bl;
 		rnd = new Random();
 	}
 	
+	//get total number of particles
+	public int getBliefPoolSize(){
+		int total = 0;
+		for(int key : belife_pool.keySet()){
+			
+			total += key;
+		}
+		return total;
+	}
 	
 	// state should come in with the size of N_DEVCARDTYPESs
 	public BelifeState(int[] cardNotReveal, int[][] cardPlaiedThisRound, BoardLayout bl){
@@ -37,22 +45,30 @@ public class BelifeState implements GameStateConstants{
 		// Fix all the hashtable for all the hash table which involve key as an array
 		this.bl = bl;
 		rnd = new Random();
-		for(int i = 0; i < POMCPConstance.TOTAL_PARTICLE; i++){
-			int[] particle = samplingParticle(cardPlaiedThisRound);
-			int hc_particle = getHashCodeFromStateArray(particle);
-			if(belife_pool.containsKey(hc_particle)){
-				
-				BelifeParticle particle_input = belife_pool.get(hc_particle);
-				int tmp_value = particle_input.getValue();
-				tmp_value++;
-				particle_input.setValue(tmp_value);
-				belife_pool.put(hc_particle, particle_input);
-				
-			}else{
-				//System.out.println("Sampling new particle\n");
-				BelifeParticle particle_input = new BelifeParticle(particle, 1);
-				belife_pool.put(hc_particle, particle_input);
+		if(bl.hasHiddenInfo()){
+			for(int i = 0; i < POMCPConstance.TOTAL_PARTICLE; i++){
+				int[] particle = samplingParticle(cardPlaiedThisRound);
+				int hc_particle = getHashCodeFromStateArray(particle);
+				if(belife_pool.containsKey(hc_particle)){
+					
+					BelifeParticle particle_input = belife_pool.get(hc_particle);
+					int tmp_value = particle_input.getValue();
+					tmp_value++;
+					particle_input.setValue(tmp_value);
+					belife_pool.put(hc_particle, particle_input);
+					
+				}else{
+					//System.out.println("Sampling new particle\n");
+					BelifeParticle particle_input = new BelifeParticle(particle, 1);
+					belife_pool.put(hc_particle, particle_input);
+				}
 			}
+		}
+		else{
+			int[] particle = bl.state;
+			BelifeParticle belife_fully_observable = new BelifeParticle(particle, POMCPConstance.TOTAL_PARTICLE);
+			int hash_state = getHashCodeFromStateArray(particle);
+			belife_pool.put(hash_state,  belife_fully_observable);
 		}
 		
 	}
@@ -60,13 +76,24 @@ public class BelifeState implements GameStateConstants{
 	// to help put object into has table
 	public static int getHashCode(int[] s)
     {
-        int [] s2 = s.clone();
-        s2[OFS_TURN] = 0;
-        s2[OFS_FSMLEVEL] = 0;
-        s2[OFS_DIE1] = 0;
-        s2[OFS_DIE2] = 0;
+		int turn = s[GameStateConstants.OFS_TURN];
+        int sfmlevel = s[GameStateConstants.OFS_FSMLEVEL];
+        int die1 = s[GameStateConstants.OFS_DIE1];
+        int die2 = s[GameStateConstants.OFS_DIE2];
+        
+        s[GameStateConstants.OFS_TURN] = 0;
+        s[GameStateConstants.OFS_FSMLEVEL] = 0;
+        s[GameStateConstants.OFS_DIE1] = 0;
+        s[GameStateConstants.OFS_DIE2] = 0;
+        
+        int hasing_code = Arrays.hashCode(s);
+        
+        s[GameStateConstants.OFS_TURN] = turn;
+        s[GameStateConstants.OFS_FSMLEVEL] = sfmlevel;
+        s[GameStateConstants.OFS_DIE1] = die1;
+        s[GameStateConstants.OFS_DIE2] = die2;
 
-        return(Arrays.hashCode(s2));
+        return hasing_code;
         
         
     }
@@ -325,7 +352,16 @@ public class BelifeState implements GameStateConstants{
 		
 		for(int i = 0; i < NPLAYERS ; i++){
 
-			total_card_not_reveal += bl.eachPlayerCardNotReveal[i];
+			if(bl.player[i].isPOMCP()){
+				
+				continue;
+				
+			}
+			else{
+				
+				total_card_not_reveal += bl.eachPlayerCardNotReveal[i];
+				
+			}
 		
 		}
 		
@@ -341,20 +377,31 @@ public class BelifeState implements GameStateConstants{
 			for(int ind_pl = 0; ind_pl < NPLAYERS; ind_pl++){
 				for(int ind_card = 0; ind_card < N_DEVCARDTYPES; ind_card++){
 					
-					belife_particle[OFS_PLAYERDATA[ind_pl]+OFS_OLDCARDS + ind_card] = cardUsed[ind_pl][ind_card];
+					if(bl.player[ind_pl].isPOMCP()){
+						continue;
+					}
+					else
+					{
+						belife_particle[OFS_PLAYERDATA[ind_pl]+OFS_OLDCARDS + ind_card] = cardUsed[ind_pl][ind_card];
+					}
 					
 				}
 			}
 			// Guessing the unreveal card from the other players
 			for(int i = 0; i < NPLAYERS; i++){
 				
-				if(bl.eachPlayerCardNotReveal[i] > 0 ){
-					
-					for(int j = 0 ; j < bl.eachPlayerCardNotReveal[i];j++){
+				if(bl.player[i].isPOMCP()){
+					continue;
+				}
+				else{
+					if(bl.eachPlayerCardNotReveal[i] > 0 ){
 						
-						int card = card_remidning[rnd.nextInt(card_remidning.length)];
-						belife_particle[OFS_PLAYERDATA[i]+OFS_OLDCARDS + card]++;
-						
+						for(int j = 0 ; j < bl.eachPlayerCardNotReveal[i];j++){
+							
+							int card = card_remidning[rnd.nextInt(card_remidning.length)];
+							belife_particle[OFS_PLAYERDATA[i]+OFS_OLDCARDS + card]++;
+							
+						}
 					}
 				}
 			}
@@ -372,12 +419,12 @@ public class BelifeState implements GameStateConstants{
 		// if there is no card buy
 		
 		if(cardGussing == 0 ){
-			System.out.println("There is no mpre card to guess");
+			System.out.println("There is no more card to guess");
 			return null;
 			
 		}
 		
-		for(int i = 0 ; i < cardGussing; i++ ){
+		for(int i = 0 ; i < cardNotReveal; i++ ){
 			
 			cardBeforeBuying[i] = bl.cardSequence[cardGussing + i - 1];
 			
@@ -538,16 +585,26 @@ public class BelifeState implements GameStateConstants{
 	}
 	
 	// get hash code for each of the observation state
-	public int getHashCodeFromStateArray(int[] belife_state){
+	public int getHashCodeFromStateArray(int[] state){
 		{
-		    int [] s2 = belife_state.clone();
-		        
-		    belife_state[GameStateConstants.OFS_TURN] = 0;
-		    belife_state[GameStateConstants.OFS_FSMLEVEL] = 0;
-		    belife_state[GameStateConstants.OFS_DIE1] = 0;
-		    belife_state[GameStateConstants.OFS_DIE2] = 0;
+			int turn = state[GameStateConstants.OFS_TURN];
+	        int sfmlevel = state[GameStateConstants.OFS_FSMLEVEL];
+	        int die1 = state[GameStateConstants.OFS_DIE1];
+	        int die2 = state[GameStateConstants.OFS_DIE2];
+	        
+	        state[GameStateConstants.OFS_TURN] = 0;
+	        state[GameStateConstants.OFS_FSMLEVEL] = 0;
+	        state[GameStateConstants.OFS_DIE1] = 0;
+	        state[GameStateConstants.OFS_DIE2] = 0;
+	        
+	        int hasing_code = Arrays.hashCode(state);
+	        
+	        state[GameStateConstants.OFS_TURN] = turn;
+	        state[GameStateConstants.OFS_FSMLEVEL] = sfmlevel;
+	        state[GameStateConstants.OFS_DIE1] = die1;
+	        state[GameStateConstants.OFS_DIE2] = die2;
 
-		    return(Arrays.hashCode(s2));
+	        return hasing_code;
 		        
 		}
 	}

@@ -92,6 +92,9 @@ public class POMCPPlayer extends smartsettlers.player.Player{
 		}
 		return s;
 	}
+	public int[] getBeliefState(){
+		return pomcp_settler.getBliefState();
+	}
 }
 
 // Add back content

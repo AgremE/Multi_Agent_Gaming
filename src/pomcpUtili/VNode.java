@@ -120,11 +120,9 @@ public class VNode implements POMCPConstance{
         
         //Selected action in greedy manner to see whether it good to selection capability
         v_node.VISIT++;
-        int[] action = UCBGreedy(v_node);
+        int[] action = UCBGreedy(v_node,true);
         
-		int[] state_clone = BoardLayout.cloneOfState(state);
-		
-		int winner = bl.getWinner(state_clone);
+		int winner = bl.getWinner(state);
 		
 		if(treeDepth > MAX_DEPTH){
 			return 0;
@@ -139,14 +137,14 @@ public class VNode implements POMCPConstance{
 		
 		QNode q_node = Children.get(getHashCodeFromArray(action));
 		
-		double total_reward = q_node.simulate_q(q_node, state_clone, treeDepth);
+		double total_reward = q_node.simulate_q(q_node, state, treeDepth);
 		v_node.REWARD = total_reward;
 		
 		return total_reward;
 	}
 
 	//For helping in UCT Searching
-	public int[] UCBGreedy(VNode v_node){
+	public int[] UCBGreedy(VNode v_node, boolean ucb){
 		
 		ArrayList<int[]> action_pool = new ArrayList<>();
 		double bestq = Double.NEGATIVE_INFINITY;
@@ -168,7 +166,9 @@ public class VNode implements POMCPConstance{
 				q_node = v_node.Children.get(getHashCodeFromArray(bl.possibilities.action[ind_action]));
 				q_visit = q_node.VISIT;
 				q_value = q_node.REWARD;
-				q_value += this.UCB_FAST(v_visit, q_visit, logN);
+				if(ucb){
+					q_value += this.UCB_FAST(v_visit, q_visit, logN);
+				}
 				
 				if(bestq <= q_value){
 					
