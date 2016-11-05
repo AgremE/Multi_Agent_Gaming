@@ -47,7 +47,7 @@ public class BayesianDataGeneration implements GameStateConstants {
 		
         int firstvalue;
         int pos1, pos2=0;
-        int nSteps = 1000;
+        int nSteps = 50;
         int i;
         int N = a.length;
         
@@ -86,7 +86,7 @@ public class BayesianDataGeneration implements GameStateConstants {
 	 * */
 	public static void main(String[] args){
 		
-		Map<Integer[],Integer> collectionState = new HashMap<Integer[], Integer>();
+		Map<Integer,Integer> collectionState = new HashMap<Integer, Integer>();
 		Integer[] setCard;
 		int[] cardDesk;
 		
@@ -99,7 +99,7 @@ public class BayesianDataGeneration implements GameStateConstants {
 			if(collectionState.containsKey(setCard)){
 				int value = collectionState.get(setCard);
 				value++;
-				collectionState.put(setCard, value);
+				//collectionState.put(setCard, value);
 			}
 			
 			for(int ind_card = 0; ind_card < NCARDS; ind_card++){

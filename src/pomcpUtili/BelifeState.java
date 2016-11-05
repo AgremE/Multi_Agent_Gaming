@@ -379,7 +379,7 @@ public class BelifeState implements GameStateConstants{
 		
 		for(int i = 0 ; i < cardGussing; i++ ){
 			
-			cardBeforeBuying[i] = bl.cardSequence[cardGussing + i];
+			cardBeforeBuying[i] = bl.cardSequence[cardGussing + i - 1];
 			
 		}
 		

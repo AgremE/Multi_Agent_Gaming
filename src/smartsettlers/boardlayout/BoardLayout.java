@@ -45,7 +45,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	
 	
 	// Help Parameters for Simulation of trading
-	public int NUM_IT = 1000;
+	public int NUM_IT = 3000;
 	public int MAX_HEAP = 1000;
 	public int[] currentProductionNumber = new int[19];
 	//For translating the production into ConvNN input form
@@ -809,7 +809,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS - 1; pl++)
+        for (pl=0; pl<NPLAYERS -1 ; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);

@@ -200,19 +200,19 @@ public class QNode implements POMCPConstance{
 	public double rewardingModel(int action){
 		switch(action){
 			case GameStateConstants.A_BUILDCITY:
-				return 7;
+				return 5;
 			case GameStateConstants.A_BUILDROAD:
-				return 3;
+				return 2;
 			case GameStateConstants.A_BUILDSETTLEMENT:
 				return 5;
 			case GameStateConstants.A_BUYCARD:
-				return 4;
+				return 1;
 			case GameStateConstants.A_PAYTAX:
 				return 0.5;
 			case GameStateConstants.A_NOTHING:
 				return 0.5;
 			case GameStateConstants.A_PLACEROBBER:
-				return 1;
+				return 2;
 			case GameStateConstants.A_PLAYCARD_FREERESOURCE:
 				return 2;
 			case GameStateConstants.A_PLAYCARD_FREEROAD:
@@ -222,7 +222,7 @@ public class QNode implements POMCPConstance{
 			case GameStateConstants.A_PLAYCARD_MONOPOLY:
 				return 2;
 			case GameStateConstants.A_THROWDICE:
-				return 0.5;
+				return 0;
 			default:
 				return 0;
 		}

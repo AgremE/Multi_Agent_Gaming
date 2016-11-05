@@ -122,7 +122,7 @@ public class VNode implements POMCPConstance{
         v_node.VISIT++;
         int[] action = UCBGreedy(v_node);
         
-		int[] state_clone = bl.cloneOfState(state);
+		int[] state_clone = BoardLayout.cloneOfState(state);
 		
 		int winner = bl.getWinner(state_clone);
 		
@@ -158,21 +158,46 @@ public class VNode implements POMCPConstance{
 			
 			double q_value;
 			int q_visit;
-			QNode q_node = v_node.Children.get(getHashCodeFromArray(possibilities_list.action[ind_action]));
-			q_visit = q_node.VISIT;
-			q_value = q_node.REWARD;
-			q_value += this.UCB_FAST(v_visit, q_visit, logN);
-			
-			if(bestq <= q_value){
+			int[] action = bl.possibilities.action[ind_action];
+			QNode q_node = v_node.Children.get(getHashCodeFromArray(bl.possibilities.action[ind_action]));
+			//q_node might not be exist
+			if(q_node == null){
+				int hash_action = getHashCodeFromArray(action);
+				QNode node = new QNode(bl, action);
+				v_node.Children.put(hash_action,node);
+				q_node = v_node.Children.get(getHashCodeFromArray(bl.possibilities.action[ind_action]));
+				q_visit = q_node.VISIT;
+				q_value = q_node.REWARD;
+				q_value += this.UCB_FAST(v_visit, q_visit, logN);
 				
-				if(q_value > bestq){
+				if(bestq <= q_value){
 					
-					action_pool.clear();
+					if(q_value > bestq){
+						
+						action_pool.clear();
+						
+					}
 					
+					bestq = q_value;
+					action_pool.add(possibilities_list.action[ind_action]);
 				}
+			}
+			else{
+				q_visit = q_node.VISIT;
+				q_value = q_node.REWARD;
+				q_value += this.UCB_FAST(v_visit, q_visit, logN);
 				
-				bestq = q_value;
-				action_pool.add(possibilities_list.action[ind_action]);
+				if(bestq <= q_value){
+					
+					if(q_value > bestq){
+						
+						action_pool.clear();
+						
+					}
+					
+					bestq = q_value;
+					action_pool.add(possibilities_list.action[ind_action]);
+				}
 			}
 		}
 		

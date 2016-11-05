@@ -22,7 +22,7 @@ import uct.UCT;
 public class UCT_POCMP implements GameStateConstants{
 	
 	History history;
-	int NUM_SIMULATION = 1000;
+	int NUM_SIMULATION = 3000;
 	int treeDepth = 0;
 	int PeakTreeDepth = 0;
 	int[] state;
@@ -180,7 +180,8 @@ public class UCT_POCMP implements GameStateConstants{
 	        
 	        bl.possibilities.action = shuffle_2dArray(bl.possibilities.action);
 			
-			
+	        initChild();
+	        
 			for(int ind_it = 0; ind_it < bl.NUM_IT; ind_it++ ){
 				
 				int[] action = bl.possibilities.action[(ind_it % bl.possibilities.action.length)];
@@ -193,7 +194,13 @@ public class UCT_POCMP implements GameStateConstants{
 				
 				QNode q_node = root.Children.get(action_hash);
 				if(q_node == null){
-					initChild(bl.possibilities.action);
+					
+					QNode node = new QNode(bl, action);
+					node.setValue(0, 0);
+					int action_hash_code = root.getHashCodeFromArray(action);
+					root.Children.put(action_hash_code, node);
+					
+					
 					q_node = root.Children.get(action_hash);
 				}
 				if(q_node.Children == null){
@@ -289,9 +296,9 @@ public class UCT_POCMP implements GameStateConstants{
 	}
 	
 	//init child for the root node
-	public void initChild(int[][] action_pool){
+	public void initChild(){
 		
-	    root.NUM_ACTION = action_pool.length;
+	    root.NUM_ACTION = bl.possibilities.n;
 		root.possibilities_list = bl.possibilities;
 		
 		// put all the result of the possible action inside the list of children
