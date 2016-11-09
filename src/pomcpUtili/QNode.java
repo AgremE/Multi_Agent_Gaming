@@ -78,7 +78,7 @@ public class QNode implements POMCPConstance{
 		
 		node = q_node.Children.get(hash_code_observation);
 		
-		if(q_node.Children.get(hash_code_observation) == null){
+		if(node == null){
 			node = expand_vnode(observation_array, depth);
 		}
 		

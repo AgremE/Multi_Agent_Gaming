@@ -69,7 +69,7 @@ public class UCT_POCMP implements GameStateConstants{
 		int[] belifes;
 		QNode qnode = root.Children.get(getHashCodeFromActionArray(action));
 		VNode vnode = qnode.Children.get(getHashCodeFromObservationArray(observation));
-		
+		// check if there is no observation found need to create the sampling
 		if(vnode != null){
 			
 			belifes = vnode.getBelifeState();
@@ -84,6 +84,18 @@ public class UCT_POCMP implements GameStateConstants{
 				
 			}
 		}
+		else{
+			
+			//Add transform in the original code pacman from david silva
+			
+			 vnode = new VNode(bl);
+			 
+			 for(int num_particle = 0 ; num_particle < POMCPConstance.TOTAL_PARTICLE; num_particle++){
+					
+					vnode.belief_state.samplingParticle(bl.eachPlayerCardPlaiedThisRound);
+					
+			}
+		}
 		
 		if(root.belief_state.getBelifeState() == null){
 			return false;
@@ -94,6 +106,7 @@ public class UCT_POCMP implements GameStateConstants{
 		this.root = vnode;
 		return true;
 	}
+	
 	
 	// get hash code for each of the observation state
 	public int getHashCodeFromActionArray(int[] action){
