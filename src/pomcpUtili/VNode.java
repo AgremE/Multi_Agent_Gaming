@@ -78,8 +78,8 @@ public class VNode implements POMCPConstance{
 		
 		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
 	    int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
+	    
 		bl.player[pl].listPossibilities(bl.state);
-		
 		this.bl = bl;
 		NUM_ACTION = bl.possibilities.n;
 		possibilities_list = bl.possibilities;
@@ -120,24 +120,18 @@ public class VNode implements POMCPConstance{
         
         //Selected action in greedy manner to see whether it good to selection capability
         v_node.VISIT++;
-        int[] action = UCBGreedy(v_node);
+        int[] action = UCBGreedy(v_node,true);
         
 		int[] state_clone = BoardLayout.cloneOfState(state);
 		
 		int winner = bl.getWinner(state_clone);
-		
-		if(treeDepth > MAX_DEPTH){
-			return 0;
+		QNode q_node = v_node.Children.get(getHashCodeFromArray(action));
+
+		if(treeDepth > 50){
+			
+			return q_node.rollout(state, treeDepth);
+			
 		}
-		if(winner != -1 ){
-			STATUS = TERMINATE_STATE;
-			return 0;
-		}
-		else{
-			STATUS = NORMAL_STATE;
-		}
-		
-		QNode q_node = Children.get(getHashCodeFromArray(action));
 		
 		double total_reward = q_node.simulate_q(q_node, state_clone, treeDepth);
 		v_node.REWARD = total_reward;
@@ -146,7 +140,7 @@ public class VNode implements POMCPConstance{
 	}
 
 	//For helping in UCT Searching
-	public int[] UCBGreedy(VNode v_node){
+	public int[] UCBGreedy(VNode v_node, boolean ucb){
 		
 		ArrayList<int[]> action_pool = new ArrayList<>();
 		double bestq = Double.NEGATIVE_INFINITY;
@@ -168,7 +162,9 @@ public class VNode implements POMCPConstance{
 				q_node = v_node.Children.get(getHashCodeFromArray(bl.possibilities.action[ind_action]));
 				q_visit = q_node.VISIT;
 				q_value = q_node.REWARD;
-				q_value += this.UCB_FAST(v_visit, q_visit, logN);
+				if(ucb == true){
+					q_value += this.UCB_FAST(v_visit, q_visit, logN);
+				}
 				
 				if(bestq <= q_value){
 					
@@ -185,7 +181,9 @@ public class VNode implements POMCPConstance{
 			else{
 				q_visit = q_node.VISIT;
 				q_value = q_node.REWARD;
-				q_value += this.UCB_FAST(v_visit, q_visit, logN);
+				if(ucb == true){
+					q_value += this.UCB_FAST(v_visit, q_visit, logN);
+				}
 				
 				if(bestq <= q_value){
 					

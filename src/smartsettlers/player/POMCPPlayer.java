@@ -28,8 +28,9 @@ public class POMCPPlayer extends smartsettlers.player.Player{
 		
 	  // TODO Auto-generated method stub
 		
-	  int fsmlevel    = s[OFS_FSMLEVEL];
-      int pl          = s[OFS_FSMPLAYER+fsmlevel];
+	  //int fsmlevel    = s[OFS_FSMLEVEL];
+      /*
+	  int pl          = s[OFS_FSMPLAYER+fsmlevel];
       int statlevel 	= s[OFS_FSMSTATE+ fsmlevel];
       int numTradOffer = 0;
       int winCount = 0;
@@ -37,7 +38,8 @@ public class POMCPPlayer extends smartsettlers.player.Player{
       boolean offer_answer = false;
       int i,j;
       int MAX_TRAD_OFFER = 5;
-      int[] s2 = BoardLayout.cloneOfState(s);// we need to change that every development card that they play will be not observable  
+      */
+      //int[] s2 = BoardLayout.cloneOfState(s);// we need to change that every development card that they play will be not observable  
      
       //Call POMCP instead
       //history.add(s2);
@@ -51,28 +53,32 @@ public class POMCPPlayer extends smartsettlers.player.Player{
 	   * Noted: Should change the condition of deciding whether to trade with the providing option all not is need to consider
 	   * with Virtual win as well
 	   * */
-  
+      int[] state;
       if(bl.hasHiddenInfo()){
     
     	  // update particle for the simulation belief state
     	  pomcp_settler.mtcs_update_particle();
     	  // Simulate is already in the function action_selection
-    	  int[] state = pomcp_settler.getBliefState();
+    	  state = pomcp_settler.getBliefState();
     	 
     	  // action selection
     	  a =  pomcp_settler.action_selection();
 
-    	  state = null;
       }
       else{
     	  
     	  // Clear up the particle and update according the full state information
     	  pomcp_settler.getRoot().getBelife().updateFullyObservable();
-    	  int[] state = pomcp_settler.getBliefState();
+    	  state = BoardLayout.cloneOfState(bl.state);
     	  // using normal UCT search with UCT tree
     	  a = pomcp_settler.action_selection();
-          s2=null;
       }
+      state = bl.stateActionObservation(state, a);
+      pomcp_settler.mtcs_update(a, state);
+      //s2=null;
+	}
+	public void pomcpUpdate(int[] action, int[] observation){
+		this.pomcp_settler.mtcs_update(action, observation);
 	}
 
 	@Override

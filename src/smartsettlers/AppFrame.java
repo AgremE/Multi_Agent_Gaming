@@ -149,7 +149,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             }
         });
 
-        jButton4.setText(">|");
+        jButton4.setText("Play One Game");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton4ActionPerformed(evt);
@@ -345,7 +345,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
         if(round<1000){
         	System.out.println("Trading Accepted: " + boardlayout.tradingAccepte);
             System.out.println("Tradning offer: "+ boardlayout.tradingOffer);
-            boardlayout.GameTick(boardlayout.state,boardlayout.action);
+            //boardlayout.GameTick(boardlayout.state,boardlayout.action);
             listModel.addElement(boardlayout.gamelog.toString());
         }
         boardlayout.GameTick(boardlayout.state,boardlayout.action);

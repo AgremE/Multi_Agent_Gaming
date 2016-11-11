@@ -302,8 +302,8 @@ public class BelifeState implements GameStateConstants{
 	public void updateFullyObservable(){
 
 		belife_pool.clear();
-		BelifeParticle totally_inform = new BelifeParticle(bl.state, POMCPConstance.TOTAL_PARTICLE);
-		int hc_state_fully_obser = getHashCodeFromStateArray(bl.state);
+		BelifeParticle totally_inform = new BelifeParticle(bl.state.clone(), POMCPConstance.TOTAL_PARTICLE);
+		int hc_state_fully_obser = getHashCodeFromStateArray(bl.state.clone());
 		belife_pool.put(hc_state_fully_obser,totally_inform);
 		
 	}
@@ -367,19 +367,18 @@ public class BelifeState implements GameStateConstants{
 	// Used only in addParticle function for the reminding card in the desk when the player is still not reveal their card yet
 	public int[] cardRemindingNotReveal(int cardNotReveal){
 		
-		int cardGussing = NCARDS + cardNotReveal - bl.state[OFS_NCARDSGONE];
-		int[] cardBeforeBuying = new int[cardGussing];
+		int[] cardBeforeBuying = new int[cardNotReveal +bl.state[OFS_NCARDSGONE]];
 		// if there is no card buy
 		
-		if(cardGussing == 0 ){
-			System.out.println("There is no mpre card to guess");
+		if(cardNotReveal == 0 ){
+			System.out.println("There is no more card to guess");
 			return null;
 			
 		}
 		
-		for(int i = 0 ; i < cardGussing; i++ ){
+		for(int i = 0 ; i < cardNotReveal; i++ ){
 			
-			cardBeforeBuying[i] = bl.cardSequence[cardGussing + i - 1];
+			cardBeforeBuying[i] = bl.cardSequence[bl.state[OFS_NCARDSGONE] + i - 1];
 			
 		}
 		

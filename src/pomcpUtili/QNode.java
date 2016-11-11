@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.poi.poifs.filesystem.NPOIFSDocument;
 
@@ -55,14 +56,29 @@ public class QNode implements POMCPConstance{
 		
 		
 		double immReward, delayReward;
-		immReward = rewardingModel(q_node.action[0]);
-        
+		
+		int fsmlevel    = state[GameStateConstants.OFS_FSMLEVEL]; // To access the level of game state
+	    int pl          = state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];// To access the player number
         //Selected action in greedy manner to see whether it good to selection capability
-        q_node.VISIT++;
+       
+		if(bl.player[pl].isPOMCP()){
+			immReward = rewardingModel(q_node.action[0]);
+			 q_node.VISIT++;
+		}
+		else{
+			immReward = 0;
+			if( q_node.VISIT == 0){
+				 q_node.VISIT++;
+			}
+			
+		}
 		
 		int winner = bl.getWinner(state);
 
 		if(winner != -1 ){
+			if(bl.player[pl].isPOMCP()){
+				return 50;
+			}
 			return 0;
 		}
 		double total_reward = 0;
@@ -81,7 +97,10 @@ public class QNode implements POMCPConstance{
 		
 		if(node != null){
 			depth++;
+			
 			Children.put(hash_code_observation, node);
+			bl.player[pl].performAction_simulation(state, q_node.action);
+			bl.stateTransition(state, q_node.action);
 			delayReward = node.simulation_v(state, node, depth);
 		}
 		else{
@@ -142,27 +161,28 @@ public class QNode implements POMCPConstance{
 		double total_reward = 0.0;
 		double discount = 1.0;
 		int numSteps;
-		
+		//int[] state_clone  = BoardLayout.cloneOfState(state);
 		// TODO: check the condition of MAX_DEPTH
-		for ( numSteps = 0; numSteps +  depth < MAX_DEPTH; numSteps++){
+		int[] state_clone = BoardLayout.cloneOfState(state);
+		for ( numSteps = 0; numSteps +  depth < MAX_DEPTH_ROLLOUT; numSteps++){
 			
 	        double reward;
 	        
-	        int fsmlevel    = state[GameStateConstants.OFS_FSMLEVEL]; // To access the level of game state
-	        int pl          = state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];// To access the player number
+	        int fsmlevel    = state_clone[GameStateConstants.OFS_FSMLEVEL]; // To access the level of game state
+	        int pl          = state_clone[GameStateConstants.OFS_FSMPLAYER+fsmlevel];// To access the player number
 	        
-	        state = bl.hideState(pl, state);
-	        bl.player[pl].listPossibilities(state);
+	        //state = bl.hideState(pl, state);
+	        bl.player[pl].listPossibilities(state_clone);
 	        int[] action = bl.possibilities.action[rnd.nextInt(bl.possibilities.n)];
-	        bl.player[pl].performAction_simulation(state, action);
+	        bl.player[pl].performAction_simulation(state_clone, action);
 	        reward = rewardingModel(action[0]);
 	        
             // Changing state
             // It also changing tht player number at the same time as we use the state transition
             // We need to define the optimal simulation round so it able to do it job properly
 	        
-            bl.stateTransition(state, action);
-            int winner = bl.getWinner(state);
+            bl.stateTransition(state_clone, action);
+            int winner = bl.getWinner(state_clone);
             
             total_reward += reward*discount;
             if(winner != -1){

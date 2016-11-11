@@ -36,6 +36,7 @@ import convNNSettler.*;
 public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
 {
 	//Help parameters for POMCP
+	public boolean wrong = false;
 	public int[] eachPlayerCardNotReveal = new int[NPLAYERS];// done
 	public int[] newlyBoughtCardEachPlayer = new int[NPLAYERS];// done
 	public int[][] eachPlayerCardPlaiedThisRound = new int[NPLAYERS][N_DEVCARDTYPES];// done
@@ -45,7 +46,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	
 	
 	// Help Parameters for Simulation of trading
-	public int NUM_IT = 3000;
+	public int NUM_IT = 500;
 	public int MAX_HEAP = 1000;
 	public int[] currentProductionNumber = new int[19];
 	//For translating the production into ConvNN input form
@@ -947,17 +948,32 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].listPossibilities(s);
         player[pl].selectAction(s,a);
         
+        
         if (isLoggingOn)
             gamelog.addAction(a);
         
         player[pl].performAction(s, a);
         
         stateTransition(s, a);
+        /*
+        fsmlevel    = s[OFS_FSMLEVEL];
         // Assumming that POMCP is agent number 4 in the list
-        
+        if(fsmlevel == 0){
+        	if(wrong){
+        		try {
+					TimeUnit.MINUTES.sleep(1);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+        	}
+        	else{
+        		wrong = true;
+        	}
+        }
         if(player[pl].isPOMCP()){
         	clearHELPPOMCP();
-        }
+        }*/
     }
     
     public static void printArray(int[] s)

@@ -4,6 +4,7 @@ import java.rmi.activation.ActivationInstantiator;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import pomcpUtili.VNode.SEARCH_STAGE;
 import smartsettlers.boardlayout.ActionList;
@@ -22,7 +23,7 @@ import uct.UCT;
 public class UCT_POCMP implements GameStateConstants{
 	
 	History history;
-	int NUM_SIMULATION = 1000;
+	int NUM_SIMULATION = 500;
 	int treeDepth = 0;
 	int PeakTreeDepth = 0;
 	int[] state;
@@ -84,7 +85,17 @@ public class UCT_POCMP implements GameStateConstants{
 				
 			}
 		}
-		
+		// fixing the particle deprivation problems
+		else{
+			vnode = new VNode(bl);
+			
+			for(int num_particle = 0 ; num_particle < POMCPConstance.TOTAL_PARTICLE; num_particle++){
+				
+				vnode.belief_state.samplingParticle(bl.eachPlayerCardPlaiedThisRound);
+				
+			}
+
+		}
 		if(root.belief_state.getBelifeState() == null){
 			return false;
 		}
@@ -92,6 +103,7 @@ public class UCT_POCMP implements GameStateConstants{
 		this.state = vnode.getBelifeState();
 		// Change the root from here
 		this.root = vnode;
+		vnode = null;
 		return true;
 	}
 	
@@ -142,7 +154,7 @@ public class UCT_POCMP implements GameStateConstants{
 		}
 		
 		this.mtcs_uctsearch();
-		return root.UCBGreedy(root);
+		return root.UCBGreedy(root,false);
 	
 	}
 	
@@ -256,8 +268,27 @@ public class UCT_POCMP implements GameStateConstants{
 			StateTotalReward.add(totalReward);
 			StateTreeDepth.add(totalReward);
 			history.resize(historyDepth);
+			/*try {
+				System.out.println(root.Children.size()+"\n");
+				TimeUnit.SECONDS.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}*/
 			
 		}
+		/*
+		for(int key: root.Children.keySet()){
+			System.out.println(root.Children.lenght+"\n");
+			System.out.println("Rewarding Node:"+key+" Rewarding Value"+root.Children.get(key).REWARD + "\n");
+			
+		}
+		try {
+			TimeUnit.SECONDS.sleep(10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
 	}
 	
 
