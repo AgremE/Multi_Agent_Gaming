@@ -44,6 +44,7 @@ public class UCT_POCMP implements GameStateConstants{
 		root = new VNode(bl);
 		history = new History();
 		
+		
 	}
 	
 	// Make function for running the simulation and action selection.
