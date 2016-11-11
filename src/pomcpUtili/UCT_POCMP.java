@@ -22,7 +22,7 @@ import uct.UCT;
 public class UCT_POCMP implements GameStateConstants{
 	
 	History history;
-	int NUM_SIMULATION = 3000;
+	int NUM_SIMULATION = 1000;
 	int treeDepth = 0;
 	int PeakTreeDepth = 0;
 	int[] state;

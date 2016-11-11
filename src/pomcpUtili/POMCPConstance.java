@@ -14,8 +14,8 @@ public interface POMCPConstance{
 	//Game State
 	public final int TERMINATE_STATE = 0;
 	public final int NORMAL_STATE = 1;
-	public final int MAX_DEPTH = 1000; // Need to think about this number why?
-	public final int MAX_DEPTH_ROLLOUT  = MAX_DEPTH + 1000;
+	public final int MAX_DEPTH = 300; // Need to think about this number why?
+	public final int MAX_DEPTH_ROLLOUT  = MAX_DEPTH + 200;
 	public final double DISCOUNT_FACTOR = 0.3;
 	
 	final int TOTAL_PARTICLE = 100;
