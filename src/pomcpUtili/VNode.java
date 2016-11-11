@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.parsers.DocumentBuilder;
 
@@ -22,7 +23,7 @@ public class VNode implements POMCPConstance{
 	int STATUS = -1; // Represent the state of the game
 	int VISIT = 0;
 	double REWARD  = 0;
-	int NUM_ACTION;
+	int NUM_ACTION = 0;
 	int[] observed;
 	boolean ACTION_LIST_EMPTY = false;
 	final double EXPLORATION_CONSTANCE = 1.5;
@@ -45,25 +46,30 @@ public class VNode implements POMCPConstance{
 		
 		
 		this.belief_state = new BelifeState(bl.eachPlayerCardNotReveal,bl.eachPlayerCardPlaiedThisRound,bl);
-		
+		// when fsmlevel == 0, it will make the same decision with previous player
 		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
 	    int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
+	    this.bl = bl;
 	    
-		bl.player[pl].listPossibilities(bl.state);
-		this.bl = bl;
-		NUM_ACTION = bl.possibilities.n;
-		possibilities_list = bl.possibilities;
+	    /*
+		if(fsmlevel != 0){
+			bl.player[pl].listPossibilities(bl.state);
+			
+			NUM_ACTION = bl.possibilities.n;
+			possibilities_list = bl.possibilities;
+			
+			// put all the result of the possible action inside the list of children
+			for(int i = 0; i < this.NUM_ACTION; i++){
+				
+				int[] action = bl.possibilities.action[i];
+				QNode node = new QNode(bl, bl.possibilities.action[i]);
+				node.setValue(0, 0);
+				int action_hash_code = getHashCodeFromArray(action);
+				Children.put(action_hash_code, node);
+				
+			}
+		}*/
 		
-		// put all the result of the possible action inside the list of children
-		for(int i = 0; i < this.NUM_ACTION; i++){
-			
-			int[] action = bl.possibilities.action[i];
-			QNode node = new QNode(bl, bl.possibilities.action[i]);
-			node.setValue(0, 0);
-			int action_hash_code = getHashCodeFromArray(action);
-			Children.put(action_hash_code, node);
-			
-		}
 		stage = SEARCH_STAGE.RANDOME_ROLLOUT;
 	}
 	
@@ -78,22 +84,27 @@ public class VNode implements POMCPConstance{
 		
 		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
 	    int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
-		bl.player[pl].listPossibilities(bl.state);
-		
-		this.bl = bl;
-		NUM_ACTION = bl.possibilities.n;
-		possibilities_list = bl.possibilities;
-		
-		// put all the result of the possible action inside the list of children
-		for(int i = 0; i < this.NUM_ACTION; i++){
+	    this.bl = bl;
+	    /*
+		if(fsmlevel != 0){
+			bl.player[pl].listPossibilities(bl.state);
 			
-			int[] action = bl.possibilities.action[i];
-			QNode node = new QNode(bl, bl.possibilities.action[i]);
-			node.setValue(0, 0);
-			int action_hash_code = getHashCodeFromArray(action);
-			Children.put(action_hash_code, node);
-		}
+			NUM_ACTION = bl.possibilities.n;
+			possibilities_list = bl.possibilities;
+			
+			// put all the result of the possible action inside the list of children
+			for(int i = 0; i < this.NUM_ACTION; i++){
+				
+				int[] action = bl.possibilities.action[i];
+				QNode node = new QNode(bl, bl.possibilities.action[i]);
+				node.setValue(0, 0);
+				int action_hash_code = getHashCodeFromArray(action);
+				Children.put(action_hash_code, node);
+			}
+		}*/
+		
 		stage = SEARCH_STAGE.RANDOME_ROLLOUT;
+		
 	}
 	
 	// Converting 1-D array of int into Integer
@@ -120,11 +131,9 @@ public class VNode implements POMCPConstance{
         
         //Selected action in greedy manner to see whether it good to selection capability
         v_node.VISIT++;
-        int[] action = UCBGreedy(v_node);
+        int[] action = UCBGreedy(v_node,true);
         
-		int[] state_clone = BoardLayout.cloneOfState(state);
-		
-		int winner = bl.getWinner(state_clone);
+		int winner = bl.getWinner(state);
 		
 		if(treeDepth > MAX_DEPTH){
 			return 0;
@@ -139,21 +148,55 @@ public class VNode implements POMCPConstance{
 		
 		QNode q_node = Children.get(getHashCodeFromArray(action));
 		
-		double total_reward = q_node.simulate_q(q_node, state_clone, treeDepth);
+		double total_reward = q_node.simulate_q(q_node, state, treeDepth);
 		v_node.REWARD = total_reward;
 		
 		return total_reward;
 	}
 
 	//For helping in UCT Searching
-	public int[] UCBGreedy(VNode v_node){
+	public int[] UCBGreedy(VNode v_node, boolean ucb){
 		
 		ArrayList<int[]> action_pool = new ArrayList<>();
 		double bestq = Double.NEGATIVE_INFINITY;
 		int v_visit = v_node.VISIT;
 		double logN = Math.log(v_visit + 1);
 		
-		//TODO: Will put alpha value later
+		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
+	    int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
+	    
+	    /*try {
+			System.out.println("PL is zero");
+    		TimeUnit.MINUTES.sleep(1);
+			
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+	    
+		if(v_node.Children.isEmpty()){
+			// we can just use bl.state because the state in the first init is fully observable
+			
+			bl.player[pl].listPossibilities(bl.state);
+			v_node.NUM_ACTION = bl.possibilities.n;
+			v_node.possibilities_list = bl.possibilities;
+			
+			if(this.NUM_ACTION == 0){
+				this.NUM_ACTION = bl.possibilities.n;
+				this.possibilities_list = bl.possibilities;
+			}
+			
+			// put all the result of the possible action inside the list of children
+			for(int i = 0; i < v_node.NUM_ACTION; i++){
+				
+				int[] action = bl.possibilities.action[i];
+				QNode node = new QNode(bl, bl.possibilities.action[i]);
+				node.setValue(0, 0);
+				int action_hash_code = getHashCodeFromArray(action);
+				Children.put(action_hash_code, node);
+			}
+		}
+		
 		for(int ind_action = 0; ind_action < NUM_ACTION; ind_action++){
 			
 			double q_value;
@@ -168,7 +211,9 @@ public class VNode implements POMCPConstance{
 				q_node = v_node.Children.get(getHashCodeFromArray(bl.possibilities.action[ind_action]));
 				q_visit = q_node.VISIT;
 				q_value = q_node.REWARD;
-				q_value += this.UCB_FAST(v_visit, q_visit, logN);
+				if(ucb){
+					q_value += this.UCB_FAST(v_visit, q_visit, logN);
+				}
 				
 				if(bestq <= q_value){
 					
@@ -183,10 +228,10 @@ public class VNode implements POMCPConstance{
 				}
 			}
 			else{
+				
 				q_visit = q_node.VISIT;
 				q_value = q_node.REWARD;
-				q_value += this.UCB_FAST(v_visit, q_visit, logN);
-				
+
 				if(bestq <= q_value){
 					
 					if(q_value > bestq){

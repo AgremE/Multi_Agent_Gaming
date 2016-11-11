@@ -73,6 +73,7 @@ public class POMCPPlayer extends smartsettlers.player.Player{
     	  a = pomcp_settler.action_selection();
           s2=null;
       }
+      pomcp_settler.mtcs_update(a, pomcp_settler.getBliefState());
 	}
 
 	@Override
@@ -91,6 +92,9 @@ public class POMCPPlayer extends smartsettlers.player.Player{
 			}
 		}
 		return s;
+	}
+	public int[] getBeliefState(){
+		return pomcp_settler.getBliefState();
 	}
 }
 

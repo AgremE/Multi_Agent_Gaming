@@ -3,3 +3,19 @@
 /tradingPOMDPs/
 /uct/
 /pomcpUtili/
+<<<<<<< HEAD
+=======
+/bayesianInference/
+/bin/
+/convNNSettler/
+/dataGeneration/
+/docs/
+/experiment/
+/hmminference/
+/java/
+/resources/
+/soc/
+/tradingPOMDPs/
+/uct/
+/web/
+>>>>>>> refs/remotes/MonteCarloPOMDPs/develop

@@ -45,7 +45,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	
 	
 	// Help Parameters for Simulation of trading
-	public int NUM_IT = 3000;
+	public int NUM_IT = 1000;
 	public int MAX_HEAP = 1000;
 	public int[] currentProductionNumber = new int[19];
 	//For translating the production into ConvNN input form
@@ -1750,15 +1750,18 @@ public void recalcLongestRoad(int[] s, int pl)
     
     // checking whether there is hidden information inside the game or not ir not I will just used the UCT state for simulation
     public boolean hasHiddenInfo(){
-    	
+    	int fsmlevel    = state[OFS_FSMLEVEL]; // To access the level of game state
+    	if(fsmlevel == 0){
+    		return false;
+    	}
     	int numberCardinotherPlayerHand = 0;
     	for(int i = 0; i < NPLAYERS ; i++){
     		
     		if(player[i].isPOMCP()){
     			continue;
     		}
-    		for(int ind_card = 0; ind_card < N_DEVCARDTYPES; ind_card++){
-    			numberCardinotherPlayerHand += state[OFS_PLAYERDATA[i] + OFS_OLDCARDS + ind_card];
+    		else{
+    			numberCardinotherPlayerHand+=newlyBoughtCardEachPlayer[i];
     		}
     	}
     	if(numberCardinotherPlayerHand > 0){
@@ -1777,7 +1780,7 @@ public void recalcLongestRoad(int[] s, int pl)
      * */
     public int[] hideState(int pl, int[] state){
     	
-    	int[] s = this.cloneOfState(state);
+    	int[] s = BoardLayout.cloneOfState(state);
     	
     	for(int i =0; i< N_PLAYER;i++){
     		

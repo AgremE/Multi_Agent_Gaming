@@ -14,11 +14,15 @@ public interface POMCPConstance{
 	//Game State
 	public final int TERMINATE_STATE = 0;
 	public final int NORMAL_STATE = 1;
+<<<<<<< HEAD
 	public final int MAX_DEPTH = 300; // Need to think about this number why?
+=======
+	public final int MAX_DEPTH = 500; // Need to think about this number why?
+>>>>>>> refs/remotes/MonteCarloPOMDPs/develop
 	public final int MAX_DEPTH_ROLLOUT  = MAX_DEPTH + 200;
 	public final double DISCOUNT_FACTOR = 0.3;
 	
-	final int TOTAL_PARTICLE = 100;
+	final int TOTAL_PARTICLE = 50;
 	
 	
 	// for card gussing

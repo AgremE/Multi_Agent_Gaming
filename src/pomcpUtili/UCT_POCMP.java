@@ -69,7 +69,7 @@ public class UCT_POCMP implements GameStateConstants{
 		int[] belifes;
 		QNode qnode = root.Children.get(getHashCodeFromActionArray(action));
 		VNode vnode = qnode.Children.get(getHashCodeFromObservationArray(observation));
-		
+		// check if there is no observation found need to create the sampling
 		if(vnode != null){
 			
 			belifes = vnode.getBelifeState();
@@ -84,6 +84,18 @@ public class UCT_POCMP implements GameStateConstants{
 				
 			}
 		}
+		else{
+			
+			//Add transform in the original code pacman from david silva
+			
+			 vnode = new VNode(bl);
+			 
+			 for(int num_particle = 0 ; num_particle < POMCPConstance.TOTAL_PARTICLE; num_particle++){
+					
+					vnode.belief_state.samplingParticle(bl.eachPlayerCardPlaiedThisRound);
+					
+			}
+		}
 		
 		if(root.belief_state.getBelifeState() == null){
 			return false;
@@ -95,6 +107,7 @@ public class UCT_POCMP implements GameStateConstants{
 		return true;
 	}
 	
+	
 	// get hash code for each of the observation state
 	public int getHashCodeFromActionArray(int[] action){
 		{
@@ -105,14 +118,25 @@ public class UCT_POCMP implements GameStateConstants{
 	// get hash code for each of the observation state
 	public int getHashCodeFromObservationArray(int[] state){
 		{
-		    int [] s2 = state.clone();
 		        
-		    state[GameStateConstants.OFS_TURN] = 0;
-		    state[GameStateConstants.OFS_FSMLEVEL] = 0;
-		    state[GameStateConstants.OFS_DIE1] = 0;
-		    state[GameStateConstants.OFS_DIE2] = 0;
+		    int turn = state[GameStateConstants.OFS_TURN];
+	        int sfmlevel = state[GameStateConstants.OFS_FSMLEVEL];
+	        int die1 = state[GameStateConstants.OFS_DIE1];
+	        int die2 = state[GameStateConstants.OFS_DIE2];
+	        
+	        state[GameStateConstants.OFS_TURN] = 0;
+	        state[GameStateConstants.OFS_FSMLEVEL] = 0;
+	        state[GameStateConstants.OFS_DIE1] = 0;
+	        state[GameStateConstants.OFS_DIE2] = 0;
+	        
+	        int hasing_code = Arrays.hashCode(state);
+	        
+	        state[GameStateConstants.OFS_TURN] = turn;
+	        state[GameStateConstants.OFS_FSMLEVEL] = sfmlevel;
+	        state[GameStateConstants.OFS_DIE1] = die1;
+	        state[GameStateConstants.OFS_DIE2] = die2;
 
-		    return(Arrays.hashCode(s2));
+	        return hasing_code;
 		        
 		}
 	}
@@ -142,7 +166,7 @@ public class UCT_POCMP implements GameStateConstants{
 		}
 		
 		this.mtcs_uctsearch();
-		return root.UCBGreedy(root);
+		return root.UCBGreedy(root,false);
 	
 	}
 	
@@ -252,7 +276,7 @@ public class UCT_POCMP implements GameStateConstants{
 			// Change the state according to the belife approximation
 			treeDepth = 0;
 			PeakTreeDepth = 0;
-			double totalReward = root.simulation_v(root.belief_state.getBelifeState(), root, treeDepth);
+			double totalReward = root.simulation_v(root.belief_state.getBelifeState().clone(), root, treeDepth);
 			StateTotalReward.add(totalReward);
 			StateTreeDepth.add(totalReward);
 			history.resize(historyDepth);
