@@ -539,7 +539,7 @@ public class BelifeState implements GameStateConstants{
 	// get hash code for each of the observation state
 	public int getHashCodeFromStateArray(int[] belife_state){
 		{
-		    int [] s2 = belife_state.clone();
+		    int [] s2 = BoardLayout.cloneOfState(belife_state);
 		        
 		    belife_state[GameStateConstants.OFS_TURN] = 0;
 		    belife_state[GameStateConstants.OFS_FSMLEVEL] = 0;
@@ -552,7 +552,7 @@ public class BelifeState implements GameStateConstants{
 	}
 	public static int[] getStateBeforeHashCompare(int[] state){
 		
-		int[] state_clone = state.clone();
+		int[] state_clone = BoardLayout.cloneOfState(state);
 		
 		state_clone[GameStateConstants.OFS_TURN] = 0;
 		state_clone[GameStateConstants.OFS_FSMLEVEL] = 0;

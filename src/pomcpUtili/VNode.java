@@ -125,11 +125,20 @@ public class VNode implements POMCPConstance{
 		int[] state_clone = BoardLayout.cloneOfState(state);
 		
 		int winner = bl.getWinner(state_clone);
+		if(winner != -1){
+			if(bl.player[winner].isPOMCP()){
+				return 50;
+			}
+			else{
+				return 0;
+			}
+		}
 		QNode q_node = v_node.Children.get(getHashCodeFromArray(action));
-
+		
+		// It should replace back with max tree depth
 		if(treeDepth > 50){
 			
-			return q_node.rollout(state, treeDepth);
+			return q_node.rollout(state_clone, treeDepth);
 			
 		}
 		

@@ -121,7 +121,7 @@ public class QNode implements POMCPConstance{
 		
 		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
         int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+ fsmlevel];
-        int[] gussingObservation = bl.hideState(pl, bl.cloneOfState(bl.state));
+        int[] gussingObservation = bl.hideState(pl, BoardLayout.cloneOfState(bl.state));
         
 		for(int ind_player = 0; ind_player < GameStateConstants.NPLAYERS; ind_player++ ){
 			// TODO: Check this function to update accordingly
@@ -142,7 +142,7 @@ public class QNode implements POMCPConstance{
 	
 	public int getHashCodeFromArray(int[] state){
 		{
-	        int [] s2 = state.clone();
+	        int [] s2 = BoardLayout.cloneOfState(state);
 	        
 	        state[GameStateConstants.OFS_TURN] = 0;
 	        state[GameStateConstants.OFS_FSMLEVEL] = 0;

@@ -312,8 +312,12 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
         
         if (ind==-1)
             return;
-        boardlayout.setState((int [])boardlayout.gamelog.states.get(ind+1));
-            jTextField1.setText(boardlayout.gamelog.toString(ind));
+        int max_lenght = boardlayout.gamelog.states.size();
+        if(max_lenght >= ind - 1 ){
+        	boardlayout.setState((int [])boardlayout.gamelog.states.get(ind+1));
+        	jTextField1.setText(boardlayout.gamelog.toString(ind));
+        }
+            
         settlersPanel1.repaint();        
                 
     }//GEN-LAST:event_jList1ValueChanged

@@ -69,7 +69,7 @@ public class POMCPPlayer extends smartsettlers.player.Player{
     	  
     	  // Clear up the particle and update according the full state information
     	  pomcp_settler.getRoot().getBelife().updateFullyObservable();
-    	  state = BoardLayout.cloneOfState(bl.state);
+    	  state = BoardLayout.cloneOfState(s);
     	  // using normal UCT search with UCT tree
     	  a = pomcp_settler.action_selection();
       }
@@ -90,13 +90,14 @@ public class POMCPPlayer extends smartsettlers.player.Player{
 	// Hide the information to POMDPs agent if the card is not play yet
 	// Assuming that POMDPs is the first player
 	public int [] makeDevCarInvsible(int[] s){
+		int[] state_clone = BoardLayout.cloneOfState(s);
 		for(int i = 1; i < GameStateConstants.NPLAYERS; i++){
 			for(int j = 0; j<GameStateConstants.N_DEVCARDTYPES;i++){
-				s[OFS_PLAYERDATA[i] + OFS_OLDCARDS+ j]=(Integer) null;
-				s[OFS_PLAYERDATA[i] + OFS_OLDCARDS+ j]=(Integer) null;
+				state_clone[OFS_PLAYERDATA[i] + OFS_OLDCARDS+ j]=(Integer) null;
+				state_clone[OFS_PLAYERDATA[i] + OFS_OLDCARDS+ j]=(Integer) null;
 			}
 		}
-		return s;
+		return state_clone;
 	}
 }
 

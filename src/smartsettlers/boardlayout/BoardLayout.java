@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
+ 
 package smartsettlers.boardlayout;
 
 import java.awt.*;
@@ -33,6 +33,7 @@ import convNNSettler.*;
  * @author szityu
  */
 /*Improve by Agreme(Makara Phav)*/
+// if working on HMM change the player at players[] initialization
 public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
 {
 	//Help parameters for POMCP
@@ -810,7 +811,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS -1 ; pl++)
+        for (pl=0; pl<NPLAYERS -1  ; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
@@ -854,6 +855,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int[] players_winningRate;
         int[] state = cloneOfState(s);
         int[] trad;
+        int state_fml = 0;
         int numTradOffer = 0;
         boolean offer_answer = false;
         
@@ -948,12 +950,10 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].listPossibilities(s);
         player[pl].selectAction(s,a);
         
-        
         if (isLoggingOn)
             gamelog.addAction(a);
         
         player[pl].performAction(s, a);
-        
         stateTransition(s, a);
         /*
         fsmlevel    = s[OFS_FSMLEVEL];
@@ -1793,7 +1793,7 @@ public void recalcLongestRoad(int[] s, int pl)
      * */
     public int[] hideState(int pl, int[] state){
     	
-    	int[] s = this.cloneOfState(state);
+    	int[] s = BoardLayout.cloneOfState(state);
     	
     	for(int i =0; i< N_PLAYER;i++){
     		

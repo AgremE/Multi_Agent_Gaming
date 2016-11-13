@@ -260,11 +260,11 @@ public class UCT_POCMP implements GameStateConstants{
 		int historyDepth = history.size();
 		for(int i = 0; i < NUM_SIMULATION; i++){
 			
-			int[] card_believe_state = root.belief_state.getBelifeState();
+			int[] card_believe_state = BoardLayout.cloneOfState(root.belief_state.getBelifeState());
 			// Change the state according to the belife approximation
 			treeDepth = 0;
 			PeakTreeDepth = 0;
-			double totalReward = root.simulation_v(root.belief_state.getBelifeState(), root, treeDepth);
+			double totalReward = root.simulation_v(card_believe_state, root, treeDepth);
 			StateTotalReward.add(totalReward);
 			StateTreeDepth.add(totalReward);
 			history.resize(historyDepth);
