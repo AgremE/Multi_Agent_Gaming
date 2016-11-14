@@ -121,7 +121,8 @@ public class QNode implements POMCPConstance{
 		
 		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
         int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+ fsmlevel];
-        int[] gussingObservation = bl.hideState(pl, BoardLayout.cloneOfState(bl.state));
+        int[] state_clone = BoardLayout.cloneOfState(bl.state);
+        int[] gussingObservation = bl.hideState(pl, state_clone);
         
 		for(int ind_player = 0; ind_player < GameStateConstants.NPLAYERS; ind_player++ ){
 			// TODO: Check this function to update accordingly
@@ -135,6 +136,7 @@ public class QNode implements POMCPConstance{
 			}
 		}
 		gussingObservation = bl.stateActionObservation(gussingObservation, action);
+		state_clone = null;
 		return gussingObservation;
 	}
 	
@@ -161,10 +163,9 @@ public class QNode implements POMCPConstance{
 		double total_reward = 0.0;
 		double discount = 1.0;
 		int numSteps;
-		//int[] state_clone  = BoardLayout.cloneOfState(state);
+		int[] state_clone  = BoardLayout.cloneOfState(state);
 		// TODO: check the condition of MAX_DEPTH
-		int[] state_clone = BoardLayout.cloneOfState(state);
-		for ( numSteps = 0; numSteps +  depth < MAX_DEPTH_ROLLOUT; numSteps++){
+		for ( numSteps = 0; numSteps +  depth < 500; numSteps++){
 			
 	        double reward;
 	        
@@ -189,6 +190,7 @@ public class QNode implements POMCPConstance{
             	break;
             }
 		}
+		state_clone =  null;
 		return total_reward;
 	}
 	

@@ -103,6 +103,7 @@ public class UCT_POCMP implements GameStateConstants{
 		this.state = vnode.getBelifeState();
 		// Change the root from here
 		this.root = vnode;
+		belifes = null;
 		vnode = null;
 		return true;
 	}
@@ -181,9 +182,7 @@ public class UCT_POCMP implements GameStateConstants{
 		public void mtcs_randome_rollout(VNode vnode){
 			
 			int history_depth = history.size();
-			int[] bliefe_state = root.belief_state.getBelifeState();
 			int[] state = BoardLayout.cloneOfState(vnode.getBelifeState());
-			int[][] action_pool;
 
 			int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL]; // To access the level of game state
 	        int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER + fsmlevel];// To access the player number
@@ -251,6 +250,8 @@ public class UCT_POCMP implements GameStateConstants{
 				vnode.stage = SEARCH_STAGE.UCT_ROLLOUT;
 				
 			}
+			state = null;
+			
 		}
 		
 		
@@ -268,6 +269,7 @@ public class UCT_POCMP implements GameStateConstants{
 			StateTotalReward.add(totalReward);
 			StateTreeDepth.add(totalReward);
 			history.resize(historyDepth);
+			card_believe_state=null;
 			/*try {
 				System.out.println(root.Children.size()+"\n");
 				TimeUnit.SECONDS.sleep(100);

@@ -138,12 +138,13 @@ public class VNode implements POMCPConstance{
 		// It should replace back with max tree depth
 		if(treeDepth > 50){
 			
-			return q_node.rollout(state_clone, treeDepth);
+			return q_node.rollout(state_clone, treeDepth); 
 			
 		}
 		
 		double total_reward = q_node.simulate_q(q_node, state_clone, treeDepth);
 		v_node.REWARD = total_reward;
+		state_clone = null;
 		
 		return total_reward;
 	}

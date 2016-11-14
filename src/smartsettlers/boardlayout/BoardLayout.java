@@ -32,7 +32,8 @@ import convNNSettler.*;
  *
  * @author szityu
  */
-/*Improve by Agreme(Makara Phav)*/
+
+/*Improve by Agreme@(Makara Phav)*/
 // if working on HMM change the player at players[] initialization
 public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
 {
@@ -45,6 +46,9 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public int card_play_this_round = 0 ;
 	public boolean hiddenInfo = false;
 	
+	// Help function for HMM Player
+	public int[][] palyingCardTimeStem = new int[N_DEVCARDTYPES][500];
+	// Help parameters for MM player
 	
 	// Help Parameters for Simulation of trading
 	public int NUM_IT = 500;
@@ -811,13 +815,13 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS -1  ; pl++)
+        for (pl=0; pl<NPLAYERS   ; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
         }
         // POMCPPlayer player created
-        player[NPLAYERS - 1] = new POMCPPlayer(this,NPLAYERS - 1, true);
+        //player[NPLAYERS - 1] = new POMCPPlayer(this,NPLAYERS - 1, true);
         //player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
         
         s = new int[STATESIZE];

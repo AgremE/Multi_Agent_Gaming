@@ -313,7 +313,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
         if (ind==-1)
             return;
         int max_lenght = boardlayout.gamelog.states.size();
-        if(max_lenght >= ind - 1 ){
+        if(ind+1 < max_lenght - 1 ){
         	boardlayout.setState((int [])boardlayout.gamelog.states.get(ind+1));
         	jTextField1.setText(boardlayout.gamelog.toString(ind));
         }
