@@ -696,12 +696,17 @@ public abstract class Player implements GameStateConstants
                     s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + val]++;
                 
                 s[OFS_NCARDSGONE] ++;
+                // HMM player Helper
+                bl.buyingCardTimeStamp[pl][CARD_FREERESOURCE][s[OFS_NCARDSGONE]] = fsmlevel; 
+                
                 break;
             case A_PLAYCARD_FREERESOURCE:
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_FREERESOURCE]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_FREERESOURCE]++;
-                
+                // HMM player Helper
+                bl.palyingCardTimeStamp[pl][CARD_FREERESOURCE][s[OFS_NCARDSGONE]] = fsmlevel;
+                // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_FREERESOURCE]++;
                 
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[1]] ++;
@@ -711,7 +716,9 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_MONOPOLY]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_MONOPOLY]++;
-                
+                // HMM player Helper
+                bl.palyingCardTimeStamp[pl][CARD_FREERESOURCE][s[OFS_NCARDSGONE]] = fsmlevel;
+                // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_MONOPOLY]++;
                 
                 for (ind = 0; ind<NPLAYERS; ind++)
@@ -726,7 +733,9 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_FREEROAD]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_FREEROAD]++;
-                
+                // HMM player Helper
+                bl.palyingCardTimeStamp[pl][CARD_FREERESOURCE][s[OFS_NCARDSGONE]] = fsmlevel;
+                // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_FREEROAD]++;
                 
                 break;
@@ -734,7 +743,9 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_KNIGHT]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_KNIGHT]++;
-                
+                // HMM player Helper
+                bl.palyingCardTimeStamp[pl][CARD_FREERESOURCE][s[OFS_NCARDSGONE]] = fsmlevel;
+                // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_KNIGHT]++;
                 
                 bl.recalcLargestArmy(s);
@@ -799,6 +810,9 @@ public abstract class Player implements GameStateConstants
                 for (ind=0; ind<NCARDTYPES; ind++)
                 {
                     s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + ind] += s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + ind];
+                    if(s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + ind]!=0){
+                    	CardTimeStamp cardTime = new CardTimeStamp(ind, fsmlevel);
+                    }
                     cardBought += s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + ind];
                     s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + ind] = 0;
                     cardAvailable += s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + ind];

@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,16 +48,25 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public boolean hiddenInfo = false;
 	
 	// Help function for HMM Player
-	public int[][] palyingCardTimeStem = new int[N_DEVCARDTYPES][500];
+	public int[][][] palyingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
+	public int[][][] buyingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
+	public int[][] playingAveragingTime = new int[NPLAYERS][N_DEVCARDTYPES];//Storing inside the data.txt
+	
+	
 	// Help parameters for MM player
+	public int[][] playingCardTransition = new int[N_DEVCARDTYPES][N_DEVCARDTYPES];
+
 	
 	// Help Parameters for Simulation of trading
 	public int NUM_IT = 500;
 	public int MAX_HEAP = 1000;
 	public int[] currentProductionNumber = new int[19];
+	
 	//For translating the production into ConvNN input form
 	public int[][][] production_since = new int[N_PLAYER][N_VERTICES][N_RESOURCES];
 	public int[][] total_production_since = new int[N_VERTICES][N_RESOURCES];
+	
+	//END
 	
     public static final int[][] PORT_COORD = {
         { 3, 0, 1},
