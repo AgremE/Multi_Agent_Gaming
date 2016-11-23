@@ -7,8 +7,6 @@ import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.apache.poi.poifs.property.Child;
-
 import smartsettlers.boardlayout.ActionList;
 import smartsettlers.boardlayout.BoardLayout;
 import smartsettlers.boardlayout.GameStateConstants;

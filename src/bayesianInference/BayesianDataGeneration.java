@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.apache.poi.hmef.attribute.MAPIAttribute;
-
 import smartsettlers.boardlayout.GameStateConstants;
 
 /*

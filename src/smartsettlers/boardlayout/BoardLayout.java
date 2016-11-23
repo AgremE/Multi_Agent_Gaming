@@ -15,11 +15,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-
 import smartsettlers.player.*;
 import smartsettlers.util.*;
 import tradingPOMDPs.TradingAction;
@@ -48,9 +43,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public boolean hiddenInfo = false;
 	
 	// Help function for HMM Player
-	public int[][][] palyingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
+	// Assumption about the playing time
+	// the oldest card will play first in case of duplicate file
+	
+	public int[][][] playingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
 	public int[][][] buyingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
-	public int[][] playingAveragingTime = new int[NPLAYERS][N_DEVCARDTYPES];//Storing inside the data.txt
+	public int[][][] playingAveragingTime = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];//Storing inside the data.txt
 	
 	
 	// Help parameters for MM player
@@ -58,7 +56,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 
 	
 	// Help Parameters for Simulation of trading
-	public int NUM_IT = 500;
+	public int NUM_IT = 5000;
 	public int MAX_HEAP = 1000;
 	public int[] currentProductionNumber = new int[19];
 	
@@ -848,6 +846,15 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 break;
             }
         }
+        for(int player = 0; player < NPLAYERS; player++){
+			for(int ind_type = 0; ind_type < N_DEVCARDTYPES; ind_type++){
+				for(int ind_card = 0; ind_card < NCARDS; ind_card++){
+					playingCardTimeStamp[player][ind_type][ind_card]=0;
+					buyingCardTimeStamp[player][ind_type][ind_card]=0;
+					playingAveragingTime[player][ind_type][ind_card]=0;//Storing inside the data.txt
+				}
+			}
+		}
         int[] a = new int[ACTIONSIZE];
         GameTick(s, a);
         setState(s);
@@ -1949,7 +1956,6 @@ public void recalcLongestRoad(int[] s, int pl)
         {
             s[OFS_FSMSTATE+fsmlevel] = S_FINISHED;
         }
-        
         return s; 
     }
     /*

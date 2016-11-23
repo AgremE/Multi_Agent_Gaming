@@ -7,8 +7,6 @@ import java.util.Hashtable;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.poi.poifs.filesystem.NPOIFSDocument;
-
 import smartsettlers.boardlayout.BoardLayout;
 import smartsettlers.boardlayout.GameStateConstants;
 /*

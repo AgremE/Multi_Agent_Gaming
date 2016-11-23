@@ -352,6 +352,36 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             //boardlayout.GameTick(boardlayout.state,boardlayout.action);
             listModel.addElement(boardlayout.gamelog.toString());
         }
+        try {
+        	String content = "";
+			for(int pl = 0; pl < NPLAYERS; pl++){
+				for(int ind_type = 0; ind_type < N_DEVCARDTYPES; ind_type++){
+					for(int ind_card = 0; ind_card < NCARDS; ind_card++){
+						
+						if(boardlayout.playingAveragingTime[pl][ind_type][ind_card] != 0){
+							content = content.concat("Type: "+ind_type + " "+boardlayout.playingAveragingTime[pl][ind_type][ind_card]+"\n");
+						}
+					}
+				}
+			}
+			System.out.println(content);
+			File file = new File("C:\\Users\\AILAB\\Documents\\gameStatistic.txt");
+
+			// if file doesnt exists, then create it
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+
+			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(content);
+			bw.close();
+
+			System.out.println("Done");
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
         boardlayout.GameTick(boardlayout.state,boardlayout.action);
         listModel.addElement(boardlayout.gamelog.toString());
         
@@ -413,7 +443,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     	//boardlayout.UCTsimulateGame(boardlayout.state);
     	int[][] game_data_offer = new int[10][1];
     	int[][] game_data_accepted = new int[10][1];
-    	for(int i =0; i<10;i++){
+    	for(int i =0; i<100;i++){
         	JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
             if(boardlayout.getWinner(boardlayout.state) != -1){
                 initComponents();
@@ -424,8 +454,6 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 boardlayout.InitBoard();
             }
             playOneGame();
-            game_data_offer[i][0] = boardlayout.tradingOffer;
-            game_data_accepted[i][0] = boardlayout.tradingAccepte;
             jList1.validate();
             jScrollPane1.validate();
 
@@ -435,6 +463,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             settlersPanel1.repaint();
 		}
     	//Write data into text file
+    	/*
 		float rate = 0;
 		float total_offer = 0, total_accepted = 0;
 		int i;
@@ -444,6 +473,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     		rate = (float)(total_accepted/total_offer);
     		
     	}
+    	
     	try {
 
 			String content = "Final Game Statistic with Number of Iteration "+ boardlayout.NUM_IT +": Rate: "
@@ -465,7 +495,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed

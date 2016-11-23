@@ -201,7 +201,9 @@ public class GameLog implements GameStateConstants, HexTypeConstants {
             return str;
         }
     }
-        
+    public int getSize(){
+    	return this.size;
+    }
     @Override
         public String toString()
         {

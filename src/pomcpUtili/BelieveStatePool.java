@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import org.apache.poi.hslf.record.InteractiveInfo;
 
 import smartsettlers.boardlayout.BoardLayout;
 import smartsettlers.boardlayout.GameStateConstants;

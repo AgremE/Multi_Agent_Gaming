@@ -3,7 +3,10 @@
 
 package smartsettlers.player;
 
+import java.sql.Time;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
+
 import smartsettlers.boardlayout.*;
 import smartsettlers.util.*;
 
@@ -555,6 +558,7 @@ public abstract class Player implements GameStateConstants
     {
         int fsmlevel    = s[OFS_FSMLEVEL];
         int fsmstate    = s[OFS_FSMSTATE+fsmlevel];
+        
         int pl          = s[OFS_FSMPLAYER+fsmlevel];
         int i, j, ind, val, ind2, k, ncards;
         int another_player = 0;
@@ -697,7 +701,7 @@ public abstract class Player implements GameStateConstants
                 
                 s[OFS_NCARDSGONE] ++;
                 // HMM player Helper
-                bl.buyingCardTimeStamp[pl][CARD_FREERESOURCE][s[OFS_NCARDSGONE]] = fsmlevel; 
+                bl.buyingCardTimeStamp[pl][val][s[OFS_NCARDSGONE]] = bl.gamelog.getSize(); 
                 
                 break;
             case A_PLAYCARD_FREERESOURCE:
@@ -705,7 +709,17 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_FREERESOURCE]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_FREERESOURCE]++;
                 // HMM player Helper
-                bl.palyingCardTimeStamp[pl][CARD_FREERESOURCE][s[OFS_NCARDSGONE]] = fsmlevel;
+                for(int indCard = 0; indCard < NCARDS; indCard++){
+                	if(bl.buyingCardTimeStamp[pl][CARD_FREERESOURCE][indCard] != 0){
+                		
+                		bl.playingCardTimeStamp[pl][CARD_FREERESOURCE][indCard] = bl.gamelog.getSize();
+                		
+                		bl.playingAveragingTime[pl][CARD_FREERESOURCE][indCard] = 
+                				bl.playingCardTimeStamp[pl][CARD_FREERESOURCE][indCard] 
+                						- bl.buyingCardTimeStamp[pl][CARD_FREERESOURCE][indCard];
+                		bl.buyingCardTimeStamp[pl][CARD_FREERESOURCE][indCard] = 0;
+                	}
+                }
                 // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_FREERESOURCE]++;
                 
@@ -713,11 +727,21 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[2]] ++;
                 break;
             case A_PLAYCARD_MONOPOLY:
+            	
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_MONOPOLY]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_MONOPOLY]++;
                 // HMM player Helper
-                bl.palyingCardTimeStamp[pl][CARD_FREERESOURCE][s[OFS_NCARDSGONE]] = fsmlevel;
+                for(int indCard = 0; indCard < NCARDS; indCard++){
+                	if(bl.buyingCardTimeStamp[pl][CARD_MONOPOLY][indCard] != 0){
+                		
+                		bl.playingCardTimeStamp[pl][CARD_MONOPOLY][indCard] = bl.gamelog.getSize(); 
+                		bl.playingAveragingTime[pl][CARD_MONOPOLY][indCard] = 
+                				bl.playingCardTimeStamp[pl][CARD_MONOPOLY][indCard] 
+                						- bl.buyingCardTimeStamp[pl][CARD_MONOPOLY][indCard];
+                		bl.buyingCardTimeStamp[pl][CARD_MONOPOLY][indCard] = 0;
+                	}
+                }
                 // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_MONOPOLY]++;
                 
@@ -734,7 +758,16 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_FREEROAD]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_FREEROAD]++;
                 // HMM player Helper
-                bl.palyingCardTimeStamp[pl][CARD_FREERESOURCE][s[OFS_NCARDSGONE]] = fsmlevel;
+                for(int indCard = 0; indCard < NCARDS; indCard++){
+                	if(bl.buyingCardTimeStamp[pl][CARD_FREEROAD][indCard] != 0){
+                		
+                		bl.playingCardTimeStamp[pl][CARD_FREEROAD][indCard] = bl.gamelog.getSize(); 
+                		bl.playingAveragingTime[pl][CARD_FREEROAD][indCard] = 
+                				bl.playingCardTimeStamp[pl][CARD_FREEROAD][indCard] 
+                						- bl.buyingCardTimeStamp[pl][CARD_FREEROAD][indCard];
+                		bl.buyingCardTimeStamp[pl][CARD_FREEROAD][indCard] = 0;
+                	}
+                }
                 // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_FREEROAD]++;
                 
@@ -744,11 +777,19 @@ public abstract class Player implements GameStateConstants
                 s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + CARD_KNIGHT]--;
                 s[OFS_PLAYERDATA[pl] + OFS_USEDCARDS + CARD_KNIGHT]++;
                 // HMM player Helper
-                bl.palyingCardTimeStamp[pl][CARD_FREERESOURCE][s[OFS_NCARDSGONE]] = fsmlevel;
+                for(int indCard = 0; indCard < NCARDS; indCard++){
+                	if(bl.buyingCardTimeStamp[pl][CARD_KNIGHT][indCard] != 0){
+                		bl.playingCardTimeStamp[pl][CARD_KNIGHT][indCard] = bl.gamelog.getSize(); 
+                		bl.playingAveragingTime[pl][CARD_KNIGHT][indCard] = 
+                				bl.playingCardTimeStamp[pl][CARD_KNIGHT][indCard] 
+                						- bl.buyingCardTimeStamp[pl][CARD_KNIGHT][indCard];
+                		bl.buyingCardTimeStamp[pl][CARD_KNIGHT][indCard] = 0;
+                	}
+                }
                 // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_KNIGHT]++;
-                
                 bl.recalcLargestArmy(s);
+                
             // flow to next case! 
             case A_PLACEROBBER:
                 s[OFS_ROBBERPLACE] = a[1];
@@ -1082,6 +1123,7 @@ public abstract class Player implements GameStateConstants
             	break;*/
         }
     }
+
     public int getTotalResourceCount(int player){
     	int total = 0;
     	for(int ind_res = 0; ind_res < N_RESOURCES; ind_res++){
