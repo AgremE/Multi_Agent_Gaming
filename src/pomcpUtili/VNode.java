@@ -7,7 +7,6 @@ import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 
-import org.apache.poi.poifs.property.Child;
 
 import smartsettlers.boardlayout.ActionList;
 import smartsettlers.boardlayout.BoardLayout;
@@ -28,7 +27,7 @@ public class VNode implements POMCPConstance{
 	final double EXPLORATION_CONSTANCE = 1.5;
 	BelifeState belief_state;// need to approximate by unweighted particle filter
 	BoardLayout bl;
-	Random rnd = new Random();
+	Random rnd;
 	ActionList possibilities_list;
 
 	public enum SEARCH_STAGE{
@@ -45,6 +44,7 @@ public class VNode implements POMCPConstance{
 		
 		
 		this.belief_state = new BelifeState(bl.eachPlayerCardNotReveal,bl.eachPlayerCardPlaiedThisRound,bl);
+		this.rnd = new Random();
 		
 		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
 	    int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
@@ -58,12 +58,19 @@ public class VNode implements POMCPConstance{
 		for(int i = 0; i < this.NUM_ACTION; i++){
 			
 			int[] action = bl.possibilities.action[i];
-			QNode node = new QNode(bl, bl.possibilities.action[i]);
+			QNode node;
+			if(bl.factory.checkQNodeFatoryEmpty()){
+				node = new QNode(bl, action);
+			}
+			else{
+				node = bl.factory.popQnode(action);
+			}
 			node.setValue(0, 0);
 			int action_hash_code = getHashCodeFromArray(action);
 			Children.put(action_hash_code, node);
 			
 		}
+		this.setValue(0.0, 0);
 		stage = SEARCH_STAGE.RANDOME_ROLLOUT;
 	}
 	
@@ -75,6 +82,7 @@ public class VNode implements POMCPConstance{
 		
 		this.observed = BelifeState.getStateBeforeHashCompare(observation);
 		this.belief_state = new BelifeState(bl.eachPlayerCardNotReveal,bl.eachPlayerCardPlaiedThisRound,bl);
+		this.rnd = new Random();
 		
 		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
 	    int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
@@ -88,11 +96,18 @@ public class VNode implements POMCPConstance{
 		for(int i = 0; i < this.NUM_ACTION; i++){
 			
 			int[] action = bl.possibilities.action[i];
-			QNode node = new QNode(bl, bl.possibilities.action[i]);
+			QNode node;
+			if(bl.factory.checkQNodeFatoryEmpty()){
+				node = new QNode(bl, action);
+			}
+			else{
+				node = bl.factory.popQnode(action);
+			}
 			node.setValue(0, 0);
 			int action_hash_code = getHashCodeFromArray(action);
 			Children.put(action_hash_code, node);
 		}
+		this.setValue(0.0, 0);
 		stage = SEARCH_STAGE.RANDOME_ROLLOUT;
 	}
 	
@@ -167,7 +182,12 @@ public class VNode implements POMCPConstance{
 			//q_node might not be exist
 			if(q_node == null){
 				int hash_action = getHashCodeFromArray(action);
-				QNode node = new QNode(bl, action);
+				QNode node;
+				if(bl.factory.checkQNodeFatoryEmpty()){
+					node = new QNode(bl, action);
+				}else{
+					node = bl.factory.popQnode(action);
+				}
 				v_node.Children.put(hash_action,node);
 				q_node = v_node.Children.get(getHashCodeFromArray(bl.possibilities.action[ind_action]));
 				q_visit = q_node.VISIT;
@@ -241,6 +261,10 @@ public class VNode implements POMCPConstance{
 		this.VISIT = count;
 		
 	}
+	public void setObservation(int[] observation){
+		this.observed = observation;
+	}
+	
 	
 	// get belife state withing this VNode
 	public int[] getBelifeState(){
@@ -254,5 +278,57 @@ public class VNode implements POMCPConstance{
 		return this.belief_state;
 	}
 	
+	public VNode initVNodeFromFactory(VNode vnode){
+		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
+	    int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
+		bl.player[pl].listPossibilities(bl.state);
+		
+		for(int i = 0; i < this.NUM_ACTION; i++){
+			
+			int[] action = bl.possibilities.action[i];
+			QNode node;
+			if(bl.factory.checkQNodeFatoryEmpty()){
+				node = new QNode(bl, bl.possibilities.action[i]);
+			}
+			else{
+				node = bl.factory.popQnode(action);
+				if (node.Children == null){
+					node.Children = new Hashtable<>();
+				}
+			}
+			int action_hash_code = getHashCodeFromArray(action);
+			vnode.Children.put(action_hash_code, node);
+		}
+		return vnode;
+	}
+	
+	//init child once freshly taking out of the factory
+	/*
+	public VNode initChild(VNode vnode){
+		int fsmlevel    = bl.state[GameStateConstants.OFS_FSMLEVEL];
+	    int pl          = bl.state[GameStateConstants.OFS_FSMPLAYER+fsmlevel];
+	    
+		bl.player[pl].listPossibilities(bl.state);
+		this.bl = bl;
+		NUM_ACTION = bl.possibilities.n;
+		possibilities_list = bl.possibilities;
+		
+		// put all the result of the possible action inside the list of children
+		for(int i = 0; i < this.NUM_ACTION; i++){
+			
+			int[] action = bl.possibilities.action[i];
+			QNode node;
+			if(bl.factory.checkQNodeFatoryEmpty()){
+				node = new QNode(bl, action);
+			}
+			else{
+				node = bl.factory.popQnode(action);
+			}
+			node.setValue(0, 0);
+			int action_hash_code = getHashCodeFromArray(action);
+			Children.put(action_hash_code, node);
+			
+		}
+	}*/
 	
 }

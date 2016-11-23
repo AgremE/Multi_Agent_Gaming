@@ -14,11 +14,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Cell;
-
 import smartsettlers.player.*;
 import smartsettlers.util.*;
 import tradingPOMDPs.TradingAction;
@@ -26,6 +21,7 @@ import tradingPOMDPs.TradingUtil;
 import uct.TreeNode;
 import uct.UCT;
 import convNNSettler.*;
+import factoryFacility.FactorFacilityUtili;
 
 
 /**
@@ -45,6 +41,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public int numberCardBoughtThisRound = 0;// done
 	public int card_play_this_round = 0 ;
 	public boolean hiddenInfo = false;
+	public FactorFacilityUtili factory = new FactorFacilityUtili();
 	
 	// Help function for HMM Player
 	public int[][] palyingCardTimeStem = new int[N_DEVCARDTYPES][500];
@@ -815,13 +812,13 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS   ; pl++)
+        for (pl=0; pl<NPLAYERS - 1  ; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
         }
         // POMCPPlayer player created
-        //player[NPLAYERS - 1] = new POMCPPlayer(this,NPLAYERS - 1, true);
+        player[NPLAYERS - 1] = new POMCPPlayer(this,NPLAYERS - 1, true);
         //player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
         
         s = new int[STATESIZE];

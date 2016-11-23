@@ -87,7 +87,7 @@ public class UCT_POCMP implements GameStateConstants{
 		}
 		// fixing the particle deprivation problems
 		else{
-			vnode = new VNode(bl);
+			vnode = new VNode(bl,observation);
 			
 			for(int num_particle = 0 ; num_particle < POMCPConstance.TOTAL_PARTICLE; num_particle++){
 				
@@ -102,9 +102,10 @@ public class UCT_POCMP implements GameStateConstants{
 		
 		this.state = vnode.getBelifeState();
 		// Change the root from here
+		// Need to push all the qnode and vnode into the list of factory
+		bl.factory.pushAllQnode(root);
 		this.root = vnode;
 		belifes = null;
-		vnode = null;
 		return true;
 	}
 	
@@ -206,14 +207,16 @@ public class UCT_POCMP implements GameStateConstants{
 				QNode q_node = root.Children.get(action_hash);
 				if(q_node == null){
 					
-					QNode node = new QNode(bl, action);
-					node.setValue(0, 0);
-					int action_hash_code = root.getHashCodeFromArray(action);
-					root.Children.put(action_hash_code, node);
+					if(bl.factory.checkQNodeFatoryEmpty()){
+						q_node = new QNode(bl, action);
+					}
+					else{
+						q_node = bl.factory.popQnode(action);
+					}
+					root.Children.put(action_hash, q_node);
 					
-					
-					q_node = root.Children.get(action_hash);
 				}
+				
 				if(q_node.Children == null){
 					System.out.println("Childrean Null");
 				}
@@ -232,9 +235,20 @@ public class UCT_POCMP implements GameStateConstants{
 					
 					else{
 						
-						root.Children.get(action_hash).Children.put(getHashCodeFromObservationArray(observation), 
-								q_node.expand_vnode(observation, history_depth));
-						v_node = root.Children.get(action_hash).Children.get(observation_hash);
+						vnode = q_node.expand_vnode(observation, history_depth);
+						
+						if(root.Children.get(action_hash) == null){
+							root.Children.put(action_hash, q_node);
+						}
+						
+						if(root.Children.get(action_hash).Children== null){
+							root.Children.get(action_hash).Children = new Hashtable<>();
+							root.Children.get(action_hash).Children.put(observation_hash, vnode);
+						}
+						else{
+							root.Children.get(action_hash).Children.put(observation_hash, vnode);
+						}
+						//v_node = root.Children.get(action_hash).Children.get(observation_hash);
 					}
 					
 					immediateResard = q_node.rewardingModel(action[0]);

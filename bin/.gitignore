@@ -1,9 +1,4 @@
-/smartsettlers/
-/soc/
-/tradingPOMDPs/
-/uct/
 /pomcpUtili/
-/HMMUtitli/
+/smartsettlers/
+/bayesianInference/
 /factoryFacility/
-/hmmUtitli/
-/markovModelUtili/

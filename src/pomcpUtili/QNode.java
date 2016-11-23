@@ -7,8 +7,8 @@ import java.util.Hashtable;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.poi.poifs.filesystem.NPOIFSDocument;
 
+import smartsettlers.boardlayout.ActionList;
 import smartsettlers.boardlayout.BoardLayout;
 import smartsettlers.boardlayout.GameStateConstants;
 /*
@@ -20,7 +20,7 @@ public class QNode implements POMCPConstance{
 	int VISIT = 0;
 	double REWARD = 0;
 	int[] action;
-	Random rnd = new Random();
+	Random rnd;
 	BoardLayout bl;
 	public Hashtable<Integer, VNode> Children;// key is observation as an array of integer
 	/*
@@ -30,7 +30,9 @@ public class QNode implements POMCPConstance{
 	public QNode(BoardLayout bl, int[] action){
 		this.action = action;
 		this.bl = bl;
+		this.rnd = new Random();
 		Children = new Hashtable<>();
+		this.setValue(0.0, 0);
 		
 	}
 	
@@ -197,9 +199,13 @@ public class QNode implements POMCPConstance{
 	
 	// Expending the node from provided observation (in case it is not in the hash table)
 	public VNode expand_vnode(int[] observation, int depth){
-		
-		VNode node = new VNode(this.bl,BelifeState.getStateBeforeHashCompare(observation));
-		node.setValue(0.0, 0);
+		VNode node;
+		if(bl.factory.checkVNodeFactoryEmpty()){
+			node = new VNode(this.bl,BelifeState.getStateBeforeHashCompare(observation));
+		}
+		else{
+			node = bl.factory.popVnode(BelifeState.getStateBeforeHashCompare(observation));
+		}
 		return node;
 	}
 	
@@ -210,13 +216,16 @@ public class QNode implements POMCPConstance{
 		return this.action;
 	}
 	
+	public void setAction(int[] action){
+		this.action = action;
+	}
 	
 	// Set value into this specific node
 	public void setValue(double reward, int count){
 		this.VISIT = count;
 		this.REWARD = reward;
 	}
-	
+	// 
 	
 	// Give some potential rewarding system
 	public double rewardingModel(int action){
