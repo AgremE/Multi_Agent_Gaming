@@ -13,7 +13,7 @@ import smartsettlers.boardlayout.GameStateConstants;
  *  probability is updating due to temperal time step because the prior of game statistic estimation is update due to time of card
  *  pick up 
  */
-
+// TODO: Using this class to generate data for HMM
 public class BayesianDataGeneration implements GameStateConstants {
 	
 	private int[] cardDesk;
