@@ -26,6 +26,7 @@ public class UCT implements GameStateConstants {
     int ntraces;
     private int[] winCount = new int[NPLAYERS];
     private int[] loseCount = new int[NPLAYERS];
+    
     Trace[] traceList;
     Random rnd = new Random();
     
@@ -209,6 +210,7 @@ public class UCT implements GameStateConstants {
             }
             else
             {
+            	// Working to improve the decision making by using longterm expected reward instead
                 v = ((double)node.nwins[k][pl])/(node.nactionvisits[k]) +
                         C0*Math.sqrt(Math.log(node.nactions)/node.nactionvisits[k]);
                 if (echo)
@@ -227,6 +229,64 @@ public class UCT implements GameStateConstants {
         }
         if (echo)
             System.out.printf("sel:%d\n\n", maxind);
+        
+        this.max_outcome = maxv;
+        
+        return maxind;
+        
+    }
+    public int selectAction(int[] s, int pl, boolean echo, boolean expectedLongTermReward)
+    {
+        return selectAction(getHashCode(s),pl, echo, true);
+    }
+    
+    public int selectAction(int hc, int pl, boolean echo, boolean expectedLongTermReward)
+    {
+        int k;
+        double v, maxv;
+        int maxind=0;
+        TreeNode node = getNode(hc);
+        
+        maxv = 0.0;
+        if (node==null) 
+            return 0;
+        
+        if (node.nvisits < MINVISITS)
+        {
+            return rnd.nextInt(node.nactions);
+        }
+        
+        for (k=0; k<node.nactions; k++)
+        {
+        	
+            if (node.nactionvisits[k]==0)
+            {
+                v = MAXVAL;
+                if (echo)
+                {
+                	v = 0.0;
+                }
+            }
+          //Safe
+            else
+            {
+            	// Working to improve the decision making by using long term expected reward instead
+            	v = (node.reward[pl][k]/(double)node.nactionvisits[k]) 
+            			+ C0*Math.sqrt(Math.log(((node.nactions)/node.nactionvisits[k])+1));
+                //v = ((double)node.nwins[k][pl])/(node.nactionvisits[k]) + C0*Math.sqrt(Math.log(node.nactions)/node.nactionvisits[k]);
+                if (echo)
+                {
+                    v = (node.reward[pl][k]/(double)node.nactionvisits[k]);
+                }
+            }
+           //Not safe
+          //Safe
+            if (maxv<v)
+            {
+                maxv = v;
+                maxind = k;
+            }
+        }
         
         this.max_outcome = maxv;
         

@@ -717,6 +717,8 @@ public abstract class Player implements GameStateConstants
                 		bl.playingAveragingTime[pl][CARD_FREERESOURCE][indCard] = 
                 				bl.playingCardTimeStamp[pl][CARD_FREERESOURCE][indCard] 
                 						- bl.buyingCardTimeStamp[pl][CARD_FREERESOURCE][indCard];
+                		bl.cardPlayingTimetimeStamp[CARD_FREERESOURCE][bl.stateRepresentation(bl.playingAveragingTime[pl][CARD_FREERESOURCE][indCard])]+=1;
+                		
                 		bl.buyingCardTimeStamp[pl][CARD_FREERESOURCE][indCard] = 0;
                 	}
                 }
@@ -739,6 +741,7 @@ public abstract class Player implements GameStateConstants
                 		bl.playingAveragingTime[pl][CARD_MONOPOLY][indCard] = 
                 				bl.playingCardTimeStamp[pl][CARD_MONOPOLY][indCard] 
                 						- bl.buyingCardTimeStamp[pl][CARD_MONOPOLY][indCard];
+                		bl.cardPlayingTimetimeStamp[CARD_MONOPOLY][bl.stateRepresentation(bl.playingAveragingTime[pl][CARD_MONOPOLY][indCard])]+=1;
                 		bl.buyingCardTimeStamp[pl][CARD_MONOPOLY][indCard] = 0;
                 	}
                 }
@@ -765,6 +768,7 @@ public abstract class Player implements GameStateConstants
                 		bl.playingAveragingTime[pl][CARD_FREEROAD][indCard] = 
                 				bl.playingCardTimeStamp[pl][CARD_FREEROAD][indCard] 
                 						- bl.buyingCardTimeStamp[pl][CARD_FREEROAD][indCard];
+                		bl.cardPlayingTimetimeStamp[CARD_FREEROAD][bl.stateRepresentation(bl.playingAveragingTime[pl][CARD_FREEROAD][indCard])]+=1;
                 		bl.buyingCardTimeStamp[pl][CARD_FREEROAD][indCard] = 0;
                 	}
                 }
@@ -783,6 +787,7 @@ public abstract class Player implements GameStateConstants
                 		bl.playingAveragingTime[pl][CARD_KNIGHT][indCard] = 
                 				bl.playingCardTimeStamp[pl][CARD_KNIGHT][indCard] 
                 						- bl.buyingCardTimeStamp[pl][CARD_KNIGHT][indCard];
+                        bl.cardPlayingTimetimeStamp[CARD_KNIGHT][bl.stateRepresentation(bl.playingAveragingTime[pl][CARD_KNIGHT][indCard])]+=1;
                 		bl.buyingCardTimeStamp[pl][CARD_KNIGHT][indCard] = 0;
                 	}
                 }

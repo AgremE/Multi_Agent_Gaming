@@ -22,6 +22,7 @@ import tradingPOMDPs.TradingUtil;
 import uct.TreeNode;
 import uct.UCT;
 import convNNSettler.*;
+import hmmUtitli.HMMUtili;
 
 
 /**
@@ -49,6 +50,9 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public int[][][] playingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
 	public int[][][] buyingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
 	public int[][][] playingAveragingTime = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];//Storing inside the data.txt
+	public int[][] cardPlayingTimetimeStamp = new int[N_DEVCARDTYPES][14];
+	public int[] revealCardSoFar = new int[N_DEVCARDTYPES];
+	public HMMUtili hmmPredictor = new HMMUtili(this);
 	
 	
 	// Help parameters for MM player
@@ -876,13 +880,27 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int[] players_winningRate;
         int[] state = cloneOfState(s);
         int[] trad;
+        double[][] currentGuess;
         int state_fml = 0;
         int numTradOffer = 0;
         boolean offer_answer = false;
         
-        if(player[pl].isPOMCP()){
-        	getNumberOfCardPurchase(pl);
-        }
+        if(player[pl].isHMMPlayer()){
+        	if(this.hasHiddenInfo()){
+        		hmmPredictor.updateHMMGuessing(this.getCurrentTimeFrame());
+        	}
+        	currentGuess = hmmPredictor.getCurrentGuess();
+        	state = hideState(pl, state);
+        	state = constructHMMGuessState(state);
+        	player[pl].listPossibilities(state);
+            player[pl].selectAction(state,a);
+             
+            if (isLoggingOn)
+                 gamelog.addAction(a);
+             
+            player[pl].performAction(s, a);
+            stateTransition(s, a);
+        }else{
         
        
         //System.out.println("System start trading");
@@ -976,6 +994,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         player[pl].performAction(s, a);
         stateTransition(s, a);
+        
+        }
         /*
         fsmlevel    = s[OFS_FSMLEVEL];
         // Assumming that POMCP is agent number 4 in the list
@@ -1958,6 +1978,166 @@ public void recalcLongestRoad(int[] s, int pl)
         }
         return s; 
     }
+    public int[] clearCard(int[] cardStore){
+    	for(int i = 0; i < cardStore.length; i++){
+    		cardStore[i] = 0;
+    	}
+    	return cardStore;
+    }
+    
+    //Return the state representation
+    public int stateRepresentation(int timeFrame){
+    	int state = 0;
+    	if((timeFrame >= 0)&&(timeFrame <= 4)){
+    		state = 0;
+    	}else if((timeFrame >= 5)&&(timeFrame <= 6)){
+    		state = 1;
+    	}else if((timeFrame >= 6)&&(timeFrame <=7)){
+    		state = 2;
+    	}else if((timeFrame >= 8)&&(timeFrame <= 9)){
+    		state = 3;
+    	}else if((timeFrame >= 10)&&(timeFrame <=11)){
+    		state = 4;
+    	}else if((timeFrame >= 12)&&(timeFrame <= 13)){
+    		state = 5;
+    	}else if((timeFrame >= 14)&&(timeFrame <= 15)){
+    		state = 6;
+    	}else if((timeFrame >= 16)&&(timeFrame <= 20)){
+    		state = 7;
+    	}else if((timeFrame >= 21) && (timeFrame <= 25)){
+    		state = 8;
+    	}else if((timeFrame >= 26)&&(timeFrame <= 30)){
+    		state = 9;
+    	}else if((timeFrame >= 31)&&(timeFrame <=40)){
+    		state = 10;
+    	}else if((timeFrame >= 41)&&(timeFrame<=50)){
+    		state = 11;
+    	}else if((timeFrame > 50)&&(timeFrame <= 60)){
+    		state = 12;
+    	}else if((timeFrame > 60)&&(timeFrame <=100)){
+    		state = 13;
+    	}
+    	else if((timeFrame > 100)){
+    		state = 14;
+    	}
+    	return state;
+    		
+    }
+    
+    public void HMM_MonteCarloSimulation(int[] state){
+    	 
+    	int[] s = null;    
+        int[] a = new int[ACTIONSIZE];// ACTIONSIZE is 5
+
+        TreeNode node;
+        boolean isKnownState = true;
+        int winner;
+        int it;
+        //s2 with the side of 269
+        boolean oldIsLoggingOn = isLoggingOn;
+        isLoggingOn = false;
+        uctTime ++;
+         
+        if (uctTree.tree.size()>MAX_HEAP)
+            uctTree.tree.clear();
+         
+        int fsmlevel    = state[OFS_FSMLEVEL];
+        int pl          = state[OFS_FSMPLAYER+fsmlevel];
+         
+        //Calculate all the possible option of action like dev_card, building, or whatever
+        player[pl].listPossibilities(state);
+        int N_IT = NUM_IT;
+        // Only one action left there is nothing to stimulate there
+        if (possibilities.n == 1)
+            N_IT = 1;
+        // Divide the state into two step 1- UCB and 2- UCT
+        for(it=0; it<N_IT; it++)
+        {
+            isKnownState = true;
+            //Close state s2 in order to protect the original state
+            s = cloneOfState(state);
+            uctTree.clearTraces();
+            int round = 0;
+            while (true)
+            {
+            	// adding rewarding here
+                int hc = UCT.getHashCode(s);
+                node = uctTree.getNode(hc);
+                 
+                //System.out.print(node+" ");
+                fsmlevel    = s[OFS_FSMLEVEL];
+                pl          = s[OFS_FSMPLAYER+fsmlevel];
+                //System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
+                player[pl].listPossibilities(s);
+                int nactions = possibilities.n; //Number of action available
+                int aind; //action index (ind is stand for index)
+                if ((isKnownState) && (node!=null))
+                {             
+                    aind = uctTree.selectAction(hc,pl,false);
+                    uctTree.addTrace(hc, pl, aind);
+                }
+                else if ((isKnownState) && (node==null))
+                {
+                    // first unknown state
+                    isKnownState = false;
+                    // They doing random rollout policy which might lead to bad outcome
+                    aind = possibilities.randomInd();                
+                    uctTree.addState(s,hc, possibilities);
+                    uctTree.addTrace(hc, pl, aind);
+                }
+                else
+                {
+                    // further unknown states
+                    aind = possibilities.randomInd(); 
+                }
+
+                a = possibilities.action[aind];
+                player[pl].performAction_simulation(s, a);
+                stateTransition(s, a);
+                winner = getWinner(s);
+                round++;
+                 
+                if(round == 1000){
+                	break;
+                }
+                if (winner !=-1)
+                    break;
+             }
+            uctTree.update(winner, uctTime);
+        }
+    }
+    
+    
+    public double rewardingModel(int action){
+		switch(action){
+			case GameStateConstants.A_BUILDCITY:
+				return 5;
+			case GameStateConstants.A_BUILDROAD:
+				return 2;
+			case GameStateConstants.A_BUILDSETTLEMENT:
+				return 5;
+			case GameStateConstants.A_BUYCARD:
+				return 1;
+			case GameStateConstants.A_PAYTAX:
+				return 0.5;
+			case GameStateConstants.A_NOTHING:
+				return 0.5;
+			case GameStateConstants.A_PLACEROBBER:
+				return 2;
+			case GameStateConstants.A_PLAYCARD_FREERESOURCE:
+				return 2;
+			case GameStateConstants.A_PLAYCARD_FREEROAD:
+				return 2;
+			case GameStateConstants.A_PLAYCARD_KNIGHT:
+				return 2;
+			case GameStateConstants.A_PLAYCARD_MONOPOLY:
+				return 2;
+			case GameStateConstants.A_THROWDICE:
+				return 0;
+			default:
+				return 0;
+		}
+	}
     /*
     public boolean writeDataIntoExecl(int[] data){
     	
