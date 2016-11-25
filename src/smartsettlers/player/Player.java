@@ -47,7 +47,12 @@ public abstract class Player implements GameStateConstants
     public boolean isPOMCP(){
     	return this.POMCP;
     }
-    
+    public boolean isHMMAgent(){
+    	if((position == NPLAYERS - 1)){
+    		return true;
+    	}
+    	return false;
+    }
     public void listMonopolyPossibilities(int []s)
     {
         int fsmlevel    = s[OFS_FSMLEVEL];
@@ -698,11 +703,10 @@ public abstract class Player implements GameStateConstants
                     s[OFS_PLAYERDATA[pl] + OFS_OLDCARDS + val]++;
                 else
                     s[OFS_PLAYERDATA[pl] + OFS_NEWCARDS + val]++;
-                
-                s[OFS_NCARDSGONE] ++;
                 // HMM player Helper
-                bl.buyingCardTimeStamp[pl][val][s[OFS_NCARDSGONE]] = bl.gamelog.getSize(); 
-                
+                bl.buyingCardTimeStamp[pl][val][s[OFS_NCARDSGONE]] = bl.gamelog.getSize();
+                bl.firstBought[pl][s[OFS_NCARDSGONE]] = bl.gamelog.getSize();
+                s[OFS_NCARDSGONE] ++;
                 break;
             case A_PLAYCARD_FREERESOURCE:
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
@@ -724,6 +728,7 @@ public abstract class Player implements GameStateConstants
                 }
                 // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_FREERESOURCE]++;
+                playedCard(CARD_FREERESOURCE, pl);
                 
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[1]] ++;
                 s[OFS_PLAYERDATA[pl] + OFS_RESOURCES + a[2]] ++;
@@ -747,6 +752,7 @@ public abstract class Player implements GameStateConstants
                 }
                 // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_MONOPOLY]++;
+                playedCard(CARD_MONOPOLY, pl);
                 
                 for (ind = 0; ind<NPLAYERS; ind++)
                 {
@@ -774,7 +780,7 @@ public abstract class Player implements GameStateConstants
                 }
                 // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_FREEROAD]++;
-                
+                playedCard(CARD_FREEROAD, pl);
                 break;
             case A_PLAYCARD_KNIGHT:
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 1;
@@ -793,6 +799,7 @@ public abstract class Player implements GameStateConstants
                 }
                 // POMCP player helper
                 bl.eachPlayerCardPlaiedThisRound[pl][CARD_KNIGHT]++;
+                playedCard(CARD_KNIGHT, pl);
                 bl.recalcLargestArmy(s);
                 
             // flow to next case! 
@@ -867,7 +874,7 @@ public abstract class Player implements GameStateConstants
                 
                 bl.newlyBoughtCardEachPlayer[pl] = cardBought;
                 bl.eachPlayerCardNotReveal[pl] = cardAvailable;
-                
+                this.keepSinceAssign(bl.keepSince, bl.firstBought);
                 s[OFS_PLAYERDATA[pl] + OFS_HASPLAYEDCARD] = 0;
                 break;
                 
@@ -1135,6 +1142,39 @@ public abstract class Player implements GameStateConstants
     		total += bl.state[OFS_PLAYERDATA[player] + OFS_RESOURCES + ind_res];
     	}
     	return total;
+    }
+    
+    // Assuming the card the come first play first
+    public void playedCard(int cardType,int pl){
+    	
+    	for(int j = 0; j < bl.revealCardSoFar[0].length; j++){
+			if(bl.revealCardSoFar[pl][j] == cardType){
+				bl.keepSince[pl][j] = -1;
+				bl.revealCardSoFar[pl][j] = cardType;
+			}
+		}
+    }
+    // keep data of time log since when the player keep that particular card
+    public int[][] keepSinceAssign(int[][] keepSinceData, int[][] firstlyBought){
+    	for(int i = 0; i < keepSinceData.length; i++){
+    		for(int j = 0; j < keepSinceData[0].length; j++){
+    			if(keepSinceData[i][j] != -1){
+    				keepSinceData[i][j] = bl.gamelog.getSize() - firstlyBought[i][j];
+    			}
+    		}
+    	}
+    	return keepSinceData;
+    }
+    
+    // only for the player of HMM agent
+    public void updateRevealCard(int pl, int[][] cardBought){
+    	for(int ind_card = 0; ind_card<NCARDS; ind_card++){
+    		for(int ind_type = 0; ind_type < N_DEVCARDTYPES; ind_type++){
+    			if(cardBought[ind_card][ind_type]!=0){
+    				bl.revealCardSoFar[pl][ind_card] = ind_type;
+    			}
+    		}
+    	}
     }
 
 //    public void listPossibleTrade(int[] s){

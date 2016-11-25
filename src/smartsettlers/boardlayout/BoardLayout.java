@@ -43,15 +43,23 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public int card_play_this_round = 0 ;
 	public boolean hiddenInfo = false;
 	
+	//Not sure what the use of this
+	public int[][][] playingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
+	public int[][][] buyingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
+	// Using this one to construct the data time frame for the conditional probability
+	public int[][][] playingAveragingTime = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];//Storing inside the data.txt
+	public int[][] cardPlayingTimetimeStamp = new int[N_DEVCARDTYPES][14];
+	
 	// Help function for HMM Player
 	// Assumption about the playing time
 	// the oldest card will play first in case of duplicate file
-	
-	public int[][][] playingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
-	public int[][][] buyingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
-	public int[][][] playingAveragingTime = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];//Storing inside the data.txt
-	public int[][] cardPlayingTimetimeStamp = new int[N_DEVCARDTYPES][14];
-	public int[] revealCardSoFar = new int[N_DEVCARDTYPES];
+	public int[][] alreadyPlayed = new int[NPLAYERS][NCARDS];// Keeping which card already played
+	public int[][] keepSince = new int[NPLAYERS][NCARDS];// For tracking the time since player bought it
+	public int[][] firstBought = new int[NPLAYERS][NCARDS]; // For tracking the time when it firstly bought
+	public int[][] revealCardSoFar = new int[N_PLAYER][NCARDS]; // store card type that has been reveal so far
+	public int[][] playerDevCardData = new int[N_PLAYER][NCARDS];
+	// Constructing the likelihood data
+	public int[][][] storeData = new int[NPLAYERS][NCARDS][N_DEVCARDTYPES]; 
 	public HMMUtili hmmPredictor = new HMMUtili(this);
 	
 	
@@ -60,7 +68,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 
 	
 	// Help Parameters for Simulation of trading
-	public int NUM_IT = 5000;
+	public int NUM_IT = 1000;
 	public int MAX_HEAP = 1000;
 	public int[] currentProductionNumber = new int[19];
 	
@@ -827,11 +835,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS   ; pl++)
+        for (pl=0; pl<NPLAYERS - 1  ; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
         }
+        player[N_PLAYER - 1] = new HMMPlayer(this, NPLAYERS);
         // POMCPPlayer player created
         //player[NPLAYERS - 1] = new POMCPPlayer(this,NPLAYERS - 1, true);
         //player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
@@ -884,14 +893,14 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int state_fml = 0;
         int numTradOffer = 0;
         boolean offer_answer = false;
-        
-        if(player[pl].isHMMPlayer()){
+        /*
+        if(player[pl].isHMMAgent()){
         	if(this.hasHiddenInfo()){
-        		hmmPredictor.updateHMMGuessing(this.getCurrentTimeFrame());
+        		hmmPredictor.updateHMMGuessing(this.gamelog.getSize());
         	}
         	currentGuess = hmmPredictor.getCurrentGuess();
         	state = hideState(pl, state);
-        	state = constructHMMGuessState(state);
+        	state = constructHMMGuessState(pl,state);
         	player[pl].listPossibilities(state);
             player[pl].selectAction(state,a);
              
@@ -900,7 +909,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
              
             player[pl].performAction(s, a);
             stateTransition(s, a);
-        }else{
+        }else{ }*/
+   
         
        
         //System.out.println("System start trading");
@@ -995,7 +1005,6 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].performAction(s, a);
         stateTransition(s, a);
         
-        }
         /*
         fsmlevel    = s[OFS_FSMLEVEL];
         // Assumming that POMCP is agent number 4 in the list
@@ -1017,7 +1026,24 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         }*/
     }
     
-    public static void printArray(int[] s)
+    private int[] constructHMMGuessState(int pl, int[] state2) {
+		// TODO Auto-generated method stub
+    	int[][] currentGuessing = hmmPredictor.getCurrentCardGuess();
+    	for(int ind_pl = 0; ind_pl < NPLAYERS; ind_pl++){
+    		if(ind_pl == pl){
+    			continue;
+    		}
+    		for(int ind_card = 0; ind_card<NCARDS; ind_card++){
+    			int type = currentGuessing[ind_pl][ind_card];
+    			if(type != -1){
+    				state2[OFS_PLAYERDATA[ind_pl]+OFS_OLDCARDS+type]++;
+    			}
+    		}
+    	}
+		return state2;
+	}
+
+	public static void printArray(int[] s)
     {
         for (int i=0; i<s.length; i++)
             System.out.print(s[i]+" ");
@@ -2046,6 +2072,7 @@ public void recalcLongestRoad(int[] s, int pl)
          
         //Calculate all the possible option of action like dev_card, building, or whatever
         player[pl].listPossibilities(state);
+        int current_player = pl;
         int N_IT = NUM_IT;
         // Only one action left there is nothing to stimulate there
         if (possibilities.n == 1)
@@ -2058,9 +2085,11 @@ public void recalcLongestRoad(int[] s, int pl)
             s = cloneOfState(state);
             uctTree.clearTraces();
             int round = 0;
+            int first_action = 0;
+            boolean random = false;
             while (true)
             {
-            	// adding rewarding here
+            	double immReward = 0;
                 int hc = UCT.getHashCode(s);
                 node = uctTree.getNode(hc);
                  
@@ -2071,10 +2100,15 @@ public void recalcLongestRoad(int[] s, int pl)
                 player[pl].listPossibilities(s);
                 int nactions = possibilities.n; //Number of action available
                 int aind; //action index (ind is stand for index)
+                
+                //Noted that I change the to add just list of action of current player who doing the simulation
                 if ((isKnownState) && (node!=null))
                 {             
-                    aind = uctTree.selectAction(hc,pl,false);
-                    uctTree.addTrace(hc, pl, aind);
+                    aind = uctTree.selectAction(hc,pl,true,true);
+                    if(pl == current_player){
+                    	uctTree.addTrace(hc, pl, aind);
+                    }
+                    random = false;
                 }
                 else if ((isKnownState) && (node==null))
                 {
@@ -2082,27 +2116,59 @@ public void recalcLongestRoad(int[] s, int pl)
                     isKnownState = false;
                     // They doing random rollout policy which might lead to bad outcome
                     aind = possibilities.randomInd();                
-                    uctTree.addState(s,hc, possibilities);
-                    uctTree.addTrace(hc, pl, aind);
+                    if(pl == current_player){
+                    	uctTree.addState(s,hc, possibilities);
+                        uctTree.addTrace(hc, pl, aind);
+                        hc = UCT.getHashCode(s);
+                        node = uctTree.getNode(hc);
+                       
+                    }
+                    random = false;
                 }
                 else
                 {
                     // further unknown states
-                    aind = possibilities.randomInd(); 
+                    aind = possibilities.randomInd();
+                    random = true;
                 }
 
                 a = possibilities.action[aind];
+                if(round == 0){
+                	first_action = aind;
+                }
+                if(!random){
+                	immReward = rewardingModel(a[0]);
+                    if(uctTree.getNtrace()>0){
+                    	node.rewardActionStep[first_action][uctTree.getNtrace()-1] = immReward;
+                    }
+                    else{
+                    	node.rewardActionStep[first_action][uctTree.getNtrace()] = immReward;
+                    }
+                }
                 player[pl].performAction_simulation(s, a);
                 stateTransition(s, a);
                 winner = getWinner(s);
+                
                 round++;
-                 
+                
                 if(round == 1000){
                 	break;
                 }
                 if (winner !=-1)
                     break;
              }
+            s = cloneOfState(state);
+            int hc = UCT.getHashCode(s);
+            node = uctTree.getNode(hc);
+        	// Update expected reward accordingly
+            if(winner == current_player){
+            	double expected_reward = uctTree.returnReward(first_action, 0, true);
+            	node.setExpectedReward(current_player,first_action, expected_reward);
+            }
+            else{
+            	double expected_reward = uctTree.returnReward(first_action, 0, false);
+            	node.setExpectedReward(current_player, first_action, expected_reward);
+            }
             uctTree.update(winner, uctTime);
         }
     }

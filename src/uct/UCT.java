@@ -38,7 +38,13 @@ public class UCT implements GameStateConstants {
         for (int i=0; i<MAXNTRACES; i++)
             traceList[i] = new Trace();
     }
+    //return ntrace number
+    public int getNtrace(){
+    	return this.ntraces;
+    }
+    
     // Hash Code of state which represent in the tree
+    
     public static int getHashCode(int[] s)
     {
         int [] s2 = s.clone();
@@ -235,12 +241,12 @@ public class UCT implements GameStateConstants {
         return maxind;
         
     }
-    public int selectAction(int[] s, int pl, boolean echo, boolean expectedLongTermReward)
+    public int selectAction(int[] s, int pl, boolean ucb, boolean expectedLongTermReward)
     {
-        return selectAction(getHashCode(s),pl, echo, true);
+        return selectAction(getHashCode(s),pl, ucb, true);
     }
     
-    public int selectAction(int hc, int pl, boolean echo, boolean expectedLongTermReward)
+    public int selectAction(int hc, int pl, boolean ucb, boolean expectedLongTermReward)
     {
         int k;
         double v, maxv;
@@ -259,25 +265,27 @@ public class UCT implements GameStateConstants {
         for (k=0; k<node.nactions; k++)
         {
         	
-            if (node.nactionvisits[k]==0)
+            if (ucb)
             {
-                v = MAXVAL;
-                if (echo)
-                {
-                	v = 0.0;
-                }
+            	if(node.nactionvisits[k]==0){
+            		v = MAXVAL;
+            	}else{
+            		v = (node.expectedReward[pl][k]/(double)node.nactionvisits[k]);
+            	}
+                
             }
           //Safe
             else
             {
-            	// Working to improve the decision making by using long term expected reward instead
-            	v = (node.reward[pl][k]/(double)node.nactionvisits[k]) 
-            			+ C0*Math.sqrt(Math.log(((node.nactions)/node.nactionvisits[k])+1));
-                //v = ((double)node.nwins[k][pl])/(node.nactionvisits[k]) + C0*Math.sqrt(Math.log(node.nactions)/node.nactionvisits[k]);
-                if (echo)
-                {
-                    v = (node.reward[pl][k]/(double)node.nactionvisits[k]);
-                }
+            	if(node.nactionvisits[k] == 0){
+            		v = 0.0;
+            	}else{
+            		// Working to improve the decision making by using long term expected reward instead
+                	v = (node.expectedReward[pl][k]/(double)node.nactionvisits[k]) 
+                			+ C0*Math.sqrt(Math.log(((node.nactions)/node.nactionvisits[k])+1));
+                    //v = ((double)node.nwins[k][pl])/(node.nactionvisits[k]) + C0*Math.sqrt(Math.log(node.nactions)/node.nactionvisits[k]);
+                    
+            	}
             }
            //Not safe
           //Safe
@@ -338,18 +346,55 @@ public class UCT implements GameStateConstants {
     public int getLoseCount(int player){
     	return this.loseCount[player];
     }
+    
     public float getAverageWinLose(int player){
     	return (this.getWinCount(player)/(this.getLoseCount(player) + this.getWinCount(player)));
     }
+    
     public int[] getWinnersCount(){
     	return this.winCount;
+    }
+    final double DISCOUNT_FACTOR = 0.5;
+    public double returnReward(int ind_ac,int depth,boolean leadingToWin){
+    	double reward =0.0;
+    	double temp_reward = 0.0;
+    	if(depth > 1000){
+    		if(leadingToWin){
+    			return 30.0;
+    		}else{
+    			return 0.0;
+    		}
+    	}
+    	if(depth == ntraces){
+    		if(leadingToWin){
+    			return reward + 30;
+    		}else{
+    			return reward;
+    		}
+    		
+    	}
+    	else{
+
+        	TreeNode node = getNode(traceList[depth].hc);
+        	if(node == null){
+        		if(leadingToWin){
+        			return 30.0;
+        		}
+        		else{
+        			return 0.0;
+        		}
+        	}
+    		reward = node.rewardActionStep[ind_ac][depth] + DISCOUNT_FACTOR*returnReward(ind_ac,++depth, leadingToWin);
+    	}
+    	
+    	return reward;
     }
 }
 
 class Trace {
-    public int hc;
-    public int pl; 
-    public int aind;
+    public int hc = 0;
+    public int pl = -1; 
+    public int aind = -1;
     
     public void set(int hc, int pl, int aind)
     {

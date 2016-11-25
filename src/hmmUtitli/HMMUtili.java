@@ -17,8 +17,7 @@ import smartsettlers.boardlayout.GameStateConstants;
 public class HMMUtili implements HMMConstance, GameStateConstants{
 
 	BoardLayout bl;
-	
-	// Current guess will store all the data 
+	// Current guess will store all the data within probability form
 	double[][] currentGuessing;
 	// Model the HMM (transitional matrix)
 	double[][] HMM_TRANSITIONALMATRIX;
@@ -28,11 +27,13 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 	double[] outcome;
 	// Model the prior
 	double[] prior;
+	//get current guess in the card form
+	int[][] cardGuessing = new int[NPLAYERS][NCARDS];
 	
-	public HMMUtili(BoardLayout bl){
+	public HMMUtili(BoardLayout bl_input){
 		
-		this.bl = bl;
-		currentGuessing = new double[NPLAYERS][N_DEVCARDTYPES]; // TODO: Check this condition to verify it
+		this.bl = bl_input;
+		currentGuessing = new double[NPLAYERS][NCARDS]; // TODO: Check this condition to verify it
 		HMM_TRANSITIONALMATRIX = new double[N_DEVCARDTYPES][N_DEVCARDTYPES];
 		HMM_CONDITIONALPRO = new double[N_DEVCARDTYPES][17];
 		prior = new double[N_DEVCARDTYPES];
@@ -85,8 +86,7 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 	//TODO: Check the update variable whether it is updated correctly
 	public void updateHMMGuessing(int timeFrame){
 		int totalHiddenCard = 0;
-		this.updatePrior(bl.revealCardSoFar);
-		bl.revealCardSoFar = bl.clearCard(bl.revealCardSoFar);
+		this.updatePrior();
 		for(int i =0; i<bl.eachPlayerCardNotReveal.length;i++){
 			totalHiddenCard += bl.eachPlayerCardNotReveal[i];
 		}
@@ -105,9 +105,9 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 				}else{
 					int previousState = getIndexMaxElement(this.currentGuessing[i-1]);
 					this.currentGuessing[i] = Matrix.multiplyByMatrix
-															(Matrix.multiplyByMatrix(prior, 
-																HMM_CONDITIONALPRO[bl.stateRepresentation(timeFrame)]),
-																			this.HMM_TRANSITIONALMATRIX);
+															(Matrix.multiplyByMatrix(prior,
+																			this.HMM_TRANSITIONALMATRIX[previousState])
+																				,this.HMM_CONDITIONALPRO[bl.stateRepresentation(timeFrame)]);
 				}
 			}
 		}
@@ -127,44 +127,57 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 	}
 	
 	// Update the prior according to the guessing and reveal cards
-	public void updatePrior(int[] RevealandBelifecard){
-		int total_card = 0;
+	public void updatePrior(){
 		
-		for(int i = 0; i < RevealandBelifecard.length; i++){
-			total_card += RevealandBelifecard[i];
-		}
-		for(int i = 0; i < RevealandBelifecard.length; i++){
-			int num_card = RevealandBelifecard[i];
-			switch (i) {
-			case CARD_KNIGHT:
-				this.prior[i] = (this.prior[i]*14 - num_card)/(25-total_card);
-				break;
-			case CARD_ONEPOINT:
-				this.prior[i] = (this.prior[i]*5 - num_card)/(25 - total_card);
-				break;
-			case CARD_FREEROAD:
-				this.prior[i] = (this.prior[i]*2 - num_card)/(25 - total_card);
-				break;
-			case CARD_FREERESOURCE:
-				this.prior[i] = (this.prior[i]*2 - num_card)/(25 - total_card);
-				break;
-			case CARD_MONOPOLY:
-				this.prior[i] = (this.prior[i]*2 - num_card)/(25 - total_card);
-				break;
-			default:
-				break;
+		int total_card = 0;
+		int[] numberCardTypeReveal = new int[N_DEVCARDTYPES];
+		
+		for(int i = 0; i < bl.revealCardSoFar.length; i++){
+			for(int j =0 ; j < bl.revealCardSoFar[0].length; j++){
+				if(bl.revealCardSoFar[i][j] != -1){
+					total_card++;
+					numberCardTypeReveal[bl.revealCardSoFar[i][j]]++;
+				}
 			}
 		}
+		
+		for(int i = 0; i < N_DEVCARDTYPES; i++){
+			switch (i) {
+				case CARD_KNIGHT:
+					this.prior[i] = (14 - numberCardTypeReveal[i])/(25-total_card);
+					break;
+				case CARD_ONEPOINT:
+					this.prior[i] = (5 - numberCardTypeReveal[i])/(25 - total_card);
+					break;
+				case CARD_FREEROAD:
+					this.prior[i] = (2 - numberCardTypeReveal[i])/(25 - total_card);
+					break;
+				case CARD_FREERESOURCE:
+					this.prior[i] = (2 - numberCardTypeReveal[i])/(25 - total_card);
+					break;
+				case CARD_MONOPOLY:
+					this.prior[i] = (2 - numberCardTypeReveal[i])/(25 - total_card);
+					break;
+				default:
+					break;
+			}
+			
+		}
+		
 	}
 	
+	//store the probability that get the computation
 	public double[][] getCurrentGuess(){
 		return this.currentGuessing;
 	}
+	//Get current guess card with the max of probability guessing
+	public int[][] getCurrentCardGuess(){
+		return this.cardGuessing;
+	}
+	
 	
 	//
 	public void updateHMM(){
-		
-		
 		
 	}
 	

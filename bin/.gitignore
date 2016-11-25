@@ -1,13 +1,3 @@
 /observationalGraph/
-/bayesianInference/
-/convNNSettler/
-/dataGeneration/
-/experiment/
-/factoryFacility/
-/hmmUtitli/
-/markovModelUtili/
-/pomcpUtili/
-/smartsettlers/
-/soc/
-/tradingPOMDPs/
 /uct/
+/smartsettlers/

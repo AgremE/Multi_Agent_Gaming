@@ -19,10 +19,11 @@ public class HMMPlayer extends Player{
         int[] s2 = BoardLayout.cloneOfState(s);  
         if (bl.uctTree != null)
         {
+        	// Only when we use uct to selection action this condition will satify
         	//s2 = bl.hideState(pl, s2);
             bl.player[pl].listPossibilities(s2);
-            bl.UCTsimulateGame(s2);
-            int aind = bl.uctTree.selectAction(s, pl, true);// action index of the maximun return
+            bl.HMM_MonteCarloSimulation(s2);
+            int aind = bl.uctTree.selectAction(s, pl, false,true);// action index of the maximun return
             bl.player[pl].listPossibilities(s);
             for (i=0; i<a.length; i++)
                 a[i] = bl.possibilities.action[aind][i];
