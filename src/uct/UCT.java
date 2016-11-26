@@ -16,7 +16,9 @@ import smartsettlers.boardlayout.GameStateConstants;
  *
  * @author szityu
  */
-
+/*
+ * Improved by Agrem_E (@Makara Phav)
+ * */
 // THe implementation of Monte Carlo with UCT method
 public class UCT implements GameStateConstants {
     
@@ -270,19 +272,19 @@ public class UCT implements GameStateConstants {
             	if(node.nactionvisits[k]==0){
             		v = MAXVAL;
             	}else{
-            		v = (node.expectedReward[pl][k]/(double)node.nactionvisits[k]);
+            		v = (node.expectedReward[pl][k]/(double)node.nactionvisits[k]) 
+                			+ C0*Math.sqrt(Math.log(((node.nactions)/node.nactionvisits[k])+1));
             	}
                 
             }
           //Safe
             else
             {
+        		// greedy choosing state after running ucb
             	if(node.nactionvisits[k] == 0){
             		v = 0.0;
             	}else{
-            		// Working to improve the decision making by using long term expected reward instead
-                	v = (node.expectedReward[pl][k]/(double)node.nactionvisits[k]) 
-                			+ C0*Math.sqrt(Math.log(((node.nactions)/node.nactionvisits[k])+1));
+                	v = node.expectedReward[pl][k];
                     //v = ((double)node.nwins[k][pl])/(node.nactionvisits[k]) + C0*Math.sqrt(Math.log(node.nactions)/node.nactionvisits[k]);
                     
             	}
@@ -355,7 +357,8 @@ public class UCT implements GameStateConstants {
     	return this.winCount;
     }
     final double DISCOUNT_FACTOR = 0.5;
-    public double returnReward(int ind_ac,int depth,boolean leadingToWin){
+    
+    public double returnReward(int depth,boolean leadingToWin){
     	double reward =0.0;
     	double temp_reward = 0.0;
     	if(depth > 1000){
@@ -384,7 +387,7 @@ public class UCT implements GameStateConstants {
         			return 0.0;
         		}
         	}
-    		reward = node.rewardActionStep[ind_ac][depth] + DISCOUNT_FACTOR*returnReward(ind_ac,++depth, leadingToWin);
+    		reward = node.nodeReward + DISCOUNT_FACTOR*returnReward(++depth, leadingToWin);
     	}
     	
     	return reward;

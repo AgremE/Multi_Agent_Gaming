@@ -11,6 +11,9 @@ import smartsettlers.boardlayout.GameStateConstants;
  *
  * @author szityu
  */
+/*
+ * Improve by Agrem_E(@Makara Phav)
+ * */
 public class TreeNode implements GameStateConstants {
 
     public int nvisits;
@@ -19,16 +22,18 @@ public class TreeNode implements GameStateConstants {
     public int nactions;
     public int[] nactionvisits;
     public int timeStamp;
-    public double[][] rewardActionStep;
+    public double[] rewardActionStep;
     public double[][] expectedReward;
     public int[][] count;
+    public int first_action = 0;
+    public double nodeReward = 0;
     
     public TreeNode(int nactions)
     {
         nvisits = 0;
         nwins = new int[nactions][];
         values = new double[nactions][];
-        rewardActionStep = new double[nactions][1000]; // 20000 is MAXTRACE
+        rewardActionStep = new double[20000]; // 20000 is MAXTRACE
         expectedReward = new double[NPLAYERS][nactions];
         count = new int[NPLAYERS][nactions];
         for (int i=0; i<nactions; i++)
@@ -51,7 +56,7 @@ public class TreeNode implements GameStateConstants {
     	
     	return this.nwins;
     }
-    public double[][] getRward(){
+    public double[] getRward(){
     	return this.rewardActionStep;
     }
     public int[][] getCount(){

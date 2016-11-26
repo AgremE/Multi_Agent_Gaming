@@ -317,7 +317,7 @@ public class UCT_POCMP implements GameStateConstants{
 			int[] particle = root.belief_state.samplingParticle(bl.eachPlayerCardPlaiedThisRound);
 			if(root.belief_state.particleExist(particle)){
 				int tmp_value = root.belief_state.getValueForParticle(particle);
-				tmp_value++;
+				tmp_value++; 
 				root.belief_state.putParticleIntoBeliefPool(particle, tmp_value);
 			}
 			else{

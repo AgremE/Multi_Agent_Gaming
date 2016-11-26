@@ -2134,15 +2134,25 @@ public void recalcLongestRoad(int[] s, int pl)
 
                 a = possibilities.action[aind];
                 if(round == 0){
+                	node.first_action = aind;
                 	first_action = aind;
                 }
-                if(!random){
+                if(node != null){
                 	immReward = rewardingModel(a[0]);
                     if(uctTree.getNtrace()>0){
-                    	node.rewardActionStep[first_action][uctTree.getNtrace()-1] = immReward;
+                    	try{
+                    		node.first_action = first_action;
+                    		node.rewardActionStep[uctTree.getNtrace()-1] = immReward;
+                    		node.nodeReward = immReward;
+                    	}catch (Exception e) {
+							// TODO: handle exception
+                    		System.out.println(node.rewardActionStep.length);
+                    		System.out.println(uctTree.getNtrace()-1);
+						}
                     }
                     else{
-                    	node.rewardActionStep[first_action][uctTree.getNtrace()] = immReward;
+                    	node.nodeReward = immReward;
+                    	node.rewardActionStep[uctTree.getNtrace()] = immReward;
                     }
                 }
                 player[pl].performAction_simulation(s, a);
@@ -2162,12 +2172,14 @@ public void recalcLongestRoad(int[] s, int pl)
             node = uctTree.getNode(hc);
         	// Update expected reward accordingly
             if(winner == current_player){
-            	double expected_reward = uctTree.returnReward(first_action, 0, true);
+            	double expected_reward = uctTree.returnReward(0, true);
             	node.setExpectedReward(current_player,first_action, expected_reward);
+            	node.nodeReward += expected_reward;
             }
             else{
-            	double expected_reward = uctTree.returnReward(first_action, 0, false);
+            	double expected_reward = uctTree.returnReward(0, false);
             	node.setExpectedReward(current_player, first_action, expected_reward);
+            	node.nodeReward += expected_reward; 
             }
             uctTree.update(winner, uctTime);
         }
