@@ -5,6 +5,7 @@
 
 package uct;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -120,7 +121,28 @@ public class UCT implements GameStateConstants {
         TreeNode res = (TreeNode) tree.get(hc);
         return res;
     }
-    
+    public void setReward(double reward, int traceListIndex,int hc){
+    	 TreeNode node = (TreeNode) tree.get(hc);
+    	 node.nodeReward += reward;
+    	 node.rewardActionStep[traceListIndex] += reward;
+    	 tree.put(hc, node);
+    }
+    public void setReward(double reward, int hc){
+   	 TreeNode node = (TreeNode) tree.get(hc);
+	   	 node.nodeReward += reward;
+	   	 tree.put(hc, node);
+   }
+    public void setExpectedReward(double expectedReward, int pl, int action_ind, int hc ){
+    	 TreeNode node = (TreeNode) tree.get(hc);
+	   	 node.nodeReward += expectedReward;
+	   	 node.expectedReward[pl][action_ind] += expectedReward;
+	   	 tree.put(hc, node);
+    }
+    public void setFirstAction(int hc, int action_ind){
+    	 TreeNode node = (TreeNode) tree.get(hc);
+	   	 node.first_action = action_ind;
+	   	 tree.put(hc, node);
+    }
     public void clearTraces()
     {
         ntraces = 0;
@@ -243,26 +265,24 @@ public class UCT implements GameStateConstants {
         return maxind;
         
     }
-    public int selectAction(int[] s, int pl, boolean ucb, boolean expectedLongTermReward)
+    public int selectAction(int[] s, int pl, boolean ucb, boolean expectedLongTermReward, ActionList possibleAction,int level)
     {
-        return selectAction(getHashCode(s),pl, ucb, true);
+        return selectAction(getHashCode(s),pl, ucb, expectedLongTermReward,possibleAction, level);
     }
     
-    public int selectAction(int hc, int pl, boolean ucb, boolean expectedLongTermReward)
+    public int selectAction(int hc, int pl, boolean ucb, boolean expectedLongTermReward, ActionList possibleAction, int level)
     {
         int k;
         double v, maxv;
         int maxind=0;
+        Random rnd = new Random();
+        ArrayList<Integer> actionList = new ArrayList<>();
         TreeNode node = getNode(hc);
         
         maxv = 0.0;
         if (node==null) 
             return 0;
         
-        if (node.nvisits < MINVISITS)
-        {
-            return rnd.nextInt(node.nactions);
-        }
         
         for (k=0; k<node.nactions; k++)
         {
@@ -291,8 +311,16 @@ public class UCT implements GameStateConstants {
             }
            //Not safe
           //Safe
-            if (maxv<v)
+            /*There is a problem here with the how I assign the value to action*/
+            if (v >= maxv)
             {
+            	if(v == maxv){
+            		actionList.add(k);
+            	}
+            	else{
+            		actionList.clear();
+            		actionList.add(k);
+            	}
                 maxv = v;
                 maxind = k;
             }
@@ -300,8 +328,49 @@ public class UCT implements GameStateConstants {
         
         this.max_outcome = maxv;
         
-        return maxind;
+        if(level != S_NORMAL){
+        	if(actionList.size() > 1){
+            	return actionList.get(rnd.nextInt(actionList.size()));
+            }
+            else{
+            	return maxind;
+            }
+        }else{
+        	/*
+        	int action = this.preferenceAction(possibleAction, actionList);
+        	if(action == -1){
+        		return maxind;
+        	}
+        	else{
+        		return action;
+        	}*/
+        	return maxind;
+        	
+        }
+        //return maxind;
         
+        
+        
+    }
+    public int preferenceAction(ActionList listPossibility, ArrayList actionlist){
+		int ac_ind = 0;
+		Random rnd = new Random();
+		if(actionlist.size() == 0){
+			return -1;
+		}
+		else{
+			for(int i = 0; i < actionlist.size(); i++){
+				switch(listPossibility.action[(int)actionlist.get(i)][0]){
+					case A_BUILDCITY:
+						return i;
+					case A_BUILDSETTLEMENT:
+						return i;
+					default:
+						continue;
+				}
+			}
+			return (int)actionlist.get(rnd.nextInt(actionlist.size()));
+		}
     }
     
     @Override
@@ -356,38 +425,53 @@ public class UCT implements GameStateConstants {
     public int[] getWinnersCount(){
     	return this.winCount;
     }
-    final double DISCOUNT_FACTOR = 0.5;
+    final double DISCOUNT_FACTOR = 0.9;
     
     public double returnReward(int depth,boolean leadingToWin){
     	double reward =0.0;
     	double temp_reward = 0.0;
     	if(depth > 1000){
     		if(leadingToWin){
-    			return 30.0;
+    			return 500.0;
     		}else{
     			return 0.0;
     		}
     	}
     	if(depth == ntraces){
-    		if(leadingToWin){
-    			return reward + 30;
-    		}else{
-    			return reward;
-    		}
+    		return reward;
     		
     	}
     	else{
 
-        	TreeNode node = getNode(traceList[depth].hc);
-        	if(node == null){
-        		if(leadingToWin){
-        			return 30.0;
-        		}
-        		else{
-        			return 0.0;
-        		}
+        	if(depth == 0){
+        		TreeNode node = getNode(traceList[depth].hc);
+            	if(node == null){
+            		if(leadingToWin){
+            			return 100.0;
+            		}
+            		else{
+            			return 0.0;
+            		}
+            	}else{
+            		if(leadingToWin){
+            			reward += node.nodeReward + DISCOUNT_FACTOR*returnReward(++depth, leadingToWin) + 100.0;
+            		}else{
+            			reward += node.nodeReward + DISCOUNT_FACTOR*returnReward(++depth, leadingToWin);
+            		}
+            	}
+        		
+        	}else{
+        		TreeNode node = getNode(traceList[depth].hc);
+            	if(node == null){
+            		if(leadingToWin){
+            			return 100.0;
+            		}
+            		else{
+            			return 0.0;
+            		}
+            	}
+        		reward += node.nodeReward + DISCOUNT_FACTOR*returnReward(++depth, leadingToWin);
         	}
-    		reward = node.nodeReward + DISCOUNT_FACTOR*returnReward(++depth, leadingToWin);
     	}
     	
     	return reward;

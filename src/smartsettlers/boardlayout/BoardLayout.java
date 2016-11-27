@@ -42,22 +42,25 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public int numberCardBoughtThisRound = 0;// done
 	public int card_play_this_round = 0 ;
 	public boolean hiddenInfo = false;
+	public int guessingRight = 0;
+	public int guessingWrong = 0;
 	
 	//Not sure what the use of this
 	public int[][][] playingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
 	public int[][][] buyingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
 	// Using this one to construct the data time frame for the conditional probability
 	public int[][][] playingAveragingTime = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];//Storing inside the data.txt
-	public int[][] cardPlayingTimetimeStamp = new int[N_DEVCARDTYPES][14];
+	public int[][] cardPlayingTimetimeStamp = new int[N_DEVCARDTYPES][15];
 	
 	// Help function for HMM Player
 	// Assumption about the playing time
 	// the oldest card will play first in case of duplicate file
-	public int[][] alreadyPlayed = new int[NPLAYERS][NCARDS];// Keeping which card already played
 	public int[][] keepSince = new int[NPLAYERS][NCARDS];// For tracking the time since player bought it
 	public int[][] firstBought = new int[NPLAYERS][NCARDS]; // For tracking the time when it firstly bought
-	public int[][] revealCardSoFar = new int[N_PLAYER][NCARDS]; // store card type that has been reveal so far
-	public int[][] playerDevCardData = new int[N_PLAYER][NCARDS];
+	public int[][] revealCardSoFar = new int[NPLAYERS][NCARDS]; // store card type that has been reveal so far
+	//public int[][] playerDevCardData = new int[NPLAYERS][NCARDS];
+	public int[][] trackingMyCardIndex = new int[NPLAYERS][NCARDS];
+	public int winner = -1;
 	// Constructing the likelihood data
 	public int[][][] storeData = new int[NPLAYERS][NCARDS][N_DEVCARDTYPES]; 
 	public HMMUtili hmmPredictor = new HMMUtili(this);
@@ -231,6 +234,14 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         for (i=0; i<STATESIZE; i++)
             s2[i] = s[i];
         return s2;
+    }
+    
+    public void initArrayCardType(int[][] cardDesk){
+    	for(int i = 0; i < cardDesk.length; i++){
+    		for(int j = 0; j < cardDesk[0].length; j++){
+    			cardDesk[i][j] = -1;
+    		}
+    	}
     }
     
     public void setBoardSize(int screenWidth, int screenHeight, double scale)
@@ -833,14 +844,16 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     {
         int pl, i;
         
-        
+        this.initArrayCardType(firstBought);
+        this.initArrayCardType(revealCardSoFar);
+        this.initArrayCardType(trackingMyCardIndex);
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS - 1  ; pl++)
+        for (pl=0; pl<NPLAYERS   ; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
         }
-        player[N_PLAYER - 1] = new HMMPlayer(this, NPLAYERS);
+        //player[N_PLAYER - 1] = new HMMPlayer(this, N_PLAYER - 1);
         // POMCPPlayer player created
         //player[NPLAYERS - 1] = new POMCPPlayer(this,NPLAYERS - 1, true);
         //player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
@@ -879,7 +892,81 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             gamelog.addState(s);
         }
     }
+    public int[][] cardInMyEnermyHand(int myId){
+
+		int[][] guessingDeskCard = new int[NPLAYERS][N_DEVCARDTYPES];
+    	for(int pl = 0; pl<NPLAYERS; pl++){
+    		if(pl == myId){
+    			continue;
+    		}
+    		else{
+    			for(int ind_card = 0; ind_card < N_DEVCARDTYPES; ind_card++){
+    				if(this.state[OFS_PLAYERDATA[pl]+OFS_OLDCARDS+ind_card] > 0){
+    					guessingDeskCard[pl][ind_card] = this.state[OFS_PLAYERDATA[pl]+OFS_OLDCARDS+ind_card];
+    				}
+    			}
+    		}
+    	}
+    	return guessingDeskCard;
+    }
     
+    public int[] guessingCorrectBeforePlaying(int[] currentGuessing, int[] realCardBeforePlay){
+    	int rightGuessing = 0;
+    	int guessingWrong = 0;
+    	boolean correct = false;
+    	int[] guessingRightAndWrong = new int[2];
+    	for(int i = 0; i < realCardBeforePlay.length; i++){
+    		for(int j = 0; j < currentGuessing.length;j++){
+    			if(currentGuessing[j] != -1){
+    				if(currentGuessing[j] == realCardBeforePlay[i]){
+    					correct = true;
+    					currentGuessing[j] = -1;
+    					break;
+    				}
+    			}
+    		}
+    		if(correct){
+
+				rightGuessing++;
+				correct = false;
+    		}
+    		else{
+    			guessingWrong++;
+    		}
+    	}
+    	guessingRightAndWrong[CARD_GUESSING_RIGHT_INDEX] = rightGuessing;
+    	guessingRightAndWrong[CARD_GUESSING_WRONG_INDEX] = guessingWrong;
+    	return guessingRightAndWrong;
+    }
+    
+    public int[] guessingCorrectAfterPlaying(int[] currentGuessing, int[] realCardAfterPlay){
+    	int rightGuessing = 0;
+    	int guessingWrong = 0;
+    	boolean correct = false;
+    	int[] guessingRightAndWrong = new int[2];
+    	for(int i = 0; i < realCardAfterPlay.length; i++){
+    		for(int j = 0; j < currentGuessing.length;j++){
+    			if(currentGuessing[j] != -1){
+    				if(currentGuessing[j] == realCardAfterPlay[i]){
+    					correct = true;
+    					currentGuessing[j] = -1;
+    					break;
+    				}
+    			}
+    		}
+    		if(correct){
+
+				rightGuessing++;
+				correct = false;
+    		}
+    		else{
+    			guessingWrong++;
+    		}
+    	}
+    	guessingRightAndWrong[CARD_GUESSING_RIGHT_INDEX] = rightGuessing;
+    	guessingRightAndWrong[CARD_GUESSING_WRONG_INDEX] = guessingWrong;
+    	return guessingRightAndWrong;
+    }
     public void GameTick(int[] s, int [] a)
     {
         int fsmlevel    = s[OFS_FSMLEVEL];
@@ -890,17 +977,58 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int[] state = cloneOfState(s);
         int[] trad;
         double[][] currentGuess;
+        int[] cardDeskGuessing;
         int state_fml = 0;
         int numTradOffer = 0;
         boolean offer_answer = false;
+        int[] guessing = new int[2];
+        int[] realCard=null;
+        int totalHiddentState = 0;
         /*
         if(player[pl].isHMMAgent()){
         	if(this.hasHiddenInfo()){
-        		hmmPredictor.updateHMMGuessing(this.gamelog.getSize());
+        		// if there is or are hiddens state information about the game, we use this part of program to predict
+        		
+        		for(int i = 0; i < NPLAYERS; i++){
+        			if(i == pl){
+        				continue;
+        			}
+        			else
+        			{
+        				for(int i_devType = 0; i_devType < N_DEVCARDTYPES; i_devType++){
+        					if(state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType] != 0){
+        						totalHiddentState += state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType];
+        					}
+        				}
+        			}
+        		}
+        		realCard = new int[totalHiddentState];
+        		int index = 0;
+        		for(int i = 0; i < NPLAYERS; i++){
+        			if(i == pl){
+        				continue;
+        			}
+        			else
+        			{
+        				for(int i_devType = 0; i_devType < N_DEVCARDTYPES; i_devType++){
+        					for(int num_card = 0; num_card< state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType]; num_card++){
+    							realCard[index] = i_devType;
+    							index++;
+    						}
+        				}
+        			}
+        		}
+        		hmmPredictor.updateHMMGuessing(this.gamelog.getSize(),pl,totalHiddentState);
+
+            	currentGuess = hmmPredictor.getCurrentGuess();
+            	cardDeskGuessing = hmmPredictor.getCurrentCardGuess(totalHiddentState);
+            	guessing = this.guessingCorrectBeforePlaying(hmmPredictor.getCurrentCardGuess(totalHiddentState),
+            															realCard);
+            	this.guessingRight += guessing[CARD_GUESSING_RIGHT_INDEX];
+            	this.guessingWrong += guessing[CARD_GUESSING_WRONG_INDEX];
+            	state = hideState(pl, state);
+            	state = constructHMMGuessState(pl,state,totalHiddentState);
         	}
-        	currentGuess = hmmPredictor.getCurrentGuess();
-        	state = hideState(pl, state);
-        	state = constructHMMGuessState(pl,state);
         	player[pl].listPossibilities(state);
             player[pl].selectAction(state,a);
              
@@ -1026,15 +1154,15 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         }*/
     }
     
-    private int[] constructHMMGuessState(int pl, int[] state2) {
+    private int[] constructHMMGuessState(int pl, int[] state2, int totalHiddenState) {
 		// TODO Auto-generated method stub
-    	int[][] currentGuessing = hmmPredictor.getCurrentCardGuess();
+    	int[] currentGuessing = hmmPredictor.getCurrentCardGuess(totalHiddenState);
     	for(int ind_pl = 0; ind_pl < NPLAYERS; ind_pl++){
     		if(ind_pl == pl){
     			continue;
     		}
-    		for(int ind_card = 0; ind_card<NCARDS; ind_card++){
-    			int type = currentGuessing[ind_pl][ind_card];
+    		for(int ind_card = 0; ind_card<totalHiddenState; ind_card++){
+    			int type = currentGuessing[ind_card];
     			if(type != -1){
     				state2[OFS_PLAYERDATA[ind_pl]+OFS_OLDCARDS+type]++;
     			}
@@ -2095,6 +2223,7 @@ public void recalcLongestRoad(int[] s, int pl)
                  
                 //System.out.print(node+" ");
                 fsmlevel    = s[OFS_FSMLEVEL];
+                int fsmstate    = s[OFS_FSMSTATE+fsmlevel];// To access the state step
                 pl          = s[OFS_FSMPLAYER+fsmlevel];
                 //System.out.println("OFS_FSMLEVEL"+ OFS_FSMLEVEL +" "+fsmlevel);
                 player[pl].listPossibilities(s);
@@ -2104,7 +2233,7 @@ public void recalcLongestRoad(int[] s, int pl)
                 //Noted that I change the to add just list of action of current player who doing the simulation
                 if ((isKnownState) && (node!=null))
                 {             
-                    aind = uctTree.selectAction(hc,pl,true,true);
+                    aind = uctTree.selectAction(hc,pl,true,true,possibilities,fsmstate);
                     if(pl == current_player){
                     	uctTree.addTrace(hc, pl, aind);
                     }
@@ -2121,7 +2250,6 @@ public void recalcLongestRoad(int[] s, int pl)
                         uctTree.addTrace(hc, pl, aind);
                         hc = UCT.getHashCode(s);
                         node = uctTree.getNode(hc);
-                       
                     }
                     random = false;
                 }
@@ -2131,19 +2259,20 @@ public void recalcLongestRoad(int[] s, int pl)
                     aind = possibilities.randomInd();
                     random = true;
                 }
-
+                hc = UCT.getHashCode(s);
                 a = possibilities.action[aind];
                 if(round == 0){
-                	node.first_action = aind;
+                	uctTree.setFirstAction(hc, aind);
                 	first_action = aind;
                 }
                 if(node != null){
                 	immReward = rewardingModel(a[0]);
                     if(uctTree.getNtrace()>0){
                     	try{
-                    		node.first_action = first_action;
-                    		node.rewardActionStep[uctTree.getNtrace()-1] = immReward;
-                    		node.nodeReward = immReward;
+                    		uctTree.setFirstAction(hc, aind);
+                    		//node.rewardActionStep[uctTree.getNtrace()-1] = immReward;
+                    		uctTree.setReward(immReward, uctTree.getNtrace()-1, hc);
+                    		//node.nodeReward = immReward;
                     	}catch (Exception e) {
 							// TODO: handle exception
                     		System.out.println(node.rewardActionStep.length);
@@ -2151,8 +2280,7 @@ public void recalcLongestRoad(int[] s, int pl)
 						}
                     }
                     else{
-                    	node.nodeReward = immReward;
-                    	node.rewardActionStep[uctTree.getNtrace()] = immReward;
+                    	uctTree.setReward(immReward, uctTree.getNtrace(), hc);
                     }
                 }
                 player[pl].performAction_simulation(s, a);
@@ -2167,41 +2295,49 @@ public void recalcLongestRoad(int[] s, int pl)
                 if (winner !=-1)
                     break;
              }
-            s = cloneOfState(state);
-            int hc = UCT.getHashCode(s);
+            int[] s2 = cloneOfState(state);
+            int hc = UCT.getHashCode(s2);
             node = uctTree.getNode(hc);
         	// Update expected reward accordingly
             if(winner == current_player){
             	double expected_reward = uctTree.returnReward(0, true);
-            	node.setExpectedReward(current_player,first_action, expected_reward);
-            	node.nodeReward += expected_reward;
+            	//node.setExpectedReward(current_player,first_action, expected_reward);
+            	uctTree.setExpectedReward(expected_reward, current_player, first_action, hc);
+            	//node.nodeReward += expected_reward;
+            	uctTree.setReward(expected_reward, hc);
             }
             else{
             	double expected_reward = uctTree.returnReward(0, false);
-            	node.setExpectedReward(current_player, first_action, expected_reward);
-            	node.nodeReward += expected_reward; 
+            	//node.setExpectedReward(current_player, first_action, expected_reward);
+            	uctTree.setExpectedReward(expected_reward, current_player, first_action, hc);
+            	//node.nodeReward += expected_reward; 
+            	uctTree.setReward(expected_reward, hc);
             }
             uctTree.update(winner, uctTime);
+            first_action = 0;
         }
+        isLoggingOn = oldIsLoggingOn;
+        s=null;
+        a=null;
     }
     
     
     public double rewardingModel(int action){
 		switch(action){
 			case GameStateConstants.A_BUILDCITY:
-				return 5;
+				return 500;
 			case GameStateConstants.A_BUILDROAD:
-				return 2;
-			case GameStateConstants.A_BUILDSETTLEMENT:
-				return 5;
-			case GameStateConstants.A_BUYCARD:
 				return 1;
-			case GameStateConstants.A_PAYTAX:
-				return 0.5;
-			case GameStateConstants.A_NOTHING:
-				return 0.5;
-			case GameStateConstants.A_PLACEROBBER:
+			case GameStateConstants.A_BUILDSETTLEMENT:
+				return 200;
+			case GameStateConstants.A_BUYCARD:
 				return 2;
+			case GameStateConstants.A_PAYTAX:
+				return -0.5;
+			case GameStateConstants.A_NOTHING:
+				return 0;
+			case GameStateConstants.A_PLACEROBBER:
+				return 0;
 			case GameStateConstants.A_PLAYCARD_FREERESOURCE:
 				return 2;
 			case GameStateConstants.A_PLAYCARD_FREEROAD:

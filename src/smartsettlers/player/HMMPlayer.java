@@ -13,6 +13,7 @@ public class HMMPlayer extends Player{
 	public void selectAction(int[] s, int[] a) {
 		// TODO Auto-generated method stub
 		int fsmlevel    = s[OFS_FSMLEVEL];
+		int fsmstate    = s[OFS_FSMSTATE+fsmlevel];// To access the state step
         int pl          = s[OFS_FSMPLAYER+fsmlevel];
         int i,j;
         
@@ -23,7 +24,8 @@ public class HMMPlayer extends Player{
         	//s2 = bl.hideState(pl, s2);
             bl.player[pl].listPossibilities(s2);
             bl.HMM_MonteCarloSimulation(s2);
-            int aind = bl.uctTree.selectAction(s, pl, false,true);// action index of the maximun return
+            bl.player[pl].listPossibilities(s);
+            int aind = bl.uctTree.selectAction(s, pl, false,true,bl.possibilities,fsmstate);// action index of the maximun return
             bl.player[pl].listPossibilities(s);
             for (i=0; i<a.length; i++)
                 a[i] = bl.possibilities.action[aind][i];

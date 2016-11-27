@@ -154,6 +154,9 @@ public interface GameStateConstants extends HexTypeConstants {
     int TRAD_STONE = 4;
     int TRAD_UNKNOW = 5;
     
+    int CARD_GUESSING_RIGHT_INDEX = 0;
+    int CARD_GUESSING_WRONG_INDEX = 1;
+    
     String[] resourceNames = {"sheep", "wood", "clay", "wheat", "stone"};
     String[] cardNames = {"knight", "+1 point", "+2 road", "+2 res.", "monopoly"};
     // 

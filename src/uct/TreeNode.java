@@ -33,7 +33,7 @@ public class TreeNode implements GameStateConstants {
         nvisits = 0;
         nwins = new int[nactions][];
         values = new double[nactions][];
-        rewardActionStep = new double[20000]; // 20000 is MAXTRACE
+        rewardActionStep = new double[1001]; // 20000 is MAXTRACE
         expectedReward = new double[NPLAYERS][nactions];
         count = new int[NPLAYERS][nactions];
         for (int i=0; i<nactions; i++)

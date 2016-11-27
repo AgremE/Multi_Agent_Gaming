@@ -345,7 +345,9 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             }
             //this.paintAll(this.getGraphics());
         } while (boardlayout.getWinner(boardlayout.state) == -1);
+        
         //print number trad and trad offer
+        /*
         if(round<1000){
         	System.out.println("Trading Accepted: " + boardlayout.tradingAccepte);
             System.out.println("Tradning offer: "+ boardlayout.tradingOffer);
@@ -381,7 +383,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
 
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
         boardlayout.GameTick(boardlayout.state,boardlayout.action);
         listModel.addElement(boardlayout.gamelog.toString());
         
@@ -437,13 +439,22 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             jTextField2.validate();
 
     }//GEN-LAST:event_jButton5ActionPerformed
-
+    public void addIntMatrix(int[][] first_matrix, int[][] second_matrix){
+    	for(int i = 0; i < first_matrix.length; i++){
+    		for(int j = 0; j<first_matrix[0].length; j++){
+    			first_matrix[i][j] += second_matrix[i][j];
+    		}
+    	}
+    }
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
     	//boardlayout.UCTsimulateGame(boardlayout.state);
     	int[][] game_data_offer = new int[10][1];
     	int[][] game_data_accepted = new int[10][1];
-    	for(int i =0; i<100;i++){
+    	int[][] conditional_probability_matrix = new int[N_DEVCARDTYPES][15];
+     	int player1win = 0;
+    	int player2win = 0;
+    	for(int i =0; i<10;i++){
         	JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
             if(boardlayout.getWinner(boardlayout.state) != -1){
                 initComponents();
@@ -461,6 +472,40 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             scrollbar.setValue(scrollbar.getMaximum());
                 
             settlersPanel1.repaint();
+            int winner = boardlayout.getWinner(boardlayout.state);
+            if(winner == 0){
+            	player1win++;
+            }
+            else{
+            	player2win++;
+            }
+            this.addIntMatrix(conditional_probability_matrix, boardlayout.cardPlayingTimetimeStamp);
+		}
+    	try {
+
+			String content = "";
+
+			File file = new File("C:\\Users\\AILAB\\Documents\\hmmData.txt");
+			for(int i = 0; i < conditional_probability_matrix.length; i++){
+	    		for(int j = 0; j<conditional_probability_matrix[0].length; j++){
+	    			content = content.concat(Integer.toString(conditional_probability_matrix[i][j])+',');
+	    		}
+	    		content = content.concat("\n");
+	    	}
+			// if file doesnt exists, then create it
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+
+			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(content);
+			bw.close();
+
+			System.out.println("Done");
+
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
     	//Write data into text file
     	/*

@@ -706,6 +706,7 @@ public abstract class Player implements GameStateConstants
                 // HMM player Helper
                 bl.buyingCardTimeStamp[pl][val][s[OFS_NCARDSGONE]] = bl.gamelog.getSize();
                 bl.firstBought[pl][s[OFS_NCARDSGONE]] = bl.gamelog.getSize();
+                bl.trackingMyCardIndex[pl][s[OFS_NCARDSGONE]] = val;
                 s[OFS_NCARDSGONE] ++;
                 break;
             case A_PLAYCARD_FREERESOURCE:
@@ -724,6 +725,8 @@ public abstract class Player implements GameStateConstants
                 		bl.cardPlayingTimetimeStamp[CARD_FREERESOURCE][bl.stateRepresentation(bl.playingAveragingTime[pl][CARD_FREERESOURCE][indCard])]+=1;
                 		
                 		bl.buyingCardTimeStamp[pl][CARD_FREERESOURCE][indCard] = 0;
+                		bl.firstBought[pl][indCard] = 0;
+                		bl.revealCardSoFar[pl][indCard] = CARD_FREERESOURCE;
                 	}
                 }
                 // POMCP player helper
@@ -748,6 +751,8 @@ public abstract class Player implements GameStateConstants
                 						- bl.buyingCardTimeStamp[pl][CARD_MONOPOLY][indCard];
                 		bl.cardPlayingTimetimeStamp[CARD_MONOPOLY][bl.stateRepresentation(bl.playingAveragingTime[pl][CARD_MONOPOLY][indCard])]+=1;
                 		bl.buyingCardTimeStamp[pl][CARD_MONOPOLY][indCard] = 0;
+                		bl.firstBought[pl][indCard] = 0;
+                		bl.revealCardSoFar[pl][indCard] = CARD_MONOPOLY;
                 	}
                 }
                 // POMCP player helper
@@ -776,6 +781,8 @@ public abstract class Player implements GameStateConstants
                 						- bl.buyingCardTimeStamp[pl][CARD_FREEROAD][indCard];
                 		bl.cardPlayingTimetimeStamp[CARD_FREEROAD][bl.stateRepresentation(bl.playingAveragingTime[pl][CARD_FREEROAD][indCard])]+=1;
                 		bl.buyingCardTimeStamp[pl][CARD_FREEROAD][indCard] = 0;
+                		bl.firstBought[pl][indCard] = 0;
+                		bl.revealCardSoFar[pl][indCard] = CARD_FREEROAD;
                 	}
                 }
                 // POMCP player helper
@@ -793,8 +800,10 @@ public abstract class Player implements GameStateConstants
                 		bl.playingAveragingTime[pl][CARD_KNIGHT][indCard] = 
                 				bl.playingCardTimeStamp[pl][CARD_KNIGHT][indCard] 
                 						- bl.buyingCardTimeStamp[pl][CARD_KNIGHT][indCard];
-                        bl.cardPlayingTimetimeStamp[CARD_KNIGHT][bl.stateRepresentation(bl.playingAveragingTime[pl][CARD_KNIGHT][indCard])]+=1;
+                        bl.cardPlayingTimetimeStamp[CARD_KNIGHT][bl.stateRepresentation(bl.playingAveragingTime[pl][CARD_KNIGHT][indCard])]++;
                 		bl.buyingCardTimeStamp[pl][CARD_KNIGHT][indCard] = 0;
+                		bl.firstBought[pl][indCard] = 0;
+                		bl.revealCardSoFar[pl][indCard] = CARD_KNIGHT;
                 	}
                 }
                 // POMCP player helper
@@ -1167,14 +1176,13 @@ public abstract class Player implements GameStateConstants
     }
     
     // only for the player of HMM agent
-    public void updateRevealCard(int pl, int[][] cardBought){
-    	for(int ind_card = 0; ind_card<NCARDS; ind_card++){
-    		for(int ind_type = 0; ind_type < N_DEVCARDTYPES; ind_type++){
-    			if(cardBought[ind_card][ind_type]!=0){
-    				bl.revealCardSoFar[pl][ind_card] = ind_type;
-    			}
-    		}
-    	}
+    public void updateRevealCardFromMyCard(int pl){
+    	
+    	for(int ind_card = 0; ind_card < NCARDS; ind_card++){
+			if(bl.trackingMyCardIndex[pl][ind_card]!= -1){
+				bl.revealCardSoFar[pl][ind_card] = bl.trackingMyCardIndex[pl][ind_card] ;
+			}
+		}
     }
 
 //    public void listPossibleTrade(int[] s){
