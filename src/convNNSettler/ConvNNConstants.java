@@ -20,7 +20,15 @@ public interface ConvNNConstants {
 	int COVN_N_EDGES                 = 72;// Number of Edge
 	int COVN_N_RESOURCES             = 5; // Number of resources
 	int COVN_N_DEVCARDTYPES          = 5; // Number Development Cards
-	
+	int OFS_COVN_VER = 0;
+	int OFS_COVN_EDGE = OFS_COVN_VER + 1;
+	int OFS_COVN_RES = 2;
+	int OFS_RESOURCESSHEEP = 3;
+	int OFS_RESOURCESWOOD = 4;
+	int OFS_RESOURCESCLAY = 5;
+	int OFS_RESOURCESWHEAT = 6;
+	int OFS_RESOURCESSTONE = 7;
+	int OFS_RESOURCESNOTHIN = 8;
 	/* There are six types of ports we can have on the board present int the constant below
 	int PORT_SHEEP	: 
 	int PORT_WOOD 	:
@@ -29,44 +37,30 @@ public interface ConvNNConstants {
 	int PORT_STONE	:	
 	int PORT_MISC   :
 */
-	public final int OFS_RESOURCESSHEEP = 3;
-	public final int OFS_RESOURCESWOOD = 4;
-	public final int OFS_RESOURCESCLAY = 5;
-	public final int OFS_RESOURCESWHEAT = 6;
-	public final int OFS_RESOURCESSTONE = 7;
-	public final int OFS_RESOURCESNOTHIN = 8;
-	public final int OFS_VERTECES_NUMONE = 8;
-	public final int OFS_VERTECES_NUMTWO = 9;
-	public final int OFS_VERTECES_NUMFOUR = 11;
-	public final int OFS_VERTECES_NUMFIVE = 10;
-	public final int OFS_VERTECES_NUMSIX = 10;
-	public final int OFS_VERTECES_NUMSEVEN = 10;
-	public final int OFS_VERTECES_NUMEIGHT = 10;
-	public final int OFS_VERTECES_NUMNINE = 10;
-	public final int OFS_VERTECES_NUMTEN = 10;
-	public final int OFS_VERTECES_NUMELEVEN = 10;
-	public final int OFS_VERTECES_NUMTWELVE= 10;
-	public final int OFS_RESOURCE_PRODUCE_SINCE = 10;
+	
 	
 	//Translate the whole player data into ConvNN form of input
 	
-    int OFS_COVN_VER = 8;
-	int OFS_COVN_EDGE = OFS_COVN_VER + 1;
-	int OFS_COVN_RES = OFS_COVN_EDGE + COVN_N_RESOURCES;
-	int OFS_COVN_VERPRODUCTION_SINCE = OFS_COVN_RES + COVN_N_RESOURCES;
-	int OFS_COVN_ROAD = OFS_COVN_VERPRODUCTION_SINCE + 1;
+    
+	int PLAYERDATA_START_INDEX = 9;
+	int OFS_COVN_ROAD = PLAYERDATA_START_INDEX + 1;
 	int OFS_COVN_SETTLEMENTS = OFS_COVN_ROAD + 1;
 	int OFS_COVN_CITIES = OFS_COVN_SETTLEMENTS + 1;
 	int OFS_COVN_DEVCARD = OFS_COVN_CITIES + 1;
-	int COVN_PLAYERSTATESIZE         = OFS_COVN_DEVCARD + COVN_N_DEVCARDTYPES;
+	int OFS_TILEFIRSTNUMBER = OFS_COVN_DEVCARD + 1;
+	int OFS_TILESECONDNUMBER = OFS_TILEFIRSTNUMBER + 1;
+	int OFS_TILETHIRDNUMBER = OFS_TILESECONDNUMBER + 1; 
+	int OFS_RESOURCE_PRODUCE_SINCE = OFS_TILETHIRDNUMBER + 1;
+	int OFS_CONV_PORT = OFS_RESOURCE_PRODUCE_SINCE + 1;
+	int COVN_PLAYERSTATESIZE         = OFS_CONV_PORT + 1; // 20 for first player for two player it is 31
     
-    
-    int[] OFS_COVN_PLAYERDATA        = { COVN_PLAYERSTATESIZE,//Whole game state of the board presenting + player one
-    								2*COVN_PLAYERSTATESIZE,// 
+    int[] OFS_COVN_PLAYERDATA        = { PLAYERDATA_START_INDEX,PLAYERDATA_START_INDEX + COVN_PLAYERSTATESIZE//Whole game state of the board presenting + player one
+    								// 
                                     //OFS_VERTICES+N_VERTICES + 2*PLAYERSTATESIZE
                                     //OFS_VERTICES+N_VERTICES + 3*PLAYERSTATESIZE
                                     };// Change it to semi zero sum game between two players
-}
+    int CONV_DATASIZE = PLAYERDATA_START_INDEX + 2*COVN_PLAYERSTATESIZE;
+	}
     /*
 	
 	//Layer of ConvNN translate data from the board for player 1

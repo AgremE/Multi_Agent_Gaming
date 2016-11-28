@@ -665,7 +665,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         //Check the good condition of the board 
         betterBoard();
         TranslationState test = new TranslationState(action, this);
-        int[][][] testState = test.translateFromHEXto2D();
+        int[][][] testState = test.getTheRestTranslationofTheBoard();
+        test.getResourceandDevelopmentCardsTranslation();
         
         for(int x = 0; x < testState[1].length; x++){
         	try{
@@ -678,7 +679,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 			}
         	System.out.print("\n");
         }
-        /*
+        
         int seqind = 0;
         for (int x=0; x<MAXX; x++)
             for (int y=0; y<MAXY; y++)
@@ -691,7 +692,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                     seqind++;
                 }
                 
-            }*/
+            }/**/
         
         NewGame(state, true); //todo: remove this.
         

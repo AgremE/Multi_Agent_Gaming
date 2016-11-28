@@ -449,12 +449,12 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
     	//boardlayout.UCTsimulateGame(boardlayout.state);
-    	int[][] game_data_offer = new int[10][1];
-    	int[][] game_data_accepted = new int[10][1];
+    	//int[][] game_data_offer = new int[10][1];
+    	//int[][] game_data_accepted = new int[10][1];
     	int[][] conditional_probability_matrix = new int[N_DEVCARDTYPES][15];
-     	int player1win = 0;
-    	int player2win = 0;
-    	for(int i =0; i<10;i++){
+     	//int player1win = 0;
+    	//int player2win = 0;
+    	for(int i =0; i<100;i++){
         	JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
             if(boardlayout.getWinner(boardlayout.state) != -1){
                 initComponents();
@@ -473,12 +473,6 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 
             settlersPanel1.repaint();
             int winner = boardlayout.getWinner(boardlayout.state);
-            if(winner == 0){
-            	player1win++;
-            }
-            else{
-            	player2win++;
-            }
             this.addIntMatrix(conditional_probability_matrix, boardlayout.cardPlayingTimetimeStamp);
 		}
     	try {

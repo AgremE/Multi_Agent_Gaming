@@ -9,10 +9,10 @@ import smartsettlers.boardlayout.HexTile;
 import smartsettlers.boardlayout.HexTypeConstants;
 import smartsettlers.boardlayout.Vertex;
 
-public class TranslationState implements ConvNNConstants{
+public class TranslationState implements ConvNNConstants, GameStateConstants{
 	//private int[] state; // to store current state from board layout
 	private int[] action;// to store action state from board game
-	private int[][][] state = new int[48][23][23];
+	private int[][][] state = new int[CONV_DATASIZE][23][23];
 	private Coordinate[] portCoord;
 	private Coordinate[] centerofHexTile;
 	private BoardLayout bl;
@@ -290,10 +290,24 @@ public class TranslationState implements ConvNNConstants{
 			}
 		}
 	}*/
+	
+	public int[][] getResourceandDevelopmentCardsTranslation(){
+		int[][] translation = new int[N_PLAYER][COVN_N_DEVCARDTYPES + COVN_N_RESOURCES];
+		for(int i = 0; i< N_PLAYER;i++){
+			for(int ind_dev = 0; ind_dev < COVN_N_DEVCARDTYPES; ind_dev++){
+				translation[i][ind_dev] = this.bl.state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+ind_dev];
+			}
+			
+			for(int ind_res = 0; ind_res < COVN_N_RESOURCES; ind_res++){
+				translation[i][ind_res] = this.bl.state[OFS_PLAYERDATA[i]+OFS_RESOURCES + ind_res];
+			}
+		}
+		return translation;
+	}
 	// Translate the whole state input into three dimensional array with dimension of [23][23][16]
 	//TODO: Translate all the resources with its type and player data into this 2 dimensional array
 	// Change this function to no return statement
-	public int[][][] translateFromHEXto2D(){
+	public int[][][] getTheRestTranslationofTheBoard(){
 		Coordinate[] vertex = null;
 		Coordinate[] edge = null;
 		/*for(int i = 0 ; i < this.centerofHexTile.length; i++){
@@ -339,6 +353,7 @@ public class TranslationState implements ConvNNConstants{
 			 * with that specific VERTECES because each VERTECES can produce three different type of resource that why I slipt it into layer
 			 * of resource
 			 * */
+			//put the resource produce since here as well
 			//Translate all resource into layer of CNN
 			
 			switch(bl.hextiles[BoardLayout.LAND_START_INDEX + i].subtype){
@@ -379,6 +394,7 @@ public class TranslationState implements ConvNNConstants{
 
 		}
 		
+		
 		// Initialize the port coordinate and type of port from the bl
 		// "NOTICE": It have to be after the array is being shuffle
 		
@@ -389,8 +405,10 @@ public class TranslationState implements ConvNNConstants{
     		if( i % 2 == 0){
     			
     			int port_type = bl.hextiles[BoardLayout.PORT_START_INDEX+i/2].subtype;
-        		this.state[OFS_PORT][this.portCoord[i].getX()][this.portCoord[i].getY()] = port_type;
-        		this.state[OFS_PORT][this.portCoord[i+1].getX()][this.portCoord[i+1].getY()] = port_type;
+        		for(int pl = 0; pl <NPLAYERS; pl++){
+        			this.state[OFS_COVN_PLAYERDATA[pl]+OFS_CONV_PORT][this.portCoord[i].getX()][this.portCoord[i].getY()] = port_type;
+            		this.state[OFS_COVN_PLAYERDATA[pl]+OFS_CONV_PORT][this.portCoord[i+1].getX()][this.portCoord[i+1].getY()] = port_type;
+        		}
 
     		}
     	}
@@ -421,7 +439,7 @@ public class TranslationState implements ConvNNConstants{
 					case 1:
 						this.state[OFS_COVN_PLAYERDATA[player]+OFS_COVN_SETTLEMENTS]
 								[vertex[ind_ver].getX()]
-										[vertex[ind_ver].getY()] = 1;
+										[vertex[ind_ver].getY()] = 2;
 						break;
 					default:
 						break;
@@ -430,21 +448,22 @@ public class TranslationState implements ConvNNConstants{
 				else{
 					int player_construction = bl.state[GameStateConstants.OFS_VERTICES + ver_ind];
 					vertex = getVertex(centerofHexTile[ind_hex]);
-					int player = player_construction - GameStateConstants.VERTEX_HASSETTLEMENT;
-					player = player_construction - GameStateConstants.VERTEX_HASCITY;
-					switch (player) {
-					case 0:
-						this.state[OFS_COVN_PLAYERDATA[player]+OFS_COVN_CITIES]
-								[vertex[ind_ver].getX()]
-										[vertex[ind_ver].getY()] = 1;
-						break;
-					case 1:
-						this.state[OFS_COVN_PLAYERDATA[player]+OFS_COVN_CITIES]
-								[vertex[ind_ver].getX()]
-										[vertex[ind_ver].getY()] = 1;
-						break;
-					default:
-						break;
+					if(player_construction != 0){
+						int player = player_construction - GameStateConstants.VERTEX_HASCITY;
+						switch (player) {
+						case 0:
+							this.state[OFS_COVN_PLAYERDATA[player]+OFS_COVN_CITIES]
+									[vertex[ind_ver].getX()]
+											[vertex[ind_ver].getY()] = 1;
+							break;
+						case 1:
+							this.state[OFS_COVN_PLAYERDATA[player]+OFS_COVN_CITIES]
+									[vertex[ind_ver].getX()]
+											[vertex[ind_ver].getY()] = 2;
+							break;
+						default:
+							break;
+						}
 					}
 				}
 			}
@@ -476,7 +495,7 @@ public class TranslationState implements ConvNNConstants{
 					case 1:
 						this.state[OFS_COVN_PLAYERDATA[player] + OFS_COVN_ROAD]
 								[edge[ind_edge].getX()]
-										[edge[ind_edge].getY()] = 1;
+										[edge[ind_edge].getY()] = 2;
 						break;
 						
 					default:
@@ -486,23 +505,68 @@ public class TranslationState implements ConvNNConstants{
 				}
 			}
 		}
+		
 		// Translate the resource that each player have in case of two players
+		// I think if we put those resources card and development cards inside another matrix when training it is easier
+		// Check the resource and dev card translation above
 		/*Finish*/
 		
-		
-		/*Start translating resource type*/
 		//TODO: Translate resource produce with vertex with also the layer with resource produce since
-		
-		
-		/*Put all the resource into vertex center of the hex when that number produce*/
-		
+		int diceOutCome = bl.state[OFS_DIE1] + bl.state[OFS_DIE2];
+		for(int ind_hex = 0; ind_hex < TOTAL_LAND_TILE; ind_hex++){
+			
+			if(bl.currentProductionNumber[ind_hex] == diceOutCome){
+				for(int ind_ver = 0; ind_ver < NUM_VER_TO_HEX; ind_ver++){
+					int ver_ind = bl.neighborHexVertex[ind_hex][ind_ver];
+					if(ver_ind != -1){
+						vertex = getVertex(centerofHexTile[ind_hex]);
+						for(int pl = 0; pl<N_PLAYER;pl++){
+							this.state[OFS_COVN_PLAYERDATA[pl]+OFS_RESOURCE_PRODUCE_SINCE]
+									[vertex[ind_ver].getX()]
+											[vertex[ind_ver].getY()] += 1;
+						}
+					}
+				
+				}
+			}
+		}
+		// Translate the number of each vertex into convNN data layout so we can train it
+		for(int ind_hex = 0; ind_hex < TOTAL_LAND_TILE; ind_hex++){
+			int vertexNum = bl.currentProductionNumber[ind_hex];
+			for(int ind_ver = 0; ind_ver < NUM_VER_TO_HEX; ind_ver++){
+				int ver_ind = bl.neighborHexVertex[ind_hex][ind_ver];
+				if(ver_ind != -1){
+					vertex = getVertex(centerofHexTile[ind_hex]);
+					for(int pl = 0; pl<N_PLAYER;pl++){
+						int first_num = this.state[OFS_COVN_PLAYERDATA[pl]+OFS_TILEFIRSTNUMBER]
+								[vertex[ind_ver].getX()]
+										[vertex[ind_ver].getY()];
+						if(first_num !=0){
+							int second_num = this.state[OFS_COVN_PLAYERDATA[pl]+OFS_TILESECONDNUMBER]
+									[vertex[ind_ver].getX()][vertex[ind_ver].getY()];
+							if(second_num !=0){
+								this.state[OFS_COVN_PLAYERDATA[pl]+OFS_TILETHIRDNUMBER]
+										[vertex[ind_ver].getX()][vertex[ind_ver].getY()] = vertexNum;
+							}else{
+								this.state[OFS_COVN_PLAYERDATA[pl]+OFS_TILESECONDNUMBER]
+										[vertex[ind_ver].getX()][vertex[ind_ver].getY()] = vertexNum;
+							}
+						}else{
+							this.state[OFS_COVN_PLAYERDATA[pl]+OFS_TILEFIRSTNUMBER]
+									[vertex[ind_ver].getX()][vertex[ind_ver].getY()] = vertexNum;
+						}
+					}
+				}
+				
+			}
+		}
+		//Finish
 		/*Finish the resource translation*/
-		
-		/*The development card will represent into two dimensional state*/
-		//TODO: Translate the development card state
-		
-		
+		//TODO: Translate the development card state (Done)
 		/*Start to translate the player data into Layer I decide to write another function to help out this part*/
+		/*Put all the resource into vertex center of the hex when that number produce*/
+		/*The development card will represent into two dimensional state*/
+		
 		return this.state;
 	}
 		/* Finish Translate port*/
