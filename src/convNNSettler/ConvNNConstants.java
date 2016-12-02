@@ -61,14 +61,14 @@ public interface ConvNNConstants {
                                     };// Change it to semi zero sum game between two players
     int CONV_DATASIZE = PLAYERDATA_START_INDEX + 2*COVN_PLAYERSTATESIZE;
     // if want to know the detail on the implementation please refer to code in traslation
-    final int BOARD_DIM_X  = 48;
+    final int BOARD_DIM_X  = 47;
     final int BOARD_DIM_Y = 23;
     final int BOARD_DIM_Z = 23;
     
     final int CARD_DIM_X = 2; // number of player
     final int CARD_DIM_Y = 10;// number of both dev card and res card 
     
-    final int ACTION_DIM = 5;
+    final int ACTION_DIM = 20;
     
     // You can refer to the structure of the file in the documentation
     //final String GROUP_GAME_DATA = "GROUP_GMAE_DATA";

@@ -11,7 +11,6 @@ import smartsettlers.boardlayout.Vertex;
 
 public class TranslationState implements ConvNNConstants, GameStateConstants{
 	//private int[] state; // to store current state from board layout
-	private int[] action;// to store action state from board game
 	private int[][][] state = new int[CONV_DATASIZE][23][23];
 	private Coordinate[] portCoord;
 	private Coordinate[] centerofHexTile;
@@ -20,8 +19,7 @@ public class TranslationState implements ConvNNConstants, GameStateConstants{
 	
 	final public int N_VERTECESTOHEX = 6;
 	
-	public TranslationState( int[] action,BoardLayout bl){
-		this.action = action;
+	public TranslationState(BoardLayout bl){
 		this.bl = bl;
 		this.initState3D();
 		this.centerofHexTile = new Coordinate[19];
@@ -30,6 +28,7 @@ public class TranslationState implements ConvNNConstants, GameStateConstants{
 		initCenter();
 		initPort(this.portCoord);
 	}
+	
 	/*
 	 * Tranform the state of the game from HEX representation to 2D representation
 	 * */
@@ -215,6 +214,15 @@ public class TranslationState implements ConvNNConstants, GameStateConstants{
 			}
 		}
 		return stateEdge;
+	}
+	
+	public int[] translateAction(int[] input){
+		int[] action = new int[N_ACTION_TYPE+ACTIONSIZE - 1];
+		action[input[0]] = 1;
+		for(int i = 1; i < input.length ; i++){
+			action[N_ACTION_TYPE+i - 1] = input[i];
+		} 
+		return action;
 	}
 	// This is hard coding translation from board of smartSettler to convNNsettler
 	public void initPort(Coordinate[] ports){

@@ -18,6 +18,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JScrollBar;
+
+import convNNSettler.DataAccess;
 import smartsettlers.boardlayout.*;
 
 /**
@@ -322,10 +324,11 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 
     }//GEN-LAST:event_jList1ValueChanged
 
-    public void playOneGame()
+    public void playOneGame(int GameNum)
     {
         JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
-        int round = 0;
+        DataAccess hdfFileAccess = new DataAccess(GameNum);
+        int GameStep = 0;
         do
         {
             boardlayout.GameTick(boardlayout.state,boardlayout.action);
@@ -339,8 +342,16 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             scrollbar.setValue(scrollbar.getMaximum());
             settlersPanel1.paintAll(settlersPanel1.getGraphics());
             jList1.paintAll(jList1.getGraphics());
-            round++;
-            if(round>1000){
+            int[] actionGameData = boardlayout.convNNStateTranslator.translateAction(boardlayout.choosenAction);
+            int[][][] boardGameData = boardlayout.convNNStateTranslator.getBoardData();
+            int[][] cardGameData = boardlayout.convNNStateTranslator.getCardData();
+            
+            GameStep++;
+            hdfFileAccess.createGroupGameStep(GameNum, GameStep);
+            hdfFileAccess.writeBoardDataset(boardGameData, GameNum, GameStep);
+            hdfFileAccess.writeCardDataSet(cardGameData, GameNum, GameStep);
+            hdfFileAccess.writeActionDataSet(actionGameData, GameNum, GameStep);
+            if(GameStep>1000){
             	break;
             }
             //this.paintAll(this.getGraphics());
@@ -392,7 +403,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
         
-        playOneGame();
+        playOneGame(0);
         jList1.validate();
         jScrollPane1.validate();
 
@@ -425,7 +436,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
 //                listModel.addElement(boardlayout.gamelog.toString());
             } while (boardlayout.getWinner(boardlayout.state) == -1);
             boardlayout.GameTick(boardlayout.state,boardlayout.action);
-            playOneGame();
+            playOneGame(0);
         }
         long totaltime = System.currentTimeMillis() - starttime;
         jList1.validate();
@@ -452,6 +463,8 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     	//int[][] game_data_offer = new int[10][1];
     	//int[][] game_data_accepted = new int[10][1];
     	int[][] conditional_probability_matrix = new int[N_DEVCARDTYPES][15];
+
+    	
      	//int player1win = 0;
     	//int player2win = 0;
     	for(int i =0; i<100;i++){
@@ -464,10 +477,10 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 settlersPanel1.SetBoardLayout(boardlayout);
                 boardlayout.InitBoard();
             }
-            playOneGame();
+            playOneGame(i);
             jList1.validate();
             jScrollPane1.validate();
-
+            
             jList1.setSelectedIndex(listModel.getSize()-1);
             scrollbar.setValue(scrollbar.getMaximum());
                 
@@ -479,7 +492,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
 
 			String content = "";
 
-			File file = new File("C:\\Users\\AILAB\\Documents\\hmmData.txt");
+			File file = new File("hmmData.txt");
 			for(int i = 0; i < conditional_probability_matrix.length; i++){
 	    		for(int j = 0; j<conditional_probability_matrix[0].length; j++){
 	    			content = content.concat(Integer.toString(conditional_probability_matrix[i][j])+',');

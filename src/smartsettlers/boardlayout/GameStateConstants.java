@@ -124,6 +124,8 @@ public interface GameStateConstants extends HexTypeConstants {
     int A_TRADING				= 14;
     int A_CONSIDEROFFER			= 15;
     
+    int N_ACTION_TYPE = 16;
+    
     int TRADING_OPTIONS 			= 16;
     
     
