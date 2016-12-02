@@ -44,6 +44,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public boolean hiddenInfo = false;
 	public int guessingRight = 0;
 	public int guessingWrong = 0;
+	// ConvNN help instace
+	public int[][][] translatedState;
 	
 	//Not sure what the use of this
 	public int[][][] playingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
@@ -665,8 +667,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         //Check the good condition of the board 
         betterBoard();
         TranslationState test = new TranslationState(action, this);
-        int[][][] testState = test.getTheRestTranslationofTheBoard();
-        test.getResourceandDevelopmentCardsTranslation();
+        int[][][] testState = test.getBoardData();
+        test.getCardData();
         
         for(int x = 0; x < testState[1].length; x++){
         	try{

@@ -60,6 +60,40 @@ public interface ConvNNConstants {
                                     //OFS_VERTICES+N_VERTICES + 3*PLAYERSTATESIZE
                                     };// Change it to semi zero sum game between two players
     int CONV_DATASIZE = PLAYERDATA_START_INDEX + 2*COVN_PLAYERSTATESIZE;
+    // if want to know the detail on the implementation please refer to code in traslation
+    final int BOARD_DIM_X  = 48;
+    final int BOARD_DIM_Y = 23;
+    final int BOARD_DIM_Z = 23;
+    
+    final int CARD_DIM_X = 2; // number of player
+    final int CARD_DIM_Y = 10;// number of both dev card and res card 
+    
+    final int ACTION_DIM = 5;
+    
+    // You can refer to the structure of the file in the documentation
+    //final String GROUP_GAME_DATA = "GROUP_GMAE_DATA";
+    
+    final String GROUP_GAME_NUM = "GROUP_GAME_NUM_";
+    
+    final String GROUP_GAME_STEP = "GROUP_GAME_SETP_NUM_";
+    
+    final String GROUP_BOARD_INFO = "GROUP_BOARD_INFO";
+  
+    final String DATASET_BOARD_INFO = "DATASET_BOARD_INFO_STEP_";// already translate and will store in 3 dimensional array 
+   
+    final String GROUP_CARD_INFO = "GROUP_CARD_INFO";
+   
+    final String DATASET_CARD_INFO = "DATASET_CARD_INFO_STEP_"; // already translate and will store in 2 dimensional array
+    
+    final String GROUP_OUTCOME_INFO = "GROUP_OUTCOME_INFO";
+    
+    final String DATASET_OUTCOME = "DATASET_OUTCOME_GAMES";// 1 represent win and 0 represent lose for example if store about 1000 game this will len(DATASET) = 1000
+    //Dataset in HDF5
+    
+    final String GROUP_ACTION_INFO = "GROUP_ACTION_INPUT_SETP_";
+    
+    final String DATASET_ACITON_INFO = "DATASET_ACTION_INFO";// will be in one dimensional array of len = 
+    
 	}
     /*
 	

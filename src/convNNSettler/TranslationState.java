@@ -291,7 +291,7 @@ public class TranslationState implements ConvNNConstants, GameStateConstants{
 		}
 	}*/
 	
-	public int[][] getResourceandDevelopmentCardsTranslation(){
+	public int[][] getCardData(){
 		int[][] translation = new int[N_PLAYER][COVN_N_DEVCARDTYPES + COVN_N_RESOURCES];
 		for(int i = 0; i< N_PLAYER;i++){
 			for(int ind_dev = 0; ind_dev < COVN_N_DEVCARDTYPES; ind_dev++){
@@ -307,7 +307,7 @@ public class TranslationState implements ConvNNConstants, GameStateConstants{
 	// Translate the whole state input into three dimensional array with dimension of [23][23][16]
 	//TODO: Translate all the resources with its type and player data into this 2 dimensional array
 	// Change this function to no return statement
-	public int[][][] getTheRestTranslationofTheBoard(){
+	public int[][][] getBoardData(){
 		Coordinate[] vertex = null;
 		Coordinate[] edge = null;
 		/*for(int i = 0 ; i < this.centerofHexTile.length; i++){
