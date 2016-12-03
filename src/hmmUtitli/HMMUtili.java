@@ -34,8 +34,12 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 		
 		this.bl = bl_input;
 		currentGuessing = new double[NCARDS][N_DEVCARDTYPES]; // TODO: Check this condition to verify it
-		HMM_TRANSITIONALMATRIX = new double[N_DEVCARDTYPES][N_DEVCARDTYPES];
-		HMM_CONDITIONALPRO = new double[15][N_DEVCARDTYPES];
+		HMM_TRANSITIONALMATRIX = new double[][]{{14/24,5/24,2/24,2/24,2/24},
+												{15/24,4/24,2/24,2/24,2/24},
+												{15/24,5/24,1/24,2/24,2/24},
+												{15/24,5/24,2/24,1/24,2/24},
+												{15/24,5/24,2/24,2/24,1/24}};
+		HMM_CONDITIONALPRO = new double[N_DEVCARDTYPES][TIMESTATESTEP];
 		prior = new double[N_DEVCARDTYPES];
 		this.readDataHMM();
 		
@@ -46,33 +50,18 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 		  try {
 			  
 		        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("C:\\Users\\AILAB\\Documents\\hmmData.txt")));         
-		        boolean conditionalMatrixRead = false;
 		        String line;
 		        int lineDevCon = 0;
-		        int lineDevTran = 0;
 		        String[] lineSplit; 
 		        while ((line = br.readLine()) != null) {
-		        	if(line == "Conditional_Probability_Matrix"){
-		        		conditionalMatrixRead = true;
-		        		continue;
-		        	}
-		        	if(conditionalMatrixRead){
-		        		lineSplit = line.split(",");
-		        		for(int i = 0; i < lineSplit.length; i++){
-		        			if((i < 15)&&(lineDevCon < N_DEVCARDTYPES)){
-		        				this.HMM_CONDITIONALPRO[i][lineDevCon] = Double.valueOf(lineSplit[i]);
-		        			}
-		        		}
-		        		lineDevCon++;
-		        	}else{
-		        		lineSplit = line.split(",");
-		        		for(int i = 0; i < lineSplit.length; i++){
-		        			if((i < N_DEVCARDTYPES)&&(lineDevTran < N_DEVCARDTYPES)){
-		        				this.HMM_TRANSITIONALMATRIX[lineDevTran][i] = Double.valueOf(lineSplit[i]);
-		        			}
-		        		}
-		        		lineDevTran++;
-		        	}
+		        	lineSplit = line.split(",");
+	        		for(int i = 0; i < lineSplit.length; i++){
+	        			if((i < TIMESTATESTEP)&&(lineDevCon < N_DEVCARDTYPES)){
+	        				this.HMM_CONDITIONALPRO[lineDevCon][i] = Double.valueOf(lineSplit[i]);
+	        				
+	        			}
+	        		}
+	        		lineDevCon++;
 		        }
 		        br.close();
 
@@ -81,6 +70,7 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 			// TODO: handle exception
 			System.out.println("There is an error file reading from HMM agent: " + e.getMessage());
 		}
+		  //this.HMM_CONDITIONALPRO = this.convertDataIntoPro(this.HMM_CONDITIONALPRO);
 	}
 	
 	// Update the guessing according to the time
@@ -93,7 +83,20 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 		}
 		
 		if(totalHiddenCard == 1){
-			this.currentGuessing[0] = Matrix.multiplyByMatrix(this.prior, this.HMM_CONDITIONALPRO[bl.stateRepresentation(timeFrame)]);
+			int timedifferent = 0;
+			for(int ind_card = 0; ind_card < NCARDS; ind_card++){
+				for(int pl = 0; pl < NPLAYERS; pl++){
+					if(currentPlayer == pl){
+						continue;
+					}
+					else{
+						if(bl.firstBought[pl][ind_card] > 0){
+							timedifferent = timeFrame - bl.firstBought[pl][ind_card];
+						}
+					}
+				}
+			}
+			this.currentGuessing[0] = Matrix.multiplyByMatrix(this.prior, this.HMM_CONDITIONALPRO[bl.stateRepresentation(timedifferent)]);
 		}
 		else{
 			int[] timedifferent = new int[totalHiddenCard];
@@ -110,6 +113,7 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 						}
 					}
 				}
+			}
 			for(int i = 0 ; i < totalHiddenCard ; i++){
 				if(i == 0){
 					this.currentGuessing[i] = Matrix.multiplyByMatrix(this.prior, this.HMM_CONDITIONALPRO[bl.stateRepresentation(timedifferent[i])]);
@@ -119,12 +123,8 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 															(Matrix.multiplyByMatrix(prior,
 																			this.HMM_TRANSITIONALMATRIX[previousState])
 																				,this.HMM_CONDITIONALPRO[bl.stateRepresentation(timedifferent[i])]);
+					}	
 				}
-				
-				}
-				
-				
-			}
 		}
 	}
 	
@@ -142,7 +142,24 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 		}
 		return temp_ind;
 	}
-	
+	// try to conver the conditional pro data into probability data
+	public double[][] convertDataIntoPro(double[][] data){
+		double[][] dataPro = new double[TIMESTATESTEP][N_DEVCARDTYPES] ;
+		double[] totalCount = new double[N_DEVCARDTYPES];
+		for(int i = 0; i < TIMESTATESTEP; i++){
+			for(int j = 0; j < dataPro[0].length; i++){
+				dataPro[i][j] = data[i][j] + 1;
+				totalCount[j] += data[i][j];
+			}
+		}
+		for(int i = 0; i < TIMESTATESTEP; i++){
+			for(int j = 0; j < dataPro[0].length; i++){
+				dataPro[i][j] = dataPro[i][j]/totalCount[i];
+			}
+		}
+		
+		return dataPro;
+	}
 	// Update the prior according to the guessing and reveal cards
 	public void updatePrior(){
 		
@@ -183,12 +200,17 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 		
 	}
 	
+	public double[][] getConditionalPro(){
+		return this.HMM_CONDITIONALPRO;
+	}
+	
 	//store the probability that get the computation
 	public double[][] getCurrentGuess(){
 		return this.currentGuessing;
 	}
+	
 	//Get current guess card with the max of probability guessing
-	public int[] getCurrentCardGuess(int totalHiddenCards){
+	public int[] getCurrentProCardGuess(int totalHiddenCards){
 		int[] cardPrediction = new int[totalHiddenCards];
 		for(int i = 0; i < totalHiddenCards; i++){
 			int type = this.getIndexMaxElement(this.currentGuessing[i]);

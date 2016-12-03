@@ -50,7 +50,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public int[][][] buyingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
 	// Using this one to construct the data time frame for the conditional probability
 	public int[][][] playingAveragingTime = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];//Storing inside the data.txt
-	public int[][] cardPlayingTimetimeStamp = new int[N_DEVCARDTYPES][15];
+	public int[][] cardPlayingTimetimeStamp = new int[N_DEVCARDTYPES][STATE_TIME_REPRESENTATION];
 	
 	// Help function for HMM Player
 	// Assumption about the playing time
@@ -883,6 +883,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 			}
 		}
         int[] a = new int[ACTIONSIZE];
+        gamelog.size = 0;
         GameTick(s, a);
         setState(s);
         this.isLoggingOn = isLoggingOn;
@@ -910,7 +911,36 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     	}
     	return guessingDeskCard;
     }
-    
+    public int getTotalHiddenState(int pl){
+    	int total_hidden_state = 0;
+    	for(int ind_pl = 0;ind_pl < NPLAYERS; ind_pl++){
+    		if(pl != ind_pl){
+    			for(int ind_type = 0; ind_type<N_DEVCARDTYPES;ind_type++){
+            		total_hidden_state += this.state[OFS_PLAYERDATA[ind_pl]+OFS_OLDCARDS+ind_type];
+            	}
+    		}
+    	}
+    	return total_hidden_state;
+    }
+    public int[] getRealCardBeforePlay(int pl){
+    	int totalHiddenCard = getTotalHiddenState(pl);
+    	int[] cards = new int[totalHiddenCard];
+    	int nextIndex = 0;
+    	for(int ind_pl =0; ind_pl < NPLAYERS; ind_pl++){
+    		if(pl != ind_pl){
+    			for(int ind_type = 0; ind_type < N_DEVCARDTYPES; ind_type++){
+    				if(this.state[OFS_PLAYERDATA[ind_pl]+OFS_OLDCARDS+ind_type]!=0){
+    					for(int i = 0; i <nextIndex; i++ ){
+    						cards[i] = ind_type;
+    					}
+    				}
+    				nextIndex += state[OFS_PLAYERDATA[ind_pl]+OFS_OLDCARDS+ind_type];
+    			}
+    		}
+    	}
+    	return cards;
+    	
+    }
     public int[] guessingCorrectBeforePlaying(int[] currentGuessing, int[] realCardBeforePlay){
     	int rightGuessing = 0;
     	int guessingWrong = 0;
@@ -1157,7 +1187,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     
     private int[] constructHMMGuessState(int pl, int[] state2, int totalHiddenState) {
 		// TODO Auto-generated method stub
-    	int[] currentGuessing = hmmPredictor.getCurrentCardGuess(totalHiddenState);
+    	int[] currentGuessing = hmmPredictor.getCurrentProCardGuess(totalHiddenState);
     	for(int ind_pl = 0; ind_pl < NPLAYERS; ind_pl++){
     		if(ind_pl == pl){
     			continue;
@@ -2169,11 +2199,13 @@ public void recalcLongestRoad(int[] s, int pl)
     		state = 11;
     	}else if((timeFrame > 50)&&(timeFrame <= 60)){
     		state = 12;
-    	}else if((timeFrame > 60)&&(timeFrame <=100)){
-    		state = 13;
     	}
-    	else if((timeFrame > 100)){
+    	else if((timeFrame > 60)&&(timeFrame <= 70)){
+    		state = 13;
+    	}else if((timeFrame > 70)&&(timeFrame <= 80)){
     		state = 14;
+    	}else if(timeFrame > 80){
+    		state = 15;
     	}
     	return state;
     		
@@ -2353,6 +2385,21 @@ public void recalcLongestRoad(int[] s, int pl)
 				return 0;
 		}
 	}
+    
+    // Using in 
+    public void final_update_conditionalpro(){
+    	for(int ind_card = 0; ind_card < NCARDS; ind_card++){
+    		for(int ind_pl = 0; ind_pl < N_PLAYER; ind_pl++){
+    			for(int ind_type = 0; ind_type < N_DEVCARDTYPES;ind_type++){
+    				if(this.buyingCardTimeStamp[ind_pl][ind_type][ind_card]!=0){
+        				this.cardPlayingTimetimeStamp[ind_type]
+        													[this.stateRepresentation(this.gamelog.getSize() 
+        															- this.buyingCardTimeStamp[ind_pl][ind_type][ind_card])]+=1 ;
+        			}
+    			}
+    		}
+    	}
+    }
     /*
     public boolean writeDataIntoExecl(int[] data){
     	

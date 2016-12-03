@@ -21,5 +21,6 @@ public interface HMMConstance{
 	 * 		State 16 of 40 -> 50	
  	 */
 	public final int TIMESTATE = 0;// 0->4
+	final int TIMESTATESTEP = 16;
 	
 }

@@ -446,6 +446,13 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     		}
     	}
     }
+    public void addIntMatrix(int[][] first_matrix, double[][] second_matrix){
+    	for(int i = 0; i < first_matrix.length; i++){
+    		for(int j = 0; j<first_matrix[0].length; j++){
+    			first_matrix[i][j] += (int)second_matrix[i][j];
+    		}
+    	}
+    }
     private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
         // TODO add your handling code here:
     	//boardlayout.UCTsimulateGame(boardlayout.state);
@@ -456,14 +463,13 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     	//int player2win = 0;
     	for(int i =0; i<100;i++){
         	JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
-            if(boardlayout.getWinner(boardlayout.state) != -1){
-                initComponents();
-                listModel = new DefaultListModel();
-                jList1.setModel(listModel);
-                boardlayout = new BoardLayout(settlersPanel1.getWidth(),settlersPanel1.getHeight());
-                settlersPanel1.SetBoardLayout(boardlayout);
-                boardlayout.InitBoard();
-            }
+        	initComponents();
+            listModel = new DefaultListModel();
+            jList1.setModel(listModel);
+            boardlayout = new BoardLayout(settlersPanel1.getWidth(),settlersPanel1.getHeight());
+           
+            settlersPanel1.SetBoardLayout(boardlayout);
+            boardlayout.InitBoard();
             playOneGame();
             jList1.validate();
             jScrollPane1.validate();
@@ -473,10 +479,11 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 
             settlersPanel1.repaint();
             int winner = boardlayout.getWinner(boardlayout.state);
+            boardlayout.final_update_conditionalpro();
             this.addIntMatrix(conditional_probability_matrix, boardlayout.cardPlayingTimetimeStamp);
 		}
     	try {
-
+    		this.addIntMatrix(conditional_probability_matrix,boardlayout.hmmPredictor.getConditionalPro());
 			String content = "";
 
 			File file = new File("C:\\Users\\AILAB\\Documents\\hmmData.txt");
@@ -491,7 +498,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
 				file.createNewFile();
 			}
 
-			FileWriter fw = new FileWriter(file.getAbsoluteFile(),true);
+			FileWriter fw = new FileWriter(file.getAbsoluteFile(),false);
 			BufferedWriter bw = new BufferedWriter(fw);
 			bw.write(content);
 			bw.close();

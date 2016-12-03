@@ -157,6 +157,8 @@ public interface GameStateConstants extends HexTypeConstants {
     int CARD_GUESSING_RIGHT_INDEX = 0;
     int CARD_GUESSING_WRONG_INDEX = 1;
     
+    int STATE_TIME_REPRESENTATION = 16;
+    
     String[] resourceNames = {"sheep", "wood", "clay", "wheat", "stone"};
     String[] cardNames = {"knight", "+1 point", "+2 road", "+2 res.", "monopoly"};
     // 

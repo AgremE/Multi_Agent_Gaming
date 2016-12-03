@@ -571,7 +571,7 @@ public abstract class Player implements GameStateConstants
         switch (a[0])
         {
             case A_BUILDSETTLEMENT: 
-                s[OFS_VERTICES+a[1]] =  VERTEX_HASSETTLEMENT+ pl;// At vertices index a[1] already have settlement with player number pl
+                s[OFS_VERTICES+a[1]] =  VERTEX_HASSETTLEMENT+ pl;// At ve   rtices index a[1] already have settlement with player number pl
                 s[OFS_PLAYERDATA[pl]+OFS_NSETTLEMENTS]++;
                 s[OFS_LASTVERTEX] = a[1];
                 boolean[] hasOpponentRoad = new boolean[NPLAYERS];
@@ -707,6 +707,7 @@ public abstract class Player implements GameStateConstants
                 bl.buyingCardTimeStamp[pl][val][s[OFS_NCARDSGONE]] = bl.gamelog.getSize();
                 bl.firstBought[pl][s[OFS_NCARDSGONE]] = bl.gamelog.getSize();
                 bl.trackingMyCardIndex[pl][s[OFS_NCARDSGONE]] = val;
+                
                 s[OFS_NCARDSGONE] ++;
                 break;
             case A_PLAYCARD_FREERESOURCE:
