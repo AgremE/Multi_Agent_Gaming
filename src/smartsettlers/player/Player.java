@@ -25,6 +25,7 @@ public abstract class Player implements GameStateConstants
     //int lastvertex; // last vertex where a settlement has been placed. 
                     // needed for initial road placement
     
+    boolean HMM = false;
     boolean POMCP = false;
     BoardLayout bl;
     Random rnd;
@@ -36,22 +37,19 @@ public abstract class Player implements GameStateConstants
         rnd = new Random();
     }
     
-    public Player(BoardLayout bl, int position, boolean isPOMCP)
+    public Player(BoardLayout bl, int position, boolean isHMMAGENT)
     {
         this.bl = bl;
         this.position = position;
         rnd = new Random();
-        POMCP = isPOMCP;
+        HMM = isHMMAGENT;
     }
     
     public boolean isPOMCP(){
     	return this.POMCP;
     }
     public boolean isHMMAgent(){
-    	if((position == NPLAYERS - 1)){
-    		return true;
-    	}
-    	return false;
+    	return this.HMM;
     }
     public void listMonopolyPossibilities(int []s)
     {

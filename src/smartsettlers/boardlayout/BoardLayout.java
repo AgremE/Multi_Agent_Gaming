@@ -664,6 +664,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         InitProductionNumbers();
         //Check the good condition of the board 
         betterBoard();
+        /*
         TranslationState test = new TranslationState(action, this);
         int[][][] testState = test.getTheRestTranslationofTheBoard();
         test.getResourceandDevelopmentCardsTranslation();
@@ -692,7 +693,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                     seqind++;
                 }
                 
-            }/**/
+            }*/
         
         NewGame(state, true); //todo: remove this.
         
@@ -849,12 +850,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         this.initArrayCardType(revealCardSoFar);
         this.initArrayCardType(trackingMyCardIndex);
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS   ; pl++)
+        for (pl=0; pl<NPLAYERS -1   ; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
         }
-        //player[N_PLAYER - 1] = new HMMPlayer(this, N_PLAYER - 1);
+        player[N_PLAYER - 1] = new HMMPlayer(this, N_PLAYER - 1,true);
         // POMCPPlayer player created
         //player[NPLAYERS - 1] = new POMCPPlayer(this,NPLAYERS - 1, true);
         //player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
@@ -946,12 +947,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     	int guessingWrong = 0;
     	boolean correct = false;
     	int[] guessingRightAndWrong = new int[2];
-    	for(int i = 0; i < realCardBeforePlay.length; i++){
-    		for(int j = 0; j < currentGuessing.length;j++){
-    			if(currentGuessing[j] != -1){
-    				if(currentGuessing[j] == realCardBeforePlay[i]){
+    	for(int ind_real = 0; ind_real < realCardBeforePlay.length; ind_real++){
+    		for(int ind_guess = 0; ind_guess < currentGuessing.length;ind_guess++){
+    			if(currentGuessing[ind_guess] != -1){
+    				if(currentGuessing[ind_guess] == realCardBeforePlay[ind_real]){
     					correct = true;
-    					currentGuessing[j] = -1;
+    					currentGuessing[ind_guess] = -1;
     					break;
     				}
     			}
@@ -962,7 +963,9 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 				correct = false;
     		}
     		else{
+    			
     			guessingWrong++;
+    		
     		}
     	}
     	guessingRightAndWrong[CARD_GUESSING_RIGHT_INDEX] = rightGuessing;
@@ -1015,7 +1018,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int[] guessing = new int[2];
         int[] realCard=null;
         int totalHiddentState = 0;
-        /*
+        
         if(player[pl].isHMMAgent()){
         	if(this.hasHiddenInfo()){
         		// if there is or are hiddens state information about the game, we use this part of program to predict
@@ -1052,8 +1055,8 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         		hmmPredictor.updateHMMGuessing(this.gamelog.getSize(),pl,totalHiddentState);
 
             	currentGuess = hmmPredictor.getCurrentGuess();
-            	cardDeskGuessing = hmmPredictor.getCurrentCardGuess(totalHiddentState);
-            	guessing = this.guessingCorrectBeforePlaying(hmmPredictor.getCurrentCardGuess(totalHiddentState),
+            	cardDeskGuessing = hmmPredictor.getCurrentProCardGuess(totalHiddentState);
+            	guessing = this.guessingCorrectBeforePlaying(cardDeskGuessing,
             															realCard);
             	this.guessingRight += guessing[CARD_GUESSING_RIGHT_INDEX];
             	this.guessingWrong += guessing[CARD_GUESSING_WRONG_INDEX];
@@ -1068,7 +1071,17 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
              
             player[pl].performAction(s, a);
             stateTransition(s, a);
-        }else{ }*/
+        }else{
+        
+        player[pl].listPossibilities(s);
+        player[pl].selectAction(s,a);
+        
+        if (isLoggingOn)
+            gamelog.addAction(a);
+        
+        player[pl].performAction(s, a);
+        stateTransition(s, a); 
+       }
    
         
        
@@ -1155,7 +1168,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         
         // We always clean up the list before we continues to work on building up the new list of possibility
         // When we are in the pay tax state that program will perform really bad and the outcomes are unreliable
-        player[pl].listPossibilities(s);
+        /* player[pl].listPossibilities(s);
         player[pl].selectAction(s,a);
         
         if (isLoggingOn)
@@ -1164,7 +1177,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player[pl].performAction(s, a);
         stateTransition(s, a);
         
-        /*
+        
         fsmlevel    = s[OFS_FSMLEVEL];
         // Assumming that POMCP is agent number 4 in the list
         if(fsmlevel == 0){
@@ -1996,7 +2009,7 @@ public void recalcLongestRoad(int[] s, int pl)
     	int numberCardinotherPlayerHand = 0;
     	for(int i = 0; i < NPLAYERS ; i++){
     		
-    		if(player[i].isPOMCP()){
+    		if(player[i].isHMMAgent()){
     			continue;
     		}
     		for(int ind_card = 0; ind_card < N_DEVCARDTYPES; ind_card++){

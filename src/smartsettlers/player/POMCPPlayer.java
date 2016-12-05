@@ -17,7 +17,7 @@ public class POMCPPlayer extends smartsettlers.player.Player{
 	private ArrayList<int []> history = new ArrayList<int []>();
 	UCT_POCMP pomcp_settler;
 	
-	public POMCPPlayer(BoardLayout bl, int position, boolean trues){
+	public POMCPPlayer(BoardLayout bl, int position){
 		
 		super(bl,position,true);
 		pomcp_settler  = new UCT_POCMP(bl,position);

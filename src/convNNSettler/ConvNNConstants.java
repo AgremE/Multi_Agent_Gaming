@@ -42,7 +42,7 @@ public interface ConvNNConstants {
 	//Translate the whole player data into ConvNN form of input
 	
     
-	int PLAYERDATA_START_INDEX = 9;
+	int PLAYERDATA_START_INDEX = 0;
 	int OFS_COVN_ROAD = PLAYERDATA_START_INDEX + 1;
 	int OFS_COVN_SETTLEMENTS = OFS_COVN_ROAD + 1;
 	int OFS_COVN_CITIES = OFS_COVN_SETTLEMENTS + 1;
@@ -54,12 +54,12 @@ public interface ConvNNConstants {
 	int OFS_CONV_PORT = OFS_RESOURCE_PRODUCE_SINCE + 1;
 	int COVN_PLAYERSTATESIZE         = OFS_CONV_PORT + 1; // 20 for first player for two player it is 31
     
-    int[] OFS_COVN_PLAYERDATA        = { PLAYERDATA_START_INDEX,PLAYERDATA_START_INDEX + COVN_PLAYERSTATESIZE//Whole game state of the board presenting + player one
+    int[] OFS_COVN_PLAYERDATA        = { OFS_RESOURCESNOTHIN + COVN_PLAYERSTATESIZE,OFS_RESOURCESNOTHIN + 2*COVN_PLAYERSTATESIZE//Whole game state of the board presenting + player one
     								// 
                                     //OFS_VERTICES+N_VERTICES + 2*PLAYERSTATESIZE
                                     //OFS_VERTICES+N_VERTICES + 3*PLAYERSTATESIZE
                                     };// Change it to semi zero sum game between two players
-    int CONV_DATASIZE = PLAYERDATA_START_INDEX + 2*COVN_PLAYERSTATESIZE;
+    int CONV_DATASIZE = OFS_RESOURCESNOTHIN + 2*COVN_PLAYERSTATESIZE;
 	}
     /*
 	

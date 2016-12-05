@@ -28,6 +28,10 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     
     BoardLayout boardlayout;
     DefaultListModel listModel;
+    int right =0;
+    int wrong = 0;
+    int hmmwin = 0;
+    int hmmlose = 0;
 //    ListSelectionListener selChanged;
     
     /** Creates new form AppFrame */
@@ -393,6 +397,8 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
         JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
         
         playOneGame();
+        System.out.println("RIGHT"+ boardlayout.guessingRight);
+        System.out.println("Wrong"+ boardlayout.guessingWrong);
         jList1.validate();
         jScrollPane1.validate();
 
@@ -461,7 +467,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     	int[][] conditional_probability_matrix = new int[N_DEVCARDTYPES][15];
      	//int player1win = 0;
     	//int player2win = 0;
-    	for(int i =0; i<100;i++){
+    	for(int i =0; i < 10;i++){
         	JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
         	initComponents();
             listModel = new DefaultListModel();
@@ -479,20 +485,33 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 
             settlersPanel1.repaint();
             int winner = boardlayout.getWinner(boardlayout.state);
-            boardlayout.final_update_conditionalpro();
-            this.addIntMatrix(conditional_probability_matrix, boardlayout.cardPlayingTimetimeStamp);
+            right += boardlayout.guessingRight;
+            wrong += boardlayout.guessingWrong;
+            if(winner == 1){
+            	hmmwin++;
+            }else{
+            	hmmlose++;
+            }
+            //boardlayout.final_update_conditionalpro();
+            //this.addIntMatrix(conditional_probability_matrix, boardlayout.cardPlayingTimetimeStamp);
 		}
     	try {
-    		this.addIntMatrix(conditional_probability_matrix,boardlayout.hmmPredictor.getConditionalPro());
-			String content = "";
+    		//this.addIntMatrix(conditional_probability_matrix,boardlayout.hmmPredictor.getConditionalPro());
+			
+    		String content = "";
 
-			File file = new File("C:\\Users\\AILAB\\Documents\\hmmData.txt");
-			for(int i = 0; i < conditional_probability_matrix.length; i++){
+			File file = new File("C:\\Users\\AILAB\\Documents\\hmmDataResult.txt");
+			/*for(int i = 0; i < conditional_probability_matrix.length; i++){
 	    		for(int j = 0; j<conditional_probability_matrix[0].length; j++){
 	    			content = content.concat(Integer.toString(conditional_probability_matrix[i][j])+',');
 	    		}
 	    		content = content.concat("\n");
-	    	}
+	    	}*/
+			content = content.concat("HMM Guessing Right: "+Integer.toString(right)+"\n");
+			content = content.concat("HMM Guessing Wrong: "+Integer.toString(wrong)+"\n");
+			content = content.concat("HMM Agent winning rate: "+ Integer.toString(hmmwin)+"\n");
+			content = content.concat("HMM Agent lossing rate: " + Integer.toString(hmmlose)+"\n");
+			
 			// if file doesnt exists, then create it
 			if (!file.exists()) {
 				file.createNewFile();
