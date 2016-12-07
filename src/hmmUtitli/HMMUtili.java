@@ -81,7 +81,7 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 	public void readDataHMM(){
 		  try {
 			  
-		        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("C:\\Users\\AILAB\\Documents\\hmmConditionalProData.txt")));         
+		        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("C:\\Users\\AILAB\\Documents\\hmmData.txt")));         
 		        String line;
 		        int lineDevCon = 0;
 		        String[] lineSplit; 
@@ -103,16 +103,66 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 		}
 		  //this.HMM_CONDITIONALPRO = this.convertDataIntoPro(this.HMM_CONDITIONALPRO);
 	}
+	// update local prior
+	public double[] updatePriorWithCardReveal(double[] prior_input, int[] localReveal){
+		int total_card = 0;
+		
+		for(int i = 0; i < localReveal.length; i++){
+			total_card += localReveal[i];
+		}
+		for(int i = 0; i < N_DEVCARDTYPES; i++){
+			switch (i) {
+				case CARD_KNIGHT:
+					prior_input[i] = (double)(15 - localReveal[i])/(25-total_card);
+					break;
+				case CARD_ONEPOINT:
+					prior_input[i] = (double)(5 - localReveal[i])/(25 - total_card);
+					break;
+				case CARD_FREEROAD:
+					prior_input[i] = (double)(2 - localReveal[i])/(25 - total_card);
+					break;
+				case CARD_FREERESOURCE:
+					prior_input[i] = (double)(2 - localReveal[i])/(25 - total_card);
+					break;
+				case CARD_MONOPOLY:
+					prior_input[i] = (double)(2 - localReveal[i])/(25 - total_card);
+					break;
+				default:
+					break;
+			}
+			
+		}
+		return prior_input;
+	}
 	
+	public int[] getCurrentRevealCard(){
+		int[] numberCardTypeReveal = new int[N_DEVCARDTYPES];
+		
+		for(int i = 0; i < bl.revealCardSoFar.length; i++){
+			for(int j =0 ; j < bl.revealCardSoFar[0].length; j++){
+				if(bl.revealCardSoFar[i][j] != -1){
+					numberCardTypeReveal[bl.revealCardSoFar[i][j]]++;
+				}
+			}
+		}
+		return numberCardTypeReveal;
+	}
+	
+	public int[] updateCurrentBelifeGuessCard(int[] currentGuess, int type){
+		currentGuess[type]++;
+		return currentGuess;
+	}
 	// Update the guessing according to the time
 	//TODO: Check the update variable whether it is updated correctly
+
 	public void updateHMMGuessing(int timeFrame, int currentPlayer, int totalHiddenCard){
 		
 		this.updatePrior();
 		if(totalHiddenCard == 0){
 			return;
 		}
-		
+		int[] cardReveal = getCurrentRevealCard();
+		double[] prior_input = prior;
 		if(totalHiddenCard == 1){
 			int timedifferent = 0;
 			for(int ind_card = 0; ind_card < NCARDS; ind_card++){
@@ -149,9 +199,13 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 				if(i == 0){
 					this.currentGuessing[i] = Matrix.multiplyByMatrix(this.prior, this.HMM_CONDITIONALPRO[bl.stateRepresentation(timedifferent[i])]);
 				}else{
+					
 					int previousState = getIndexMaxElement(this.currentGuessing[i-1]);
+					cardReveal = updateCurrentBelifeGuessCard(cardReveal, previousState);
+					prior_input = updatePriorWithCardReveal(prior_input, cardReveal);
+					//should update the prior first
 					this.currentGuessing[i] = Matrix.multiplyByMatrix
-															(Matrix.multiplyByMatrix(prior,
+															(Matrix.multiplyByMatrix(prior_input,
 																			this.HMM_TRANSITIONALMATRIX[previousState])
 																				,this.HMM_CONDITIONALPRO[bl.stateRepresentation(timedifferent[i])]);
 					}	

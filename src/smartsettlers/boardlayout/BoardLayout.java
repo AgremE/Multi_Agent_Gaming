@@ -850,7 +850,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         this.initArrayCardType(revealCardSoFar);
         this.initArrayCardType(trackingMyCardIndex);
         player = new Player[NPLAYERS];
-        for (pl=0; pl<NPLAYERS -1   ; pl++)
+        for (pl=0; pl<NPLAYERS-1   ; pl++)
         {
             player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
@@ -945,19 +945,21 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     public int[] guessingCorrectBeforePlaying(int[] currentGuessing, int[] realCardBeforePlay){
     	int rightGuessing = 0;
     	int guessingWrong = 0;
+    	int totalGuessingRight = 0;
     	boolean correct = false;
     	int[] guessingRightAndWrong = new int[2];
     	for(int ind_real = 0; ind_real < realCardBeforePlay.length; ind_real++){
     		for(int ind_guess = 0; ind_guess < currentGuessing.length;ind_guess++){
     			if(currentGuessing[ind_guess] != -1){
     				if(currentGuessing[ind_guess] == realCardBeforePlay[ind_real]){
-    					correct = true;
+    					totalGuessingRight++;
     					currentGuessing[ind_guess] = -1;
     					break;
     				}
     			}
     		}
-    		if(correct){
+    		// Just count the number of cards that we are able to guess correctly
+    		/*if(correct){
 
 				rightGuessing++;
 				correct = false;
@@ -966,7 +968,14 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     			
     			guessingWrong++;
     		
-    		}
+    		}*/
+    	}
+    	// correct only when the whole sequence of card are guessing correctly
+    	if(totalGuessingRight == currentGuessing.length){
+    		rightGuessing++;
+    	}
+    	else{
+    		guessingWrong++;
     	}
     	guessingRightAndWrong[CARD_GUESSING_RIGHT_INDEX] = rightGuessing;
     	guessingRightAndWrong[CARD_GUESSING_WRONG_INDEX] = guessingWrong;
@@ -1071,22 +1080,23 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
              
             player[pl].performAction(s, a);
             stateTransition(s, a);
-        }else{
+        }
+        else{
         
-        player[pl].listPossibilities(s);
-        player[pl].selectAction(s,a);
-        
-        if (isLoggingOn)
-            gamelog.addAction(a);
-        
-        player[pl].performAction(s, a);
-        stateTransition(s, a); 
+	        player[pl].listPossibilities(s);
+	        player[pl].selectAction(s,a);
+	        
+	        if (isLoggingOn)
+	            gamelog.addAction(a);
+	        
+	        player[pl].performAction(s, a);
+	        stateTransition(s, a); 
        }
    
-        
+        /*
        
         //System.out.println("System start trading");
-        /*
+        
         if(statlevel == S_NORMAL){
         	
         	//System.out.println("System start trading");
@@ -1195,7 +1205,17 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         }
         if(player[pl].isPOMCP()){
         	clearHELPPOMCP();
-        }*/
+        }
+        player[pl].listPossibilities(s);
+        player[pl].selectAction(s,a);
+        
+        if (isLoggingOn)
+            gamelog.addAction(a);
+        
+        player[pl].performAction(s, a);
+        stateTransition(s, a); 
+        */
+        
     }
     
     private int[] constructHMMGuessState(int pl, int[] state2, int totalHiddenState) {

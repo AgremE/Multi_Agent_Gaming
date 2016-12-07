@@ -31,6 +31,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     int right =0;
     int wrong = 0;
     int hmmwin = 0;
+    boolean abnormaly= true;
     int hmmlose = 0;
 //    ListSelectionListener selChanged;
     
@@ -344,9 +345,12 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
             settlersPanel1.paintAll(settlersPanel1.getGraphics());
             jList1.paintAll(jList1.getGraphics());
             round++;
+            abnormaly = false;
             if(round>1000){
+            	abnormaly = true;
             	break;
             }
+            
             //this.paintAll(this.getGraphics());
         } while (boardlayout.getWinner(boardlayout.state) == -1);
         
@@ -467,7 +471,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     	int[][] conditional_probability_matrix = new int[N_DEVCARDTYPES][15];
      	//int player1win = 0;
     	//int player2win = 0;
-    	for(int i =0; i < 10;i++){
+    	for(int i =0; i < 500;i++){
         	JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
         	initComponents();
             listModel = new DefaultListModel();
@@ -485,12 +489,15 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 
             settlersPanel1.repaint();
             int winner = boardlayout.getWinner(boardlayout.state);
-            right += boardlayout.guessingRight;
-            wrong += boardlayout.guessingWrong;
-            if(winner == 1){
-            	hmmwin++;
-            }else{
-            	hmmlose++;
+            if(!abnormaly){
+            	right += boardlayout.guessingRight;
+                wrong += boardlayout.guessingWrong;
+                if(winner == 1){
+                	hmmwin++;
+                }else{
+                	hmmlose++;
+                }
+                abnormaly = true;
             }
             //boardlayout.final_update_conditionalpro();
             //this.addIntMatrix(conditional_probability_matrix, boardlayout.cardPlayingTimetimeStamp);
@@ -501,17 +508,22 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     		String content = "";
 
 			File file = new File("C:\\Users\\AILAB\\Documents\\hmmDataResult.txt");
-			/*for(int i = 0; i < conditional_probability_matrix.length; i++){
-	    		for(int j = 0; j<conditional_probability_matrix[0].length; j++){
-	    			content = content.concat(Integer.toString(conditional_probability_matrix[i][j])+',');
-	    		}
-	    		content = content.concat("\n");
-	    	}*/
+			
+
 			content = content.concat("HMM Guessing Right: "+Integer.toString(right)+"\n");
 			content = content.concat("HMM Guessing Wrong: "+Integer.toString(wrong)+"\n");
 			content = content.concat("HMM Agent winning rate: "+ Integer.toString(hmmwin)+"\n");
 			content = content.concat("HMM Agent lossing rate: " + Integer.toString(hmmlose)+"\n");
 			
+			/*
+			 * for(int i = 0; i < conditional_probability_matrix.length; i++){
+	    		for(int j = 0; j<conditional_probability_matrix[0].length; j++){
+	    			content = content.concat(Integer.toString(conditional_probability_matrix[i][j])+',');
+	    		}
+	    		content = content.concat("\n");
+	    	}
+			
+			*/
 			// if file doesnt exists, then create it
 			if (!file.exists()) {
 				file.createNewFile();
