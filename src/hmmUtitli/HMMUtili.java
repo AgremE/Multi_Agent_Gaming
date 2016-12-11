@@ -81,7 +81,7 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 	public void readDataHMM(){
 		  try {
 			  
-		        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("C:\\Users\\AILAB\\Documents\\hmmData.txt")));         
+		        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("C:\\Users\\AILAB\\Documents\\hmmNewDataPro1000.txt")));         
 		        String line;
 		        int lineDevCon = 0;
 		        String[] lineSplit; 

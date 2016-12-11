@@ -471,7 +471,13 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     	int[][] conditional_probability_matrix = new int[N_DEVCARDTYPES][15];
      	//int player1win = 0;
     	//int player2win = 0;
-    	for(int i =0; i < 500;i++){
+
+		String guessingWringLen = "";
+		String guessingRightLen = "";
+		int[] countRight = new int[25];
+		int[] countwrong = new int[25];
+		
+    	for(int i =0; i < 100;i++){
         	JScrollBar scrollbar = jScrollPane1.getVerticalScrollBar();
         	initComponents();
             listModel = new DefaultListModel();
@@ -499,6 +505,15 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 }
                 abnormaly = true;
             }
+            for(int ind_i = 0; ind_i < boardlayout.guessingRightlen.size(); ind_i++){
+				//guessingWringLen = guessingWringLen.concat(Integer.toString(boardlayout.guessingRightlen.get(i)));
+				countRight[boardlayout.guessingRightlen.get(ind_i)]++;
+			}
+			for(int ind_i = 0; ind_i < boardlayout.guessingWronglen.size(); ind_i++){
+				//guessingWringLen = guessingWringLen.concat(Integer.toString(boardlayout.guessingRightlen.get(i)));
+				countwrong[boardlayout.guessingWronglen.get(ind_i)]++;
+			}
+			
             //boardlayout.final_update_conditionalpro();
             //this.addIntMatrix(conditional_probability_matrix, boardlayout.cardPlayingTimetimeStamp);
 		}
@@ -515,6 +530,16 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
 			content = content.concat("HMM Agent winning rate: "+ Integer.toString(hmmwin)+"\n");
 			content = content.concat("HMM Agent lossing rate: " + Integer.toString(hmmlose)+"\n");
 			
+			for(int i = 0; i < 25;i++){
+				if(countRight[i]>0){
+					guessingRightLen = guessingRightLen.concat("Guessing Right at len "+i+" "+ Integer.toString(countRight[i])+ "\n");
+				}
+				if(countwrong[i] > 0){
+					guessingWringLen = guessingWringLen.concat("Guessing Wrong at len "+i+" "+ Integer.toString(countwrong[i])+ "\n");
+				}
+			}
+			content = content.concat(guessingRightLen);
+			content = content.concat(guessingWringLen);
 			/*
 			 * for(int i = 0; i < conditional_probability_matrix.length; i++){
 	    		for(int j = 0; j<conditional_probability_matrix[0].length; j++){

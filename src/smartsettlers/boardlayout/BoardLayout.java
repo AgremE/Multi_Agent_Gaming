@@ -60,6 +60,9 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public int[][] revealCardSoFar = new int[NPLAYERS][NCARDS]; // store card type that has been reveal so far
 	//public int[][] playerDevCardData = new int[NPLAYERS][NCARDS];
 	public int[][] trackingMyCardIndex = new int[NPLAYERS][NCARDS];
+	public ArrayList<Integer> guessingRightlen = new ArrayList<>();
+	public ArrayList<Integer> guessingWronglen = new ArrayList<>();
+	
 	public int winner = -1;
 	// Constructing the likelihood data
 	public int[][][] storeData = new int[NPLAYERS][NCARDS][N_DEVCARDTYPES]; 
@@ -972,9 +975,11 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     	}
     	// correct only when the whole sequence of card are guessing correctly
     	if(totalGuessingRight == currentGuessing.length){
+    		guessingRightlen.add(totalGuessingRight);
     		rightGuessing++;
     	}
     	else{
+    		guessingWronglen.add(currentGuessing.length);
     		guessingWrong++;
     	}
     	guessingRightAndWrong[CARD_GUESSING_RIGHT_INDEX] = rightGuessing;
