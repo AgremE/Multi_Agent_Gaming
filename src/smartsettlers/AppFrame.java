@@ -504,15 +504,16 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 	hmmlose++;
                 }
                 abnormaly = true;
+
+                for(int ind_i = 0; ind_i < boardlayout.guessingRightlen.size(); ind_i++){
+    				//guessingWringLen = guessingWringLen.concat(Integer.toString(boardlayout.guessingRightlen.get(i)));
+    				countRight[boardlayout.guessingRightlen.get(ind_i)]++;
+    			}
+    			for(int ind_i = 0; ind_i < boardlayout.guessingWronglen.size(); ind_i++){
+    				//guessingWringLen = guessingWringLen.concat(Integer.toString(boardlayout.guessingRightlen.get(i)));
+    				countwrong[boardlayout.guessingWronglen.get(ind_i)]++;
+    			}
             }
-            for(int ind_i = 0; ind_i < boardlayout.guessingRightlen.size(); ind_i++){
-				//guessingWringLen = guessingWringLen.concat(Integer.toString(boardlayout.guessingRightlen.get(i)));
-				countRight[boardlayout.guessingRightlen.get(ind_i)]++;
-			}
-			for(int ind_i = 0; ind_i < boardlayout.guessingWronglen.size(); ind_i++){
-				//guessingWringLen = guessingWringLen.concat(Integer.toString(boardlayout.guessingRightlen.get(i)));
-				countwrong[boardlayout.guessingWronglen.get(ind_i)]++;
-			}
 			
             //boardlayout.final_update_conditionalpro();
             //this.addIntMatrix(conditional_probability_matrix, boardlayout.cardPlayingTimetimeStamp);
@@ -521,6 +522,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
     		//this.addIntMatrix(conditional_probability_matrix,boardlayout.hmmPredictor.getConditionalPro());
 			
     		String content = "";
+    		
 
 			File file = new File("C:\\Users\\AILAB\\Documents\\hmmDataResult.txt");
 			

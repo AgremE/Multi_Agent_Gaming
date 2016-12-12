@@ -158,11 +158,15 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 	public void updateHMMGuessing(int timeFrame, int currentPlayer, int totalHiddenCard){
 		
 		this.updatePrior();
+		
 		if(totalHiddenCard == 0){
 			return;
 		}
+		
 		int[] cardReveal = getCurrentRevealCard();
-		double[] prior_input = prior;
+		double[] prior_input = new double[N_DEVCARDTYPES];
+		prior_input = prior.clone();
+		
 		if(totalHiddenCard == 1){
 			int timedifferent = 0;
 			for(int ind_card = 0; ind_card < NCARDS; ind_card++){

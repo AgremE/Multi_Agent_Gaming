@@ -21,8 +21,8 @@ import tradingPOMDPs.TradingAction;
 import tradingPOMDPs.TradingUtil;
 import uct.TreeNode;
 import uct.UCT;
-import convNNSettler.*;
 import hmmUtitli.HMMUtili;
+import randomePlayer.RandomAgent;
 
 
 /**
@@ -32,7 +32,7 @@ import hmmUtitli.HMMUtili;
 
 /*Improve by Agreme@(Makara Phav)*/
 // if working on HMM change the player at players[] initialization
-public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants, ConvNNConstants
+public class BoardLayout implements HexTypeConstants, VectorConstants, GameStateConstants
 {
 	//Help parameters for POMCP
 	public boolean wrong = false;
@@ -51,6 +51,10 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	// Using this one to construct the data time frame for the conditional probability
 	public int[][][] playingAveragingTime = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];//Storing inside the data.txt
 	public int[][] cardPlayingTimetimeStamp = new int[N_DEVCARDTYPES][STATE_TIME_REPRESENTATION];
+	
+	//Radome guessing state agent
+	RandomAgent ramdonAgent = new RandomAgent(this);
+	//End
 	
 	// Help function for HMM Player
 	// Assumption about the playing time
@@ -79,7 +83,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public int[] currentProductionNumber = new int[19];
 	
 	//For translating the production into ConvNN input form
-	public int[][][] production_since = new int[N_PLAYER][N_VERTICES][N_RESOURCES];
+	public int[][][] production_since = new int[NPLAYERS][N_VERTICES][N_RESOURCES];
 	public int[][] total_production_since = new int[N_VERTICES][N_RESOURCES];
 	
 	//END
@@ -855,10 +859,11 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         player = new Player[NPLAYERS];
         for (pl=0; pl<NPLAYERS-1   ; pl++)
         {
-            player[pl] = new UctPlayer(this, pl);
 //            player[pl] = new RandomPlayer(this, pl);
+            player[pl] = new UctPlayer(this, pl);
         }
-        player[N_PLAYER - 1] = new HMMPlayer(this, N_PLAYER - 1,true);
+
+    	player[NPLAYERS - 1] = new HMMPlayer(this, NPLAYERS - 1,true);
         // POMCPPlayer player created
         //player[NPLAYERS - 1] = new POMCPPlayer(this,NPLAYERS - 1, true);
         //player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
@@ -951,12 +956,14 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     	int totalGuessingRight = 0;
     	boolean correct = false;
     	int[] guessingRightAndWrong = new int[2];
-    	for(int ind_real = 0; ind_real < realCardBeforePlay.length; ind_real++){
-    		for(int ind_guess = 0; ind_guess < currentGuessing.length;ind_guess++){
-    			if(currentGuessing[ind_guess] != -1){
-    				if(currentGuessing[ind_guess] == realCardBeforePlay[ind_real]){
+    	int[] guessing = currentGuessing.clone();
+    	int[] realCard = realCardBeforePlay.clone();
+    	for(int ind_real = 0; ind_real < realCard.length; ind_real++){
+    		for(int ind_guess = 0; ind_guess < guessing.length;ind_guess++){
+    			if(guessing[ind_guess] != -1){
+    				if(guessing[ind_guess] == realCard[ind_real]){
     					totalGuessingRight++;
-    					currentGuessing[ind_guess] = -1;
+    					guessing[ind_guess] = -1;
     					break;
     				}
     			}
@@ -974,12 +981,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     		}*/
     	}
     	// correct only when the whole sequence of card are guessing correctly
-    	if(totalGuessingRight == currentGuessing.length){
+    	if(totalGuessingRight == guessing.length){
     		guessingRightlen.add(totalGuessingRight);
     		rightGuessing++;
     	}
     	else{
-    		guessingWronglen.add(currentGuessing.length);
+    		guessingWronglen.add(guessing.length);
     		guessingWrong++;
     	}
     	guessingRightAndWrong[CARD_GUESSING_RIGHT_INDEX] = rightGuessing;
@@ -1032,6 +1039,182 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int[] guessing = new int[2];
         int[] realCard=null;
         int totalHiddentState = 0;
+        int[] guessingCard;
+        /*
+        //Testing code between Random Agent vs HMM Agent
+        
+        if(player[pl].isRandomAgent()){
+        	if(this.hasHiddenInfo()){
+        		for(int i = 0; i < NPLAYERS; i++){
+        			if(i == pl){
+        				continue;
+        			}
+        			else
+        			{
+        				for(int i_devType = 0; i_devType < N_DEVCARDTYPES; i_devType++){
+        					if(state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType] != 0){
+        						totalHiddentState += state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType];
+        					}
+        				}
+        			}
+        		}
+        		realCard = new int[totalHiddentState];
+        		int index = 0;
+        		for(int i = 0; i < NPLAYERS; i++){
+        			if(i == pl){
+        				continue;
+        			}
+        			else
+        			{
+        				for(int i_devType = 0; i_devType < N_DEVCARDTYPES; i_devType++){
+        					for(int num_card = 0; num_card< state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType]; num_card++){
+    							realCard[index] = i_devType;
+    							index++;
+    						}
+        				}
+        			}
+        		}
+        		guessingCard = this.ramdonAgent.guessingCard(totalHiddentState);
+        		guessing = this.guessingCorrectBeforePlaying(guessingCard,realCard);
+				this.guessingRight += guessing[CARD_GUESSING_RIGHT_INDEX];
+				this.guessingWrong += guessing[CARD_GUESSING_WRONG_INDEX];
+				state = hideState(pl, state);
+            	state = constructRandomState(pl,state,guessingCard);
+        	}
+        	player[pl].listPossibilities(state);
+            player[pl].selectAction(state,a);
+             
+            if (isLoggingOn)
+                 gamelog.addAction(a);
+             
+            player[pl].performAction(s, a);
+            stateTransition(s, a);
+        }else if(player[pl].isHMMAgent()){
+        	if(this.hasHiddenInfo()){
+        		// if there is or are hiddens state information about the game, we use this part of program to predict
+        		
+        		for(int i = 0; i < NPLAYERS; i++){
+        			if(i == pl){
+        				continue;
+        			}
+        			else
+        			{
+        				for(int i_devType = 0; i_devType < N_DEVCARDTYPES; i_devType++){
+        					if(state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType] != 0){
+        						totalHiddentState += state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType];
+        					}
+        				}
+        			}
+        		}
+        		realCard = new int[totalHiddentState];
+        		int index = 0;
+        		for(int i = 0; i < NPLAYERS; i++){
+        			if(i == pl){
+        				continue;
+        			}
+        			else
+        			{
+        				for(int i_devType = 0; i_devType < N_DEVCARDTYPES; i_devType++){
+        					for(int num_card = 0; num_card< state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType]; num_card++){
+    							realCard[index] = i_devType;
+    							index++;
+    						}
+        				}
+        			}
+        		}
+        		hmmPredictor.updateHMMGuessing(this.gamelog.getSize(),pl,totalHiddentState);
+
+            	currentGuess = hmmPredictor.getCurrentGuess();
+            	cardDeskGuessing = hmmPredictor.getCurrentProCardGuess(totalHiddentState);
+            	guessing = this.guessingCorrectBeforePlaying(cardDeskGuessing,
+            															realCard);
+            	this.guessingRight += guessing[CARD_GUESSING_RIGHT_INDEX];
+            	this.guessingWrong += guessing[CARD_GUESSING_WRONG_INDEX];
+            	state = hideState(pl, state);
+            	state = constructHMMGuessState(pl,state,totalHiddentState);
+        	}
+        	player[pl].listPossibilities(state);
+            player[pl].selectAction(state,a);
+             
+            if (isLoggingOn)
+                 gamelog.addAction(a);
+             
+            player[pl].performAction(s, a);
+            stateTransition(s, a);
+        }else{
+        	player[pl].listPossibilities(state);
+            player[pl].selectAction(state,a);
+             
+            if (isLoggingOn)
+                 gamelog.addAction(a);
+             
+            player[pl].performAction(s, a);
+            stateTransition(s, a);
+        }
+        //End of Random vs HMMAgent
+        
+        //Testing with Random Agent and SmartSettler
+        
+        if(player[pl].isRandomAgent()){
+        	if(this.hasHiddenInfo()){
+        		for(int i = 0; i < NPLAYERS; i++){
+        			if(i == pl){
+        				continue;
+        			}
+        			else
+        			{
+        				for(int i_devType = 0; i_devType < N_DEVCARDTYPES; i_devType++){
+        					if(state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType] != 0){
+        						totalHiddentState += state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType];
+        					}
+        				}
+        			}
+        		}
+        		realCard = new int[totalHiddentState];
+        		int index = 0;
+        		for(int i = 0; i < NPLAYERS; i++){
+        			if(i == pl){
+        				continue;
+        			}
+        			else
+        			{
+        				for(int i_devType = 0; i_devType < N_DEVCARDTYPES; i_devType++){
+        					for(int num_card = 0; num_card< state[OFS_PLAYERDATA[i]+OFS_OLDCARDS+i_devType]; num_card++){
+    							realCard[index] = i_devType;
+    							index++;
+    						}
+        				}
+        			}
+        		}
+        		guessingCard = this.ramdonAgent.guessingCard(totalHiddentState);
+        		guessing = this.guessingCorrectBeforePlaying(guessingCard,realCard);
+				this.guessingRight += guessing[CARD_GUESSING_RIGHT_INDEX];
+				this.guessingWrong += guessing[CARD_GUESSING_WRONG_INDEX];
+				state = hideState(pl, state);
+            	state = constructRandomState(pl,state,guessingCard);
+        	}
+        	player[pl].listPossibilities(state);
+            player[pl].selectAction(state,a);
+             
+            if (isLoggingOn)
+                 gamelog.addAction(a);
+             
+            player[pl].performAction(s, a);
+            stateTransition(s, a);
+        }else{
+        	player[pl].listPossibilities(state);
+            player[pl].selectAction(state,a);
+             
+            if (isLoggingOn)
+                 gamelog.addAction(a);
+             
+            player[pl].performAction(s, a);
+            stateTransition(s, a);
+        }
+        */
+        // End for testing code with random agent
+        
+        // HMM Working code
         
         if(player[pl].isHMMAgent()){
         	if(this.hasHiddenInfo()){
@@ -1097,7 +1280,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	        player[pl].performAction(s, a);
 	        stateTransition(s, a); 
        }
-   
+        //End of HMM vs SmartSettler
         /*
        
         //System.out.println("System start trading");
@@ -1239,6 +1422,20 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     	}
 		return state2;
 	}
+    private int[] constructRandomState(int pl, int[] state, int[] guessing){
+    	for(int ind_pl = 0; ind_pl < NPLAYERS; ind_pl++){
+    		if(ind_pl == pl){
+    			continue;
+    		}
+    		for(int ind_card = 0; ind_card<guessing.length; ind_card++){
+    			int type = guessing[ind_card];
+    			if(type != -1){
+    				state[OFS_PLAYERDATA[ind_pl]+OFS_OLDCARDS+type]++;
+    			}
+    		}
+    	}
+		return state;
+    }
 
 	public static void printArray(int[] s)
     {
@@ -1999,7 +2196,7 @@ public void recalcLongestRoad(int[] s, int pl)
     
     //Clear data for POMCP which use to help POMCP player
     public void clearHELPPOMCP(){
-    	for(int ind_pl = 0; ind_pl < N_PLAYER; ind_pl++){
+    	for(int ind_pl = 0; ind_pl < NPLAYERS; ind_pl++){
     		
     		eachPlayerCardNotReveal[ind_pl] = 0;
     		newlyBoughtCardEachPlayer[ind_pl] = 0;
@@ -2059,7 +2256,7 @@ public void recalcLongestRoad(int[] s, int pl)
     	
     	int[] s = BoardLayout.cloneOfState(state);
     	
-    	for(int i =0; i< N_PLAYER;i++){
+    	for(int i =0; i< NPLAYERS;i++){
     		
     		if(i != pl){
     			//Hide victory point card
@@ -2427,7 +2624,7 @@ public void recalcLongestRoad(int[] s, int pl)
     // Using in 
     public void final_update_conditionalpro(){
     	for(int ind_card = 0; ind_card < NCARDS; ind_card++){
-    		for(int ind_pl = 0; ind_pl < N_PLAYER; ind_pl++){
+    		for(int ind_pl = 0; ind_pl < NPLAYERS; ind_pl++){
     			for(int ind_type = 0; ind_type < N_DEVCARDTYPES;ind_type++){
     				if(this.buyingCardTimeStamp[ind_pl][ind_type][ind_card]!=0){
         				this.cardPlayingTimetimeStamp[ind_type]

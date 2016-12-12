@@ -27,6 +27,7 @@ public abstract class Player implements GameStateConstants
     
     boolean HMM = false;
     boolean POMCP = false;
+    boolean RandomGuessing = false;
     BoardLayout bl;
     Random rnd;
     
@@ -44,12 +45,23 @@ public abstract class Player implements GameStateConstants
         rnd = new Random();
         HMM = isHMMAGENT;
     }
+    public Player(BoardLayout bl, int position, boolean isHMMAGENT, boolean isRandom)
+    {
+        this.bl = bl;
+        this.position = position;
+        rnd = new Random();
+        HMM = isHMMAGENT;
+        RandomGuessing = isRandom;
+    }
     
     public boolean isPOMCP(){
     	return this.POMCP;
     }
     public boolean isHMMAgent(){
     	return this.HMM;
+    }
+    public boolean isRandomAgent(){
+    	return this.RandomGuessing;
     }
     public void listMonopolyPossibilities(int []s)
     {
