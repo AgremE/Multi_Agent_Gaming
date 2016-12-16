@@ -2,9 +2,9 @@ package smartsettlers.player;
 
 import smartsettlers.boardlayout.BoardLayout;
 
-public class RandomAgent extends Player{
+public class GuessingAgent extends Player{
 
-		public RandomAgent(BoardLayout bl, int position, boolean HMM, boolean random) {
+		public GuessingAgent(BoardLayout bl, int position, boolean HMM, boolean random) {
 			super(bl, position, HMM, random);
 			// TODO Auto-generated constructor stub
 		}

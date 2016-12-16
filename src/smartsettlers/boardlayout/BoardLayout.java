@@ -860,10 +860,11 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         for (pl=0; pl<NPLAYERS-1   ; pl++)
         {
 //            player[pl] = new RandomPlayer(this, pl);
-            player[pl] = new UctPlayer(this, pl);
+            player[pl] = new GuessingAgent(this, pl, false , true);
         }
 
-    	player[NPLAYERS - 1] = new HMMPlayer(this, NPLAYERS - 1,true);
+    	player[NPLAYERS-1] = new HMMPlayer(this, NPLAYERS-1, true);
+    	
         // POMCPPlayer player created
         //player[NPLAYERS - 1] = new POMCPPlayer(this,NPLAYERS - 1, true);
         //player[NPLAYERS-1] = new POMCPPlayer(this, NPLAYERS-1);
@@ -981,16 +982,19 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
     		}*/
     	}
     	// correct only when the whole sequence of card are guessing correctly
-    	if(totalGuessingRight == guessing.length){
-    		guessingRightlen.add(totalGuessingRight);
-    		rightGuessing++;
+    	if(guessing.length!=0){
+    		if(totalGuessingRight == guessing.length){
+        		guessingRightlen.add(totalGuessingRight);
+        		rightGuessing++;
+        	}
+        	else{
+        		guessingWronglen.add(guessing.length);
+        		guessingWrong++;
+        	}
+        	guessingRightAndWrong[CARD_GUESSING_RIGHT_INDEX] = rightGuessing;
+        	guessingRightAndWrong[CARD_GUESSING_WRONG_INDEX] = guessingWrong;
     	}
-    	else{
-    		guessingWronglen.add(guessing.length);
-    		guessingWrong++;
-    	}
-    	guessingRightAndWrong[CARD_GUESSING_RIGHT_INDEX] = rightGuessing;
-    	guessingRightAndWrong[CARD_GUESSING_WRONG_INDEX] = guessingWrong;
+
     	return guessingRightAndWrong;
     }
     
@@ -1040,7 +1044,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         int[] realCard=null;
         int totalHiddentState = 0;
         int[] guessingCard;
-        /*
+        
         //Testing code between Random Agent vs HMM Agent
         
         if(player[pl].isRandomAgent()){
@@ -1150,11 +1154,12 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
              
             player[pl].performAction(s, a);
             stateTransition(s, a);
+            state = null;
         }
         //End of Random vs HMMAgent
         
         //Testing with Random Agent and SmartSettler
-        
+        /*
         if(player[pl].isRandomAgent()){
         	if(this.hasHiddenInfo()){
         		for(int i = 0; i < NPLAYERS; i++){
@@ -1211,7 +1216,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
             player[pl].performAction(s, a);
             stateTransition(s, a);
         }
-        */
+        
         // End for testing code with random agent
         
         // HMM Working code
@@ -2595,13 +2600,13 @@ public void recalcLongestRoad(int[] s, int pl)
 			case GameStateConstants.A_BUILDCITY:
 				return 500;
 			case GameStateConstants.A_BUILDROAD:
-				return 1;
+				return 10;
 			case GameStateConstants.A_BUILDSETTLEMENT:
 				return 200;
 			case GameStateConstants.A_BUYCARD:
-				return 2;
+				return 20;
 			case GameStateConstants.A_PAYTAX:
-				return -0.5;
+				return 0;
 			case GameStateConstants.A_NOTHING:
 				return 0;
 			case GameStateConstants.A_PLACEROBBER:
@@ -2609,11 +2614,11 @@ public void recalcLongestRoad(int[] s, int pl)
 			case GameStateConstants.A_PLAYCARD_FREERESOURCE:
 				return 2;
 			case GameStateConstants.A_PLAYCARD_FREEROAD:
-				return 2;
+				return 10;
 			case GameStateConstants.A_PLAYCARD_KNIGHT:
-				return 2;
+				return 10;
 			case GameStateConstants.A_PLAYCARD_MONOPOLY:
-				return 2;
+				return 10;
 			case GameStateConstants.A_THROWDICE:
 				return 0;
 			default:

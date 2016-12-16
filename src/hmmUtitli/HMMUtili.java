@@ -37,41 +37,41 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 		this.bl = bl_input;
 		currentGuessing = new double[NCARDS][N_DEVCARDTYPES]; // TODO: Check this condition to verify it
 		HMM_CONDITIONALPRO = new double[TIMESTATESTEP][N_DEVCARDTYPES];
-		prior = new double[]{(double)15/25,(double)5/25,(double)2/25,(double)2/25,(double)2/25};
+		prior = new double[]{(double)14/25,(double)5/25,(double)2/25,(double)2/25,(double)2/25};
 		initTranMatrix();
 		this.readDataHMM();
 		
 	}
 	public void initTranMatrix(){
-		this.HMM_TRANSITIONALMATRIX[0][0] = (double)14/24;
+		this.HMM_TRANSITIONALMATRIX[0][0] = (double)13/24;
 		this.HMM_TRANSITIONALMATRIX[0][1] = (double)5/24;
 		this.HMM_TRANSITIONALMATRIX[0][2] = (double)2/24;
 		this.HMM_TRANSITIONALMATRIX[0][3] = (double)2/24;
 		this.HMM_TRANSITIONALMATRIX[0][4] = (double)2/24;
 		
 
-		this.HMM_TRANSITIONALMATRIX[1][0] = (double)15/24;
+		this.HMM_TRANSITIONALMATRIX[1][0] = (double)14/24;
 		this.HMM_TRANSITIONALMATRIX[1][1] = (double)4/24;
 		this.HMM_TRANSITIONALMATRIX[1][2] = (double)2/24;
 		this.HMM_TRANSITIONALMATRIX[1][3] = (double)2/24;
 		this.HMM_TRANSITIONALMATRIX[1][4] = (double)2/24;
 		
 
-		this.HMM_TRANSITIONALMATRIX[2][0] = (double)15/24;
+		this.HMM_TRANSITIONALMATRIX[2][0] = (double)14/24;
 		this.HMM_TRANSITIONALMATRIX[2][1] = (double)5/24;
 		this.HMM_TRANSITIONALMATRIX[2][2] = (double)1/24;
 		this.HMM_TRANSITIONALMATRIX[2][3] = (double)2/24;
 		this.HMM_TRANSITIONALMATRIX[2][4] = (double)2/24;
 		
 
-		this.HMM_TRANSITIONALMATRIX[3][0] = (double)15/24;
+		this.HMM_TRANSITIONALMATRIX[3][0] = (double)14/24;
 		this.HMM_TRANSITIONALMATRIX[3][1] = (double)5/24;
 		this.HMM_TRANSITIONALMATRIX[3][2] = (double)2/24;
 		this.HMM_TRANSITIONALMATRIX[3][3] = (double)1/24;
 		this.HMM_TRANSITIONALMATRIX[3][4] = (double)2/24;
 		
 
-		this.HMM_TRANSITIONALMATRIX[4][0] = (double)15/24;
+		this.HMM_TRANSITIONALMATRIX[4][0] = (double)14/24;
 		this.HMM_TRANSITIONALMATRIX[4][1] = (double)5/24;
 		this.HMM_TRANSITIONALMATRIX[4][2] = (double)2/24;
 		this.HMM_TRANSITIONALMATRIX[4][3] = (double)2/24;
@@ -113,7 +113,7 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 		for(int i = 0; i < N_DEVCARDTYPES; i++){
 			switch (i) {
 				case CARD_KNIGHT:
-					prior_input[i] = (double)(15 - localReveal[i])/(25-total_card);
+					prior_input[i] = (double)(14 - localReveal[i])/(25-total_card);
 					break;
 				case CARD_ONEPOINT:
 					prior_input[i] = (double)(5 - localReveal[i])/(25 - total_card);
@@ -267,7 +267,7 @@ public class HMMUtili implements HMMConstance, GameStateConstants{
 		for(int i = 0; i < N_DEVCARDTYPES; i++){
 			switch (i) {
 				case CARD_KNIGHT:
-					this.prior[i] = (double)(15 - numberCardTypeReveal[i])/(25-total_card);
+					this.prior[i] = (double)(14 - numberCardTypeReveal[i])/(25-total_card);
 					break;
 				case CARD_ONEPOINT:
 					this.prior[i] = (double)(5 - numberCardTypeReveal[i])/(25 - total_card);

@@ -500,7 +500,7 @@ public class AppFrame extends javax.swing.JFrame implements GameStateConstants {
                 wrong += boardlayout.guessingWrong;
                 if(winner == 1){
                 	hmmwin++;
-                }else{
+                }else if (winner == 0){
                 	hmmlose++;
                 }
                 abnormaly = true;
