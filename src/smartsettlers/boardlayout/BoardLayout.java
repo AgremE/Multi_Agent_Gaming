@@ -44,6 +44,11 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
 	public boolean hiddenInfo = false;
 	public int guessingRight = 0;
 	public int guessingWrong = 0;
+	// ConvNN help instace
+	public int[][][] translatedState;
+	public TranslationState convNNStateTranslator = new TranslationState(this);
+	public int[] choosenAction;
+	public boolean validity;
 	
 	//Not sure what the use of this
 	public int[][][] playingCardTimeStamp = new int[NPLAYERS][N_DEVCARDTYPES][NCARDS];
@@ -671,11 +676,18 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         InitProductionNumbers();
         //Check the good condition of the board 
         betterBoard();
+<<<<<<< HEAD
         /*
         TranslationState test = new TranslationState(action, this);
         int[][][] testState = test.getTheRestTranslationofTheBoard();
         test.getResourceandDevelopmentCardsTranslation();
         
+=======
+        //TranslationState test = new TranslationState(action, this);
+        //int[][][] testState = test.getBoardData();
+        //test.getCardData();
+        /*
+>>>>>>> CovNN
         for(int x = 0; x < testState[1].length; x++){
         	try{
         		for(int y = 0; y < testState[1][x].length; y++){
@@ -686,7 +698,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         		System.err.println("The error Messeange"+e.getMessage()+" with " + testState[x][8]);
 			}
         	System.out.print("\n");
-        }
+        }*/
         
         int seqind = 0;
         for (int x=0; x<MAXX; x++)
@@ -695,7 +707,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
                 int ind = hexatcoord[x][y];
                 if ((ind != -1) && hextiles[ind].type == TYPE_LAND && hextiles[ind].subtype != LAND_DESERT)
                 {
-                	System.out.println("LAND at X "+ x + " and Y "+ y+ " with Production Number of " + hexnumberSequence[seqind]+" and land production is " + hextiles[hexatcoord[x][y]].subtype );
+                	//System.out.println("LAND at X "+ x + " and Y "+ y+ " with Production Number of " + hexnumberSequence[seqind]+" and land production is " + hextiles[hexatcoord[x][y]].subtype );
                     hextiles[ind].productionNumber = hexnumberSequence[seqind];
                     seqind++;
                 }
@@ -1373,7 +1385,7 @@ public class BoardLayout implements HexTypeConstants, VectorConstants, GameState
         // When we are in the pay tax state that program will perform really bad and the outcomes are unreliable
         /* player[pl].listPossibilities(s);
         player[pl].selectAction(s,a);
-        
+        this.choosenAction = a;
         if (isLoggingOn)
             gamelog.addAction(a);
         
